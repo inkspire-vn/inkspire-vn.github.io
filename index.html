@@ -1,1 +1,367 @@
-test
+<!DOCTYPE html>
+<html lang="vi" data-bs-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>InkSpire Bookstore</title>
+
+  <!-- Bootstrap 5.3 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+  <style>
+    :root {
+      --inkspire-green-light: #00c4b4;   /* vibrant for light mode */
+      --inkspire-green-dark: #26d7a8;    /* softer & less blinding in dark mode */
+      --inkspire-green: var(--inkspire-green-light);
+    }
+
+    [data-bs-theme="dark"] {
+      --inkspire-green: var(--inkspire-green-dark);
+      --bs-body-bg: #0d1117;
+      --bs-body-color: #e6edf3;
+      --bs-primary: var(--inkspire-green);
+    }
+
+    [data-bs-theme="light"] {
+      --inkspire-green: var(--inkspire-green-light);
+      --bs-body-bg: #ffffff;
+      --bs-body-color: #212529;
+      --bs-primary: var(--inkspire-green);
+    }
+
+    body {
+      transition: background-color 0.4s ease, color 0.4s ease;
+    }
+
+    .navbar {
+      background-color: var(--bs-primary) !important;
+    }
+
+    .navbar-brand, .nav-link {
+      color: white !important;
+    }
+
+    .hero-store {
+      position: relative;
+      height: 60vh;
+      min-height: 400px;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.7);
+    }
+
+    .hero-store::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0.6));
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+    }
+
+    .logo-circle {
+      width: 180px;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 50%;
+      border: 6px solid white;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      margin-bottom: 1.5rem;
+    }
+
+    .slider-container {
+      overflow: hidden;
+      margin: 2.5rem 0;
+    }
+
+    .slide-track {
+      display: flex;
+      animation: scroll-left 50s linear infinite;
+      width: max-content;
+    }
+
+    .slider-reverse .slide-track {
+      animation: scroll-right 50s linear infinite;
+    }
+
+    .slide {
+      width: 240px;
+      margin: 0 12px;
+      flex-shrink: 0;
+      position: relative;
+      text-align: center;
+    }
+
+    .slide img {
+      width: 100%;
+      height: 320px;
+      object-fit: cover;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+      transition: transform 0.25s ease;
+    }
+
+    .slide:hover img {
+      transform: scale(1.06);
+    }
+
+    .price-bubble {
+      position: absolute;
+      bottom: 15px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--bs-primary);
+      color: white;
+      font-weight: bold;
+      padding: 6px 14px;
+      border-radius: 999px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    @keyframes scroll-left {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    @keyframes scroll-right {
+      0%   { transform: translateX(-50%); }
+      100% { transform: translateX(0); }
+    }
+
+    .slider-container:hover .slide-track {
+      animation-play-state: paused;
+    }
+
+    .lang-btn, .theme-btn {
+      font-size: 1.4rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0 8px;
+      color: white;
+    }
+
+    .lang-btn.active {
+      text-decoration: underline;
+      text-underline-offset: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg sticky-top shadow-sm">
+  <div class="container">
+    <a class="navbar-brand fw-bold fs-4" href="#">InkSpire</a>
+
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarMain">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item"><a class="nav-link active" href="#" data-lang-key="home">Trang chủ</a></li>
+        <li class="nav-item"><a class="nav-link" href="#" data-lang-key="products">Sản phẩm</a></li>
+        <li class="nav-item"><a class="nav-link" href="#" data-lang-key="events">Sự kiện</a></li>
+        <li class="nav-item"><a class="nav-link" href="#" data-lang-key="contact">Liên hệ</a></li>
+      </ul>
+
+      <div class="d-flex align-items-center">
+        <button class="lang-btn active" id="lang-vi" data-lang="vi">🇻🇳</button>
+        <button class="lang-btn" id="lang-en" data-lang="en">🇺🇸</button>
+        <button class="theme-btn ms-2" id="theme-toggle">🌙</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero-store" id="hero"
+  style="background-image: url('https://catchourtravelbug.com/wp-content/uploads/2023/09/Peoples-Committee-scaled.jpg');">
+  <div class="hero-content">
+    <!-- Replace src with your real logo file when ready -->
+    <img src="https://placehold.co/180x180/00c4b4/ffffff/png?text=InkSpire" alt="InkSpire Logo" class="logo-circle">
+    <h1 class="display-4 fw-bold" data-lang-key="title">InkSpire Bookstore</h1>
+    <p class="lead" data-lang-key="slogan">Nơi ý tưởng bắt đầu - Where ideas begin</p>
+  </div>
+</section>
+
+<main class="container py-5">
+
+  <!-- Toys -->
+  <h2 class="mb-4" data-lang-key="toys">Đồ chơi – Toys</h2>
+  <div class="slider-container">
+    <div class="slide-track">
+      <div class="slide"><img src="https://picsum.photos/seed/toy1/240/320" alt=""><span class="price-bubble">189k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/toy2/240/320" alt=""><span class="price-bubble">249k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/toy3/240/320" alt=""><span class="price-bubble">320k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/toy4/240/320" alt=""><span class="price-bubble">155k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/toy5/240/320" alt=""><span class="price-bubble">420k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/toy6/240/320" alt=""><span class="price-bubble">299k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/toy7/240/320" alt=""><span class="price-bubble">135k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/toy8/240/320" alt=""><span class="price-bubble">275k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/toy9/240/320" alt=""><span class="price-bubble">380k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/toy10/240/320" alt=""><span class="price-bubble">210k ₫</span></div>
+      <!-- duplicates -->
+      <div class="slide"><img src="https://picsum.photos/seed/toy1/240/320" alt=""><span class="price-bubble">189k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/toy2/240/320" alt=""><span class="price-bubble">249k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/toy3/240/320" alt=""><span class="price-bubble">320k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/toy4/240/320" alt=""><span class="price-bubble">155k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/toy5/240/320" alt=""><span class="price-bubble">420k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/toy6/240/320" alt=""><span class="price-bubble">299k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/toy7/240/320" alt=""><span class="price-bubble">135k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/toy8/240/320" alt=""><span class="price-bubble">275k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/toy9/240/320" alt=""><span class="price-bubble">380k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/toy10/240/320" alt=""><span class="price-bubble">210k ₫</span></div>
+    </div>
+  </div>
+
+  <!-- Stationery -->
+  <h2 class="mb-5 mt-5" data-lang-key="stationery">Văn phòng phẩm – Stationery</h2>
+  <div class="slider-container slider-reverse">
+    <div class="slide-track">
+      <div class="slide"><img src="https://picsum.photos/seed/pen1/240/320" alt=""><span class="price-bubble">45k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/note1/240/320" alt=""><span class="price-bubble">85k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/marker1/240/320" alt=""><span class="price-bubble">120k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/sticker1/240/320" alt=""><span class="price-bubble">65k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/tape1/240/320" alt=""><span class="price-bubble">38k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/pen2/240/320" alt=""><span class="price-bubble">55k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/note2/240/320" alt=""><span class="price-bubble">95k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/highlight1/240/320" alt=""><span class="price-bubble">28k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/washi1/240/320" alt=""><span class="price-bubble">75k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/clip1/240/320" alt=""><span class="price-bubble">22k ₫</span></div>
+      <!-- duplicates -->
+      <div class="slide"><img src="https://picsum.photos/seed/pen1/240/320" alt=""><span class="price-bubble">45k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/note1/240/320" alt=""><span class="price-bubble">85k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/marker1/240/320" alt=""><span class="price-bubble">120k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/sticker1/240/320" alt=""><span class="price-bubble">65k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/tape1/240/320" alt=""><span class="price-bubble">38k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/pen2/240/320" alt=""><span class="price-bubble">55k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/note2/240/320" alt=""><span class="price-bubble">95k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/highlight1/240/320" alt=""><span class="price-bubble">28k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/washi1/240/320" alt=""><span class="price-bubble">75k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/clip1/240/320" alt=""><span class="price-bubble">22k ₫</span></div>
+    </div>
+  </div>
+
+  <!-- Books -->
+  <h2 class="mb-5 mt-5" data-lang-key="books">Sách – Books</h2>
+  <div class="slider-container">
+    <div class="slide-track">
+      <div class="slide"><img src="https://picsum.photos/seed/book1/240/320" alt=""><span class="price-bubble">220k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/book2/240/320" alt=""><span class="price-bubble">180k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/book3/240/320" alt=""><span class="price-bubble">350k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/book4/240/320" alt=""><span class="price-bubble">95k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/book5/240/320" alt=""><span class="price-bubble">410k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/book6/240/320" alt=""><span class="price-bubble">145k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/book7/240/320" alt=""><span class="price-bubble">280k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/book8/240/320" alt=""><span class="price-bubble">199k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/book9/240/320" alt=""><span class="price-bubble">310k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/book10/240/320" alt=""><span class="price-bubble">265k ₫</span></div>
+      <!-- duplicates -->
+      <div class="slide"><img src="https://picsum.photos/seed/book1/240/320" alt=""><span class="price-bubble">220k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/book2/240/320" alt=""><span class="price-bubble">180k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/book3/240/320" alt=""><span class="price-bubble">350k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/book4/240/320" alt=""><span class="price-bubble">95k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/book5/240/320" alt=""><span class="price-bubble">410k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/book6/240/320" alt=""><span class="price-bubble">145k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/book7/240/320" alt=""><span class="price-bubble">280k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/book8/240/320" alt=""><span class="price-bubble">199k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/book9/240/320" alt=""><span class="price-bubble">310k ₫</span></div>
+      <div class="slide"><img src="https://picsum.photos/seed/book10/240/320" alt=""><span class="price-bubble">265k ₫</span></div>
+    </div>
+  </div>
+
+</main>
+
+<footer class="text-center py-4" style="background: var(--bs-primary); color: white;">
+  <div class="container">
+    <p class="mb-1">© 2026 InkSpire Bookstore • TP. Hồ Chí Minh</p>
+    <small data-lang-key="footer">Tri thức bắt đầu từ một giọt mực</small>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+<script>
+// Theme handling
+const html = document.documentElement;
+const themeToggle = document.getElementById('theme-toggle');
+
+function setTheme(theme) {
+  html.setAttribute('data-bs-theme', theme);
+  localStorage.setItem('theme', theme);
+  themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+}
+
+const savedTheme = localStorage.getItem('theme') || 'light';
+setTheme(savedTheme);
+
+themeToggle.addEventListener('click', () => {
+  const current = html.getAttribute('data-bs-theme');
+  setTheme(current === 'light' ? 'dark' : 'light');
+});
+
+// Language handling
+const langButtons = {
+  vi: document.getElementById('lang-vi'),
+  en: document.getElementById('lang-en')
+};
+
+const translations = {
+  vi: {
+    home:     "Trang chủ",
+    products: "Sản phẩm",
+    events:   "Sự kiện",
+    contact:  "Liên hệ",
+    title:    "InkSpire Bookstore",
+    slogan:   "Nơi ý tưởng bắt đầu - Where ideas begin",
+    toys:     "Đồ chơi – Toys",
+    stationery: "Văn phòng phẩm – Stationery",
+    books:    "Sách – Books",
+    footer:   "Tri thức bắt đầu từ một giọt mực"
+  },
+  en: {
+    home:     "Home",
+    products: "Products",
+    events:   "Events",
+    contact:  "Contact",
+    title:    "InkSpire Bookstore",
+    slogan:   "Where ideas begin",
+    toys:     "Toys",
+    stationery: "Stationery",
+    books:    "Books",
+    footer:   "Knowledge begins with a drop of ink"
+  }
+};
+
+function setLanguage(lang) {
+  html.lang = lang === 'vi' ? 'vi' : 'en';
+  localStorage.setItem('lang', lang);
+
+  langButtons.vi.classList.toggle('active', lang === 'vi');
+  langButtons.en.classList.toggle('active', lang === 'en');
+
+  document.querySelectorAll('[data-lang-key]').forEach(el => {
+    const key = el.getAttribute('data-lang-key');
+    if (translations[lang][key]) el.textContent = translations[lang][key];
+  });
+}
+
+const savedLang = localStorage.getItem('lang') || 'vi';
+setLanguage(savedLang);
+
+langButtons.vi.addEventListener('click', () => setLanguage('vi'));
+langButtons.en.addEventListener('click', () => setLanguage('en'));
+</script>
+</body>
+</html>
