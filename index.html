@@ -1,289 +1,409 @@
 <!DOCTYPE html>
 <html lang="vi" data-bs-theme="light">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>InkSpire Bookstore</title>
 
-  <!-- Bootstrap 5.3 -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 
   <style>
     :root {
-      --inkspire-green-light: #00c4b4;   /* vibrant for light mode */
-      --inkspire-green-dark: #26d7a8;    /* softer & less blinding in dark mode */
-      --inkspire-green: var(--inkspire-green-light);
+      --green-light: #00c4b4;
+      --green-dark:  #3de0c2;
+      --green:       var(--green-light);
     }
 
     [data-bs-theme="dark"] {
-      --inkspire-green: var(--inkspire-green-dark);
-      --bs-body-bg: #0d1117;
-      --bs-body-color: #e6edf3;
-      --bs-primary: var(--inkspire-green);
+      --green: var(--green-dark);
+      --bs-body-bg: #0a0f14;
+      --bs-body-color: #e0e6ed;
+      --bs-primary: var(--green);
     }
 
     [data-bs-theme="light"] {
-      --inkspire-green: var(--inkspire-green-light);
+      --green: var(--green-light);
       --bs-body-bg: #ffffff;
-      --bs-body-color: #212529;
-      --bs-primary: var(--inkspire-green);
+      --bs-body-color: #1a1f25;
+      --bs-primary: var(--green);
     }
 
-    body {
-      transition: background-color 0.4s ease, color 0.4s ease;
-    }
+    body { transition: background-color 0.35s, color 0.35s; }
 
-    .navbar {
-      background-color: var(--bs-primary) !important;
-    }
+    .navbar { background-color: var(--bs-primary) !important; }
+    .navbar-brand, .nav-link { color: white !important; }
 
-    .navbar-brand, .nav-link {
-      color: white !important;
-    }
-
-    .hero-store {
+    .hero {
       position: relative;
-      height: 60vh;
-      min-height: 400px;
-      background-size: cover;
-      background-position: center;
-      background-repeat: no-repeat;
+      height: 65vh;
+      min-height: 420px;
+      background: url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80') center/cover no-repeat;
+      color: white;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.75);
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
-      text-shadow: 0 2px 6px rgba(0,0,0,0.7);
     }
 
-    .hero-store::before {
+    .hero::before {
       content: "";
       position: absolute;
       inset: 0;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.35), rgba(0,0,0,0.6));
+      background: linear-gradient(to bottom, rgba(0,0,0,0.45), rgba(0,0,0,0.75));
     }
 
-    .hero-content {
-      position: relative;
-      z-index: 2;
-      text-align: center;
-    }
+    .hero-content { position: relative; z-index: 2; text-align: center; }
 
-    .logo-circle {
-      width: 180px;
-      height: 180px;
-      object-fit: cover;
+    .logo-round {
+      width: 148px;
+      height: 148px;
       border-radius: 50%;
-      border: 6px solid white;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-      margin-bottom: 1.5rem;
+      object-fit: cover;
+      border: 5px solid rgba(255,255,255,0.92);
+      box-shadow: 0 5px 22px rgba(0,0,0,0.45);
+      margin-bottom: 1.25rem;
     }
 
-    .slider-container {
-      overflow: hidden;
-      margin: 2.5rem 0;
-    }
-
-    .slide-track {
+    /* Language Toggle */
+    .lang-group {
       display: flex;
-      animation: scroll-left 50s linear infinite;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      user-select: none;
+      padding: 6px 14px;
+      border-radius: 999px;
+      transition: background 0.25s;
+    }
+
+    .lang-group:hover { background: rgba(255,255,255,0.15); }
+
+    .flag { font-size: 1.55rem; transition: opacity 0.3s; }
+    .flag.inactive { opacity: 0.48; }
+
+    .switch {
+      position: relative;
+      width: 56px;
+      height: 28px;
+      flex-shrink: 0;
+    }
+
+    .switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+
+    .switch .slider {
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0.38);
+      border-radius: 34px;
+      border: 2px solid white;
+      transition: background 0.38s;
+      cursor: pointer;
+    }
+
+    .switch .slider:before {
+      content: "";
+      position: absolute;
+      height: 20px;
+      width: 20px;
+      left: 4px;
+      bottom: 4px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.38s;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.25);
+    }
+
+    .switch input:checked + .slider { background: white; }
+    .switch input:checked + .slider:before {
+      transform: translateX(28px);
+      background: var(--bs-primary);
+    }
+
+    /* Events Box */
+    .events-box {
+      background: rgba(255,255,255,0.95);
+      border-radius: 16px;
+      padding: 2.2rem;
+      margin: 3rem auto;
+      max-width: 960px;
+      box-shadow: 0 10px 35px rgba(0,0,0,0.2);
+      border: 3px solid var(--green);
+      transition: all 0.3s ease;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+    }
+
+    .events-box:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 16px 45px rgba(0,0,0,0.28);
+    }
+
+    [data-bs-theme="dark"] .events-box {
+      background: #1e293b;
+      border-color: var(--green);
+      color: #e2e8f0;
+    }
+
+    .events-box h3 {
+      color: var(--bs-primary);
+      margin-bottom: 2rem;
+      text-align: center;
+      font-weight: 700;
+    }
+
+    .event-card {
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 1.4rem;
+      margin-bottom: 1.4rem;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+      transition: background 0.3s;
+    }
+
+    [data-bs-theme="dark"] .event-card {
+      background: #334155;
+    }
+
+    .event-card h5 {
+      color: var(--bs-primary);
+      margin-bottom: 0.6rem;
+      font-size: 1.3rem;
+    }
+
+    .event-card p {
+      margin: 0.4rem 0;
+      font-size: 1rem;
+    }
+
+    .event-card small {
+      color: #64748b;
+      display: block;
+      margin-top: 0.8rem;
+      font-size: 0.92rem;
+    }
+
+    [data-bs-theme="dark"] .event-card small {
+      color: #94a3b8;
+    }
+
+    /* Product sliders */
+    .slider-wrap {
+      overflow: hidden;
+      margin: 3rem 0;
+    }
+
+    .track {
+      display: flex;
+      animation: slide-left 55s linear infinite;
       width: max-content;
     }
 
-    .slider-reverse .slide-track {
-      animation: scroll-right 50s linear infinite;
-    }
+    .reverse .track { animation: slide-right 55s linear infinite; }
 
-    .slide {
+    .item {
       width: 240px;
-      margin: 0 12px;
-      flex-shrink: 0;
+      margin: 0 14px;
       position: relative;
+      flex-shrink: 0;
       text-align: center;
     }
 
-    .slide img {
+    .item img {
       width: 100%;
       height: 320px;
       object-fit: cover;
-      border-radius: 10px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-      transition: transform 0.25s ease;
+      border-radius: 12px;
+      box-shadow: 0 5px 18px rgba(0,0,0,0.22);
+      transition: transform 0.28s;
     }
 
-    .slide:hover img {
-      transform: scale(1.06);
-    }
+    .item:hover img { transform: scale(1.065); }
 
-    .price-bubble {
+    .price {
       position: absolute;
-      bottom: 15px;
+      bottom: 16px;
       left: 50%;
       transform: translateX(-50%);
       background: var(--bs-primary);
       color: white;
-      font-weight: bold;
-      padding: 6px 14px;
+      font-weight: 600;
+      padding: 6px 16px;
       border-radius: 999px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      box-shadow: 0 3px 10px rgba(0,0,0,0.35);
+      white-space: nowrap;
     }
 
-    @keyframes scroll-left {
-      0%   { transform: translateX(0); }
-      100% { transform: translateX(-50%); }
-    }
+    @keyframes slide-left  { 0% { transform: translateX(0);    } 100% { transform: translateX(-50%); } }
+    @keyframes slide-right { 0% { transform: translateX(-50%); } 100% { transform: translateX(0);    } }
 
-    @keyframes scroll-right {
-      0%   { transform: translateX(-50%); }
-      100% { transform: translateX(0); }
-    }
+    .slider-wrap:hover .track { animation-play-state: paused; }
 
-    .slider-container:hover .slide-track {
-      animation-play-state: paused;
-    }
-
-    .lang-btn, .theme-btn {
-      font-size: 1.4rem;
+    .theme-btn {
+      font-size: 1.5rem;
       background: none;
       border: none;
-      cursor: pointer;
-      padding: 0 8px;
       color: white;
-    }
-
-    .lang-btn.active {
-      text-decoration: underline;
-      text-underline-offset: 4px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
 
-<!-- Navbar -->
-<nav class="navbar navbar-expand-lg sticky-top shadow-sm">
+<nav class="navbar navbar-expand-lg sticky-top shadow">
   <div class="container">
     <a class="navbar-brand fw-bold fs-4" href="#">InkSpire</a>
-
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
       <span class="navbar-toggler-icon"></span>
     </button>
 
-    <div class="collapse navbar-collapse" id="navbarMain">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+    <div class="collapse navbar-collapse" id="navMain">
+      <ul class="navbar-nav me-auto">
         <li class="nav-item"><a class="nav-link active" href="#" data-lang-key="home">Trang chủ</a></li>
         <li class="nav-item"><a class="nav-link" href="#" data-lang-key="products">Sản phẩm</a></li>
         <li class="nav-item"><a class="nav-link" href="#" data-lang-key="events">Sự kiện</a></li>
         <li class="nav-item"><a class="nav-link" href="#" data-lang-key="contact">Liên hệ</a></li>
       </ul>
 
-      <div class="d-flex align-items-center">
-        <button class="lang-btn active" id="lang-vi" data-lang="vi">🇻🇳</button>
-        <button class="lang-btn" id="lang-en" data-lang="en">🇺🇸</button>
-        <button class="theme-btn ms-2" id="theme-toggle">🌙</button>
+      <div class="d-flex align-items-center gap-4">
+        <div class="lang-group" id="langGroup" role="button" tabindex="0">
+          <span class="flag vi-flag" data-lang="vi">🇻🇳</span>
+          <div class="switch">
+            <input type="checkbox" id="langSwitch">
+            <span class="slider"></span>
+          </div>
+          <span class="flag en-flag" data-lang="en">🇺🇸</span>
+        </div>
+
+        <button class="theme-btn" id="themeBtn">🌙</button>
       </div>
     </div>
   </div>
 </nav>
 
-<!-- Hero -->
-<section class="hero-store" id="hero"
-  style="background-image: url('https://catchourtravelbug.com/wp-content/uploads/2023/09/Peoples-Committee-scaled.jpg');">
+<section class="hero">
   <div class="hero-content">
-    <!-- Replace src with your real logo file when ready -->
-    <img src="https://placehold.co/180x180/00c4b4/ffffff/png?text=InkSpire" alt="InkSpire Logo" class="logo-circle">
+    <img src="https://avatars.githubusercontent.com/u/254457838?s=400&u=d271803ce1ed1461b2e12d95271a5bf30613734c&v=4" 
+         alt="InkSpire Logo" class="logo-round">
     <h1 class="display-4 fw-bold" data-lang-key="title">InkSpire Bookstore</h1>
-    <p class="lead" data-lang-key="slogan">Nơi ý tưởng bắt đầu - Where ideas begin</p>
+    <p class="lead" data-lang-key="slogan">Nơi ý tưởng bắt đầu • Where ideas begin</p>
   </div>
 </section>
 
+<!-- Ongoing Events Box – max 3 events, clickable -->
+<a href="/events.html" class="events-box text-decoration-none" id="eventsBox">
+  <h3 data-lang-key="ongoing">Sự kiện đang diễn ra</h3>
+  
+  <div class="event-card">
+    <h5>Book Signing with Local Authors</h5>
+    <p>January 20, 2026 | 2:00 PM - 5:00 PM</p>
+    <small>Join us for an inspiring afternoon with featured writers from Ho Chi Minh City!</small>
+  </div>
+
+  <div class="event-card">
+    <h5>Storytime for Kids</h5>
+    <p>Every Saturday | 10:00 AM</p>
+    <small>Fun stories, activities, and free snacks for children under 10.</small>
+  </div>
+
+  <div class="event-card">
+    <h5>20% Off All Novels</h5>
+    <p>January 15 - 22, 2026</p>
+    <small>Explore our collection of novels, comics, and bestsellers with this limited-time discount!</small>
+  </div>
+
+  <div class="text-center mt-4 small fw-bold" style="color: var(--bs-primary);">
+    Click để xem chi tiết tất cả sự kiện →
+  </div>
+</a>
+
 <main class="container py-5">
 
-  <!-- Toys -->
   <h2 class="mb-4" data-lang-key="toys">Đồ chơi – Toys</h2>
-  <div class="slider-container">
-    <div class="slide-track">
-      <div class="slide"><img src="https://picsum.photos/seed/toy1/240/320" alt=""><span class="price-bubble">189k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/toy2/240/320" alt=""><span class="price-bubble">249k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/toy3/240/320" alt=""><span class="price-bubble">320k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/toy4/240/320" alt=""><span class="price-bubble">155k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/toy5/240/320" alt=""><span class="price-bubble">420k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/toy6/240/320" alt=""><span class="price-bubble">299k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/toy7/240/320" alt=""><span class="price-bubble">135k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/toy8/240/320" alt=""><span class="price-bubble">275k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/toy9/240/320" alt=""><span class="price-bubble">380k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/toy10/240/320" alt=""><span class="price-bubble">210k ₫</span></div>
+  <div class="slider-wrap">
+    <div class="track">
+      <div class="item"><img src="https://picsum.photos/seed/tA/240/320" alt=""><div class="price">189k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/tB/240/320" alt=""><div class="price">249k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/tC/240/320" alt=""><div class="price">320k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/tD/240/320" alt=""><div class="price">155k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/tE/240/320" alt=""><div class="price">420k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/tF/240/320" alt=""><div class="price">299k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/tG/240/320" alt=""><div class="price">135k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/tH/240/320" alt=""><div class="price">275k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/tI/240/320" alt=""><div class="price">380k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/tJ/240/320" alt=""><div class="price">210k ₫</div></div>
       <!-- duplicates -->
-      <div class="slide"><img src="https://picsum.photos/seed/toy1/240/320" alt=""><span class="price-bubble">189k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/toy2/240/320" alt=""><span class="price-bubble">249k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/toy3/240/320" alt=""><span class="price-bubble">320k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/toy4/240/320" alt=""><span class="price-bubble">155k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/toy5/240/320" alt=""><span class="price-bubble">420k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/toy6/240/320" alt=""><span class="price-bubble">299k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/toy7/240/320" alt=""><span class="price-bubble">135k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/toy8/240/320" alt=""><span class="price-bubble">275k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/toy9/240/320" alt=""><span class="price-bubble">380k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/toy10/240/320" alt=""><span class="price-bubble">210k ₫</span></div>
+      <div class="item"><img src="https://picsum.photos/seed/tA/240/320" alt=""><div class="price">189k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/tB/240/320" alt=""><div class="price">249k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/tC/240/320" alt=""><div class="price">320k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/tD/240/320" alt=""><div class="price">155k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/tE/240/320" alt=""><div class="price">420k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/tF/240/320" alt=""><div class="price">299k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/tG/240/320" alt=""><div class="price">135k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/tH/240/320" alt=""><div class="price">275k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/tI/240/320" alt=""><div class="price">380k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/tJ/240/320" alt=""><div class="price">210k ₫</div></div>
     </div>
   </div>
 
-  <!-- Stationery -->
   <h2 class="mb-5 mt-5" data-lang-key="stationery">Văn phòng phẩm – Stationery</h2>
-  <div class="slider-container slider-reverse">
-    <div class="slide-track">
-      <div class="slide"><img src="https://picsum.photos/seed/pen1/240/320" alt=""><span class="price-bubble">45k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/note1/240/320" alt=""><span class="price-bubble">85k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/marker1/240/320" alt=""><span class="price-bubble">120k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/sticker1/240/320" alt=""><span class="price-bubble">65k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/tape1/240/320" alt=""><span class="price-bubble">38k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/pen2/240/320" alt=""><span class="price-bubble">55k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/note2/240/320" alt=""><span class="price-bubble">95k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/highlight1/240/320" alt=""><span class="price-bubble">28k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/washi1/240/320" alt=""><span class="price-bubble">75k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/clip1/240/320" alt=""><span class="price-bubble">22k ₫</span></div>
+  <div class="slider-wrap reverse">
+    <div class="track">
+      <div class="item"><img src="https://picsum.photos/seed/p1/240/320" alt=""><div class="price">45k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/n1/240/320" alt=""><div class="price">85k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/m1/240/320" alt=""><div class="price">120k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/s1/240/320" alt=""><div class="price">65k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/tp1/240/320" alt=""><div class="price">38k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/p2/240/320" alt=""><div class="price">55k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/n2/240/320" alt=""><div class="price">95k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/h1/240/320" alt=""><div class="price">28k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/w1/240/320" alt=""><div class="price">75k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/c1/240/320" alt=""><div class="price">22k ₫</div></div>
       <!-- duplicates -->
-      <div class="slide"><img src="https://picsum.photos/seed/pen1/240/320" alt=""><span class="price-bubble">45k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/note1/240/320" alt=""><span class="price-bubble">85k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/marker1/240/320" alt=""><span class="price-bubble">120k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/sticker1/240/320" alt=""><span class="price-bubble">65k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/tape1/240/320" alt=""><span class="price-bubble">38k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/pen2/240/320" alt=""><span class="price-bubble">55k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/note2/240/320" alt=""><span class="price-bubble">95k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/highlight1/240/320" alt=""><span class="price-bubble">28k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/washi1/240/320" alt=""><span class="price-bubble">75k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/clip1/240/320" alt=""><span class="price-bubble">22k ₫</span></div>
+      <div class="item"><img src="https://picsum.photos/seed/p1/240/320" alt=""><div class="price">45k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/n1/240/320" alt=""><div class="price">85k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/m1/240/320" alt=""><div class="price">120k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/s1/240/320" alt=""><div class="price">65k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/tp1/240/320" alt=""><div class="price">38k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/p2/240/320" alt=""><div class="price">55k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/n2/240/320" alt=""><div class="price">95k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/h1/240/320" alt=""><div class="price">28k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/w1/240/320" alt=""><div class="price">75k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/c1/240/320" alt=""><div class="price">22k ₫</div></div>
     </div>
   </div>
 
-  <!-- Books -->
   <h2 class="mb-5 mt-5" data-lang-key="books">Sách – Books</h2>
-  <div class="slider-container">
-    <div class="slide-track">
-      <div class="slide"><img src="https://picsum.photos/seed/book1/240/320" alt=""><span class="price-bubble">220k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/book2/240/320" alt=""><span class="price-bubble">180k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/book3/240/320" alt=""><span class="price-bubble">350k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/book4/240/320" alt=""><span class="price-bubble">95k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/book5/240/320" alt=""><span class="price-bubble">410k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/book6/240/320" alt=""><span class="price-bubble">145k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/book7/240/320" alt=""><span class="price-bubble">280k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/book8/240/320" alt=""><span class="price-bubble">199k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/book9/240/320" alt=""><span class="price-bubble">310k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/book10/240/320" alt=""><span class="price-bubble">265k ₫</span></div>
+  <div class="slider-wrap">
+    <div class="track">
+      <div class="item"><img src="https://picsum.photos/seed/bk1/240/320" alt=""><div class="price">220k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/bk2/240/320" alt=""><div class="price">180k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/bk3/240/320" alt=""><div class="price">350k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/bk4/240/320" alt=""><div class="price">95k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/bk5/240/320" alt=""><div class="price">410k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/bk6/240/320" alt=""><div class="price">145k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/bk7/240/320" alt=""><div class="price">280k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/bk8/240/320" alt=""><div class="price">199k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/bk9/240/320" alt=""><div class="price">310k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/bk10/240/320" alt=""><div class="price">265k ₫</div></div>
       <!-- duplicates -->
-      <div class="slide"><img src="https://picsum.photos/seed/book1/240/320" alt=""><span class="price-bubble">220k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/book2/240/320" alt=""><span class="price-bubble">180k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/book3/240/320" alt=""><span class="price-bubble">350k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/book4/240/320" alt=""><span class="price-bubble">95k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/book5/240/320" alt=""><span class="price-bubble">410k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/book6/240/320" alt=""><span class="price-bubble">145k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/book7/240/320" alt=""><span class="price-bubble">280k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/book8/240/320" alt=""><span class="price-bubble">199k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/book9/240/320" alt=""><span class="price-bubble">310k ₫</span></div>
-      <div class="slide"><img src="https://picsum.photos/seed/book10/240/320" alt=""><span class="price-bubble">265k ₫</span></div>
+      <div class="item"><img src="https://picsum.photos/seed/bk1/240/320" alt=""><div class="price">220k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/bk2/240/320" alt=""><div class="price">180k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/bk3/240/320" alt=""><div class="price">350k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/bk4/240/320" alt=""><div class="price">95k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/bk5/240/320" alt=""><div class="price">410k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/bk6/240/320" alt=""><div class="price">145k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/bk7/240/320" alt=""><div class="price">280k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/bk8/240/320" alt=""><div class="price">199k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/bk9/240/320" alt=""><div class="price">310k ₫</div></div>
+      <div class="item"><img src="https://picsum.photos/seed/bk10/240/320" alt=""><div class="price">265k ₫</div></div>
     </div>
   </div>
 
 </main>
 
-<footer class="text-center py-4" style="background: var(--bs-primary); color: white;">
+<footer class="text-center py-4" style="background:var(--bs-primary); color:white;">
   <div class="container">
     <p class="mb-1">© 2026 InkSpire Bookstore • TP. Hồ Chí Minh</p>
     <small data-lang-key="footer">Tri thức bắt đầu từ một giọt mực</small>
@@ -293,75 +413,78 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 
 <script>
-// Theme handling
+// Theme toggle + events box dark mode fix
 const html = document.documentElement;
-const themeToggle = document.getElementById('theme-toggle');
+const themeBtn = document.getElementById('themeBtn');
 
-function setTheme(theme) {
-  html.setAttribute('data-bs-theme', theme);
-  localStorage.setItem('theme', theme);
-  themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+function setTheme(mode) {
+  html.setAttribute('data-bs-theme', mode);
+  localStorage.setItem('theme', mode);
+  themeBtn.textContent = mode === 'dark' ? '☀️' : '🌙';
+  document.getElementById('eventsBox').classList.toggle('dark', mode === 'dark');
 }
 
-const savedTheme = localStorage.getItem('theme') || 'light';
-setTheme(savedTheme);
+setTheme(localStorage.getItem('theme') || 'light');
+themeBtn.onclick = () => setTheme(html.getAttribute('data-bs-theme') === 'light' ? 'dark' : 'light');
 
-themeToggle.addEventListener('click', () => {
-  const current = html.getAttribute('data-bs-theme');
-  setTheme(current === 'light' ? 'dark' : 'light');
-});
+// Language toggle
+const langGroup = document.getElementById('langGroup');
+const langSwitch = document.getElementById('langSwitch');
 
-// Language handling
-const langButtons = {
-  vi: document.getElementById('lang-vi'),
-  en: document.getElementById('lang-en')
-};
-
-const translations = {
+const dict = {
   vi: {
-    home:     "Trang chủ",
-    products: "Sản phẩm",
-    events:   "Sự kiện",
-    contact:  "Liên hệ",
-    title:    "InkSpire Bookstore",
-    slogan:   "Nơi ý tưởng bắt đầu - Where ideas begin",
-    toys:     "Đồ chơi – Toys",
+    home: "Trang chủ", products: "Sản phẩm", events: "Sự kiện", contact: "Liên hệ",
+    title: "InkSpire Bookstore",
+    slogan: "Nơi ý tưởng bắt đầu • Where ideas begin",
+    toys: "Đồ chơi – Toys",
     stationery: "Văn phòng phẩm – Stationery",
-    books:    "Sách – Books",
-    footer:   "Tri thức bắt đầu từ một giọt mực"
+    books: "Sách – Books",
+    footer: "Tri thức bắt đầu từ một giọt mực",
+    ongoing: "Sự kiện đang diễn ra"
   },
   en: {
-    home:     "Home",
-    products: "Products",
-    events:   "Events",
-    contact:  "Contact",
-    title:    "InkSpire Bookstore",
-    slogan:   "Where ideas begin",
-    toys:     "Toys",
+    home: "Home", products: "Products", events: "Events", contact: "Contact",
+    title: "InkSpire Bookstore",
+    slogan: "Where ideas begin",
+    toys: "Toys",
     stationery: "Stationery",
-    books:    "Books",
-    footer:   "Knowledge begins with a drop of ink"
+    books: "Books",
+    footer: "Knowledge begins with a drop of ink",
+    ongoing: "Ongoing Events"
   }
 };
 
-function setLanguage(lang) {
-  html.lang = lang === 'vi' ? 'vi' : 'en';
+function setLang(lang) {
+  html.lang = lang;
   localStorage.setItem('lang', lang);
+  langSwitch.checked = (lang === 'en');
 
-  langButtons.vi.classList.toggle('active', lang === 'vi');
-  langButtons.en.classList.toggle('active', lang === 'en');
+  document.querySelector('.vi-flag').classList.toggle('inactive', lang !== 'vi');
+  document.querySelector('.en-flag').classList.toggle('inactive', lang !== 'en');
 
   document.querySelectorAll('[data-lang-key]').forEach(el => {
-    const key = el.getAttribute('data-lang-key');
-    if (translations[lang][key]) el.textContent = translations[lang][key];
+    const k = el.dataset.langKey;
+    if (dict[lang][k]) el.textContent = dict[lang][k];
   });
 }
 
-const savedLang = localStorage.getItem('lang') || 'vi';
-setLanguage(savedLang);
+setLang(localStorage.getItem('lang') || 'vi');
 
-langButtons.vi.addEventListener('click', () => setLanguage('vi'));
-langButtons.en.addEventListener('click', () => setLanguage('en'));
+langGroup.addEventListener('click', (e) => {
+  const cur = localStorage.getItem('lang') || 'vi';
+  setLang(cur === 'vi' ? 'en' : 'vi');
+});
+
+langSwitch.addEventListener('change', () => {
+  setLang(langSwitch.checked ? 'en' : 'vi');
+});
+
+langGroup.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    langGroup.click();
+  }
+});
 </script>
 </body>
 </html>
