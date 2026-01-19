@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="vi" data-bs-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-lang-key="contact-title">Liên hệ - InkSpire Bookstore</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="https://avatars.githubusercontent.com/u/254457838?s=64">
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    :root {
+      --green-light: #00c4b4;
+      --green-dark:  #3de0c2;
+      --green:       var(--green-light);
+    }
+
+    [data-bs-theme="dark"] {
+      --green: var(--green-dark);
+      --bs-body-bg: #0a0f14;
+      --bs-body-color: #e0e6ed;
+      --bs-primary: var(--green);
+    }
+
+    [data-bs-theme="light"] {
+      --green: var(--green-light);
+      --bs-body-bg: #ffffff;
+      --bs-body-color: #1a1f25;
+      --bs-primary: var(--green);
+    }
+
+    body { transition: background-color 0.35s, color 0.35s; }
+
+    .navbar { background-color: var(--bs-primary) !important; }
+    .navbar-brand, .nav-link { color: white !important; }
+
+    .page-hero {
+      position: relative;
+      height: 40vh;
+      min-height: 280px;
+      background: url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80') center/cover no-repeat;
+      color: white;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.75);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .page-hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.55), rgba(0,0,0,0.85));
+    }
+
+    .page-hero-content { position: relative; z-index: 2; text-align: center; }
+
+    .contact-section { padding: 4rem 0; }
+
+    .contact-card {
+      background: rgba(255,255,255,0.95);
+      border-radius: 16px;
+      padding: 2.5rem;
+      box-shadow: 0 10px 35px rgba(0,0,0,0.18);
+      border: 2px solid var(--green);
+      transition: all 0.3s ease;
+    }
+
+    .contact-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 16px 45px rgba(0,0,0,0.25);
+    }
+
+    [data-bs-theme="dark"] .contact-card {
+      background: #1e293b;
+      border-color: var(--green);
+    }
+
+    .contact-item {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 1.8rem;
+      font-size: 1.1rem;
+    }
+
+    .contact-icon {
+      font-size: 1.8rem;
+      color: var(--bs-primary);
+      margin-right: 1.2rem;
+      width: 40px;
+      text-align: center;
+    }
+
+    .contact-text a {
+      color: var(--bs-primary);
+      text-decoration: none;
+    }
+
+    .contact-text a:hover { text-decoration: underline; }
+
+    .zalo-group {
+      margin: 2rem 0;
+      text-align: center;
+    }
+
+    .zalo-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.8rem;
+      background: #0068ff;
+      color: white !important;
+      padding: 0.8rem 1.8rem;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 1.1rem;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0,104,255,0.3);
+    }
+
+    .zalo-btn:hover {
+      background: #0050cc;
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0,104,255,0.4);
+      color: white !important;
+    }
+
+    .map-container {
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+      margin-top: 2rem;
+    }
+
+    .map-container iframe {
+      width: 100%;
+      height: 450px;
+      border: 0;
+    }
+
+    .theme-btn {
+      font-size: 1.5rem;
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+    }
+
+    /* Language toggle */
+    .lang-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      user-select: none;
+      padding: 6px 14px;
+      border-radius: 999px;
+      transition: background 0.25s;
+    }
+
+    .lang-group:hover { background: rgba(255,255,255,0.15); }
+
+    .flag { font-size: 1.55rem; transition: opacity 0.3s; }
+    .flag.inactive { opacity: 0.48; }
+
+    .switch {
+      position: relative;
+      width: 56px;
+      height: 28px;
+      flex-shrink: 0;
+    }
+
+    .switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+
+    .switch .slider {
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0.38);
+      border-radius: 34px;
+      border: 2px solid white;
+      transition: background 0.38s;
+      cursor: pointer;
+    }
+
+    .switch .slider:before {
+      content: "";
+      position: absolute;
+      height: 20px;
+      width: 20px;
+      left: 4px;
+      bottom: 4px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.38s;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.25);
+    }
+
+    .switch input:checked + .slider { background: white; }
+    .switch input:checked + .slider:before {
+      transform: translateX(28px);
+      background: var(--bs-primary);
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg sticky-top shadow">
+  <div class="container">
+    <a class="navbar-brand fw-bold fs-4" href="https://inkspire-vn.github.io">InkSpire</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navMain">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link" href="https://inkspire-vn.github.io" data-lang-key="home">Trang chủ</a></li>
+        <li class="nav-item"><a class="nav-link" href="/products" data-lang-key="products">Sản phẩm</a></li>
+        <li class="nav-item"><a class="nav-link" href="/events" data-lang-key="events">Sự kiện</a></li>
+        <li class="nav-item"><a class="nav-link active" href="/contact" data-lang-key="contact">Liên hệ</a></li>
+      </ul>
+
+      <div class="d-flex align-items-center gap-4">
+        <div class="lang-group" id="langGroup" role="button" tabindex="0">
+          <span class="flag vi-flag" data-lang="vi">🇻🇳</span>
+          <div class="switch">
+            <input type="checkbox" id="langSwitch">
+            <span class="slider"></span>
+          </div>
+          <span class="flag en-flag" data-lang="en">🇺🇸</span>
+        </div>
+
+        <button class="theme-btn" id="themeBtn">🌙</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<section class="page-hero">
+  <div class="page-hero-content">
+    <h1 class="display-4 fw-bold" data-lang-key="contact-title">Liên hệ với chúng tôi</h1>
+  </div>
+</section>
+
+<main class="container contact-section">
+
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+
+      <div class="contact-card text-center">
+        <div class="contact-item justify-content-center">
+          <div class="contact-icon"><i class="fas fa-phone-alt"></i></div>
+          <div class="contact-text">
+            <strong data-lang-key="phone-label">Điện thoại / Zalo:</strong><br>
+            <a href="tel:+84898115608">+84 898 115 608</a>
+          </div>
+        </div>
+
+        <div class="contact-item justify-content-center">
+          <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+          <div class="contact-text">
+            <strong data-lang-key="address-label">Địa chỉ:</strong><br>
+            <span data-lang-key="address-text">
+              28 Nguyễn Quý Đức, Thảo Điền,<br>
+              Thành phố Thủ Đức, Thành phố Hồ Chí Minh 700000, Việt Nam
+            </span>
+          </div>
+        </div>
+
+        <!-- Zalo Group Join Button -->
+        <div class="zalo-group">
+          <a href="https://zalo.me/g/yuncpx035" target="_blank" rel="noopener noreferrer" class="zalo-btn">
+            <i class="fab fa-zalo fa-lg"></i>
+            <span data-lang-key="join-zalo">Tham gia nhóm Zalo</span>
+          </a>
+          <div class="mt-2 small text-muted" data-lang-key="zalo-desc">
+            Kết nối, cập nhật sự kiện & ưu đãi mới nhất!
+          </div>
+        </div>
+
+        <div class="map-container">
+          <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.163410037742!2d106.73580337413928!3d10.798793558782569!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3175270056747253%3A0xe8a555f7e3f4261c!2sINKSPIRE%20BOOKSTORE!5e0!3m2!1sen!2s!4v1768822221885!5m2!1sen!2s" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+        </div>
+
+        <div class="mt-5">
+          <a href="https://inkspire-vn.github.io" class="btn btn-outline-secondary btn-lg" data-lang-key="back-home">← Quay về Trang chủ</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</main>
+
+<footer class="text-center py-4" style="background:var(--bs-primary); color:white;">
+  <div class="container">
+    <p class="mb-1">© 2026 InkSpire Bookstore • TP. Hồ Chí Minh</p>
+    <small data-lang-key="footer">Tri thức bắt đầu từ một giọt mực</small>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+
+<script>
+// Theme toggle
+const html = document.documentElement;
+const themeBtn = document.getElementById('themeBtn');
+
+function setTheme(mode) {
+  html.setAttribute('data-bs-theme', mode);
+  localStorage.setItem('theme', mode);
+  themeBtn.textContent = mode === 'dark' ? '☀️' : '🌙';
+}
+
+setTheme(localStorage.getItem('theme') || 'light');
+themeBtn.onclick = () => setTheme(html.getAttribute('data-bs-theme') === 'light' ? 'dark' : 'light');
+
+// Language toggle – now includes Zalo & contact translations
+const langGroup = document.getElementById('langGroup');
+const langSwitch = document.getElementById('langSwitch');
+
+const dict = {
+  vi: {
+    home: "Trang chủ",
+    products: "Sản phẩm",
+    events: "Sự kiện",
+    contact: "Liên hệ",
+    "contact-title": "Liên hệ với chúng tôi",
+    "phone-label": "Điện thoại / Zalo:",
+    "address-label": "Địa chỉ:",
+    "address-text": "28 Nguyễn Quý Đức, Thảo Điền,\nThành phố Thủ Đức, Thành phố Hồ Chí Minh 700000, Việt Nam",
+    "join-zalo": "Tham gia nhóm Zalo",
+    "zalo-desc": "Kết nối, cập nhật sự kiện & ưu đãi mới nhất!",
+    "back-home": "← Quay về Trang chủ",
+    footer: "Tri thức bắt đầu từ một giọt mực"
+  },
+  en: {
+    home: "Home",
+    products: "Products",
+    events: "Events",
+    contact: "Contact",
+    "contact-title": "Contact Us",
+    "phone-label": "Phone / Zalo:",
+    "address-label": "Address:",
+    "address-text": "28 Nguyen Quy Duc, Thao Dien,\nThu Duc City, Ho Chi Minh City 700000, Vietnam",
+    "join-zalo": "Join Zalo Group",
+    "zalo-desc": "Connect, get updates on events & latest offers!",
+    "back-home": "← Back to Home",
+    footer: "Knowledge begins with a drop of ink"
+  }
+};
+
+function setLang(lang) {
+  html.lang = lang;
+  localStorage.setItem('lang', lang);
+  langSwitch.checked = (lang === 'en');
+
+  document.querySelector('.vi-flag').classList.toggle('inactive', lang !== 'vi');
+  document.querySelector('.en-flag').classList.toggle('inactive', lang !== 'en');
+
+  document.querySelectorAll('[data-lang-key]').forEach(el => {
+    const k = el.getAttribute('data-lang-key');
+    if (dict[lang][k]) el.textContent = dict[lang][k];
+  });
+}
+
+setLang(localStorage.getItem('lang') || 'vi');
+
+langGroup.addEventListener('click', () => {
+  const cur = localStorage.getItem('lang') || 'vi';
+  setLang(cur === 'vi' ? 'en' : 'vi');
+});
+
+langSwitch.addEventListener('change', () => {
+  setLang(langSwitch.checked ? 'en' : 'vi');
+});
+
+langGroup.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    langGroup.click();
+  }
+});
+</script>
+</body>
+</html>
