@@ -3,19 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sản phẩm - InkSpire Bookstore</title>
+  <title data-lang-key="products-title">Sản phẩm - InkSpire Bookstore</title>
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="https://avatars.githubusercontent.com/u/254457838?s=64">
 
-  <!-- Shared CSS -->
-  <link rel="stylesheet" href="styles.css">
-
   <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
 
-  <!-- Font Awesome for icons -->
+  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <!-- Your shared styles – must come AFTER Bootstrap -->
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
@@ -65,8 +65,8 @@
     <!-- Products will be inserted here by JS -->
   </div>
 
-  <!-- No products message (hidden by default) -->
-  <div id="no-products" class="text-center py-5 d-none">
+  <!-- No products message -->
+  <div id="no-products" class="text-center py-5">
     <i class="fas fa-box-open fa-5x text-muted mb-4"></i>
     <h4 data-lang-key="no-products">Hiện chưa có sản phẩm nào</h4>
     <p data-lang-key="no-products-desc" class="text-muted">
@@ -81,7 +81,7 @@
 
 </main>
 
-<footer class="text-center py-4" style="background:var(--bs-primary); color:white;">
+<footer class="text-center py-4">
   <div class="container">
     <p class="mb-1">© 2026 InkSpire Bookstore • TP. Hồ Chí Minh</p>
     <small data-lang-key="footer">Tri thức bắt đầu từ một giọt mực</small>
@@ -160,43 +160,15 @@ langSwitch.addEventListener('change', () => {
   setLang(langSwitch.checked ? 'en' : 'vi');
 });
 
-langGroup.addEventListener('keydown', e => {
+langGroup.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' || e.key === ' ') {
     e.preventDefault();
     langGroup.click();
   }
 });
 
-// Sample products (replace with your real data later)
-const products = [
-  // Currently empty → shows "no products" message
-  // Example format if you want to add later:
-  // { name: "Sách Harry Potter", price: "220k ₫", image: "https://picsum.photos/seed/book1/300/400" },
-];
-
-// Render products or show empty state
-const grid = document.getElementById('product-grid');
-const noProductsMsg = document.getElementById('no-products');
-
-if (products.length === 0) {
-  noProductsMsg.classList.remove('d-none');
-} else {
-  products.forEach(product => {
-    const card = `
-      <div class="col-6 col-md-4 col-lg-3">
-        <div class="card h-100 border-0 shadow-sm product-card">
-          <img src="${product.image || 'https://placehold.co/300x400?text=Product'}" class="card-img-top" alt="${product.name}">
-          <div class="card-body text-center">
-            <h5 class="card-title">${product.name}</h5>
-            <p class="card-text fw-bold text-primary">${product.price}</p>
-            <a href="#" class="btn btn-outline-primary btn-sm" data-lang-key="view-detail">Xem chi tiết</a>
-          </div>
-        </div>
-      </div>
-    `;
-    grid.innerHTML += card;
-  });
-}
+// No products by default
+document.getElementById('no-products').classList.remove('d-none');
 </script>
 </body>
 </html>
