@@ -179,7 +179,7 @@ langGroup.addEventListener('keydown', (e) => {
 // Real-time product sync from GitHub JSON
 // ──────────────────────────────────────────────
 
-const PRODUCT_JSON_URL = 'https://raw.githubusercontent.com/inkspire-vn/inkspire-vn.github.io/main/data/products.json';
+const PRODUCT_JSON_URL = '/data/products.json';  
 let lastKnownProducts = null; // To detect changes
 
 async function loadProducts(forceRefresh = false) {
