@@ -80,89 +80,51 @@
 
 <main class="container py-5">
 
+  <!-- Ongoing Events Box -->
+  <a href="/events" class="events-box text-decoration-none" id="eventsBox">
+    <h3 data-lang-key="ongoing">Sự kiện đang diễn ra</h3>
+    
+    <div id="events-container" class="row g-3 justify-content-center">
+      <!-- Events loaded here -->
+    </div>
+
+    <div id="no-events-home" class="text-center py-4 d-none">
+      <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+      <p class="lead fw-bold" data-lang-key="no-events-home">Hiện chưa có sự kiện nào</p>
+      <p class="text-muted" data-lang-key="no-events-home-desc">Theo dõi nhóm Zalo để nhận thông báo sớm nhất!</p>
+    </div>
+
+    <div class="text-center mt-4 small fw-bold" style="color: var(--bs-primary);">
+      <span data-lang-key="view-all-events">Click để xem chi tiết tất cả sự kiện →</span>
+    </div>
+  </a>
+
+  <!-- Toys Slider -->
   <h2 class="mb-4" data-lang-key="toys">Đồ chơi – Toys</h2>
   <div class="slider-wrap">
-    <div class="track">
-      <div class="item"><img src="https://picsum.photos/seed/tA/240/320" alt=""><div class="price">189k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/tB/240/320" alt=""><div class="price">249k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/tC/240/320" alt=""><div class="price">320k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/tD/240/320" alt=""><div class="price">155k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/tE/240/320" alt=""><div class="price">420k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/tF/240/320" alt=""><div class="price">299k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/tG/240/320" alt=""><div class="price">135k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/tH/240/320" alt=""><div class="price">275k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/tI/240/320" alt=""><div class="price">380k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/tJ/240/320" alt=""><div class="price">210k ₫</div></div>
-      <!-- duplicates -->
-      <div class="item"><img src="https://picsum.photos/seed/tA/240/320" alt=""><div class="price">189k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/tB/240/320" alt=""><div class="price">249k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/tC/240/320" alt=""><div class="price">320k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/tD/240/320" alt=""><div class="price">155k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/tE/240/320" alt=""><div class="price">420k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/tF/240/320" alt=""><div class="price">299k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/tG/240/320" alt=""><div class="price">135k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/tH/240/320" alt=""><div class="price">275k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/tI/240/320" alt=""><div class="price">380k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/tJ/240/320" alt=""><div class="price">210k ₫</div></div>
+    <div class="track" id="toys-track">
+      <!-- Filled dynamically -->
     </div>
   </div>
 
+  <!-- Stationery Slider -->
   <h2 class="mb-5 mt-5" data-lang-key="stationery">Văn phòng phẩm – Stationery</h2>
   <div class="slider-wrap reverse">
-    <div class="track">
-      <div class="item"><img src="https://picsum.photos/seed/p1/240/320" alt=""><div class="price">45k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/n1/240/320" alt=""><div class="price">85k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/m1/240/320" alt=""><div class="price">120k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/s1/240/320" alt=""><div class="price">65k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/tp1/240/320" alt=""><div class="price">38k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/p2/240/320" alt=""><div class="price">55k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/n2/240/320" alt=""><div class="price">95k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/h1/240/320" alt=""><div class="price">28k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/w1/240/320" alt=""><div class="price">75k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/c1/240/320" alt=""><div class="price">22k ₫</div></div>
-      <!-- duplicates -->
-      <div class="item"><img src="https://picsum.photos/seed/p1/240/320" alt=""><div class="price">45k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/n1/240/320" alt=""><div class="price">85k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/m1/240/320" alt=""><div class="price">120k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/s1/240/320" alt=""><div class="price">65k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/tp1/240/320" alt=""><div class="price">38k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/p2/240/320" alt=""><div class="price">55k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/n2/240/320" alt=""><div class="price">95k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/h1/240/320" alt=""><div class="price">28k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/w1/240/320" alt=""><div class="price">75k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/c1/240/320" alt=""><div class="price">22k ₫</div></div>
+    <div class="track" id="stationery-track">
+      <!-- Filled dynamically -->
     </div>
   </div>
 
+  <!-- Books Slider -->
   <h2 class="mb-5 mt-5" data-lang-key="books">Sách – Books</h2>
   <div class="slider-wrap">
-    <div class="track">
-      <div class="item"><img src="https://picsum.photos/seed/bk1/240/320" alt=""><div class="price">220k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/bk2/240/320" alt=""><div class="price">180k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/bk3/240/320" alt=""><div class="price">350k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/bk4/240/320" alt=""><div class="price">95k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/bk5/240/320" alt=""><div class="price">410k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/bk6/240/320" alt=""><div class="price">145k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/bk7/240/320" alt=""><div class="price">280k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/bk8/240/320" alt=""><div class="price">199k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/bk9/240/320" alt=""><div class="price">310k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/bk10/240/320" alt=""><div class="price">265k ₫</div></div>
-      <!-- duplicates -->
-      <div class="item"><img src="https://picsum.photos/seed/bk1/240/320" alt=""><div class="price">220k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/bk2/240/320" alt=""><div class="price">180k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/bk3/240/320" alt=""><div class="price">350k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/bk4/240/320" alt=""><div class="price">95k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/bk5/240/320" alt=""><div class="price">410k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/bk6/240/320" alt=""><div class="price">145k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/bk7/240/320" alt=""><div class="price">280k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/bk8/240/320" alt=""><div class="price">199k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/bk9/240/320" alt=""><div class="price">310k ₫</div></div>
-      <div class="item"><img src="https://picsum.photos/seed/bk10/240/320" alt=""><div class="price">265k ₫</div></div>
+    <div class="track" id="books-track">
+      <!-- Filled dynamically -->
     </div>
   </div>
 
 </main>
-
+  
 <footer class="text-center py-4" style="background:var(--bs-primary); color:white;">
   <div class="container">
     <p class="mb-1">© 2026 InkSpire Bookstore • TP. Hồ Chí Minh</p>
@@ -171,9 +133,8 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-
 <script>
-// Theme toggle + events box dark mode fix
+// Theme toggle
 const html = document.documentElement;
 const themeBtn = document.getElementById('themeBtn');
 
@@ -181,7 +142,6 @@ function setTheme(mode) {
   html.setAttribute('data-bs-theme', mode);
   localStorage.setItem('theme', mode);
   themeBtn.textContent = mode === 'dark' ? '☀️' : '🌙';
-  document.getElementById('eventsBox').classList.toggle('dark', mode === 'dark');
 }
 
 setTheme(localStorage.getItem('theme') || 'light');
@@ -193,24 +153,36 @@ const langSwitch = document.getElementById('langSwitch');
 
 const dict = {
   vi: {
-    home: "Trang chủ", products: "Sản phẩm", events: "Sự kiện", contact: "Liên hệ",
+    home: "Trang chủ",
+    products: "Sản phẩm",
+    events: "Sự kiện",
+    contact: "Liên hệ",
     title: "InkSpire Bookstore",
     slogan: "Nơi ý tưởng bắt đầu • Where ideas begin",
     toys: "Đồ chơi – Toys",
     stationery: "Văn phòng phẩm – Stationery",
     books: "Sách – Books",
-    footer: "Tri thức bắt đầu từ một giọt mực",
-    ongoing: "Sự kiện đang diễn ra"
+    ongoing: "Sự kiện đang diễn ra",
+    "view-all-events": "Click để xem chi tiết tất cả sự kiện →",
+    "no-events-home": "Hiện chưa có sự kiện nào",
+    "no-events-home-desc": "Theo dõi nhóm Zalo để nhận thông báo sớm nhất!",
+    footer: "Tri thức bắt đầu từ một giọt mực"
   },
   en: {
-    home: "Home", products: "Products", events: "Events", contact: "Contact",
+    home: "Home",
+    products: "Products",
+    events: "Events",
+    contact: "Contact",
     title: "InkSpire Bookstore",
     slogan: "Where ideas begin",
     toys: "Toys",
     stationery: "Stationery",
     books: "Books",
-    footer: "Knowledge begins with a drop of ink",
-    ongoing: "Ongoing Events"
+    ongoing: "Ongoing Events",
+    "view-all-events": "Click to view all events →",
+    "no-events-home": "No events coming up",
+    "no-events-home-desc": "Join our Zalo group for the latest updates!",
+    footer: "Knowledge begins with a drop of ink"
   }
 };
 
@@ -223,14 +195,14 @@ function setLang(lang) {
   document.querySelector('.en-flag').classList.toggle('inactive', lang !== 'en');
 
   document.querySelectorAll('[data-lang-key]').forEach(el => {
-    const k = el.dataset.langKey;
+    const k = el.getAttribute('data-lang-key');
     if (dict[lang][k]) el.textContent = dict[lang][k];
   });
 }
 
 setLang(localStorage.getItem('lang') || 'vi');
 
-langGroup.addEventListener('click', (e) => {
+langGroup.addEventListener('click', () => {
   const cur = localStorage.getItem('lang') || 'vi';
   setLang(cur === 'vi' ? 'en' : 'vi');
 });
@@ -239,12 +211,118 @@ langSwitch.addEventListener('change', () => {
   setLang(langSwitch.checked ? 'en' : 'vi');
 });
 
-langGroup.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' || e.key === ' ') {
-    e.preventDefault();
-    langGroup.click();
+// ──────────────────────────────────────────────
+// Load products & events from GitHub JSON – real-time sync
+// ──────────────────────────────────────────────
+
+const PRODUCTS_JSON = '/data/products.json';
+const EVENTS_JSON   = '/data/events.json';
+
+let lastProductsJson = null;
+let lastEventsJson = null;
+
+async function syncData() {
+  try {
+    const cacheBuster = '?t=' + Date.now() + Math.random().toString(36).substring(2, 10);
+
+    // Load products
+    const prodRes = await fetch(PRODUCTS_JSON + cacheBuster, { cache: 'no-store' });
+    if (!prodRes.ok) throw new Error('Products fetch failed');
+    const products = await prodRes.json();
+
+    // Load events
+    const eventRes = await fetch(EVENTS_JSON + cacheBuster, { cache: 'no-store' });
+    if (!eventRes.ok) throw new Error('Events fetch failed');
+    const events = await eventRes.json();
+
+    const prodJsonStr = JSON.stringify(products);
+    const eventJsonStr = JSON.stringify(events);
+
+    // Only re-render if data changed
+    if (prodJsonStr !== lastProductsJson || eventJsonStr !== lastEventsJson) {
+      lastProductsJson = prodJsonStr;
+      lastEventsJson = eventJsonStr;
+
+      renderEvents(events);
+      renderSliders(products);
+    }
+  } catch (err) {
+    console.error('Sync error:', err);
   }
-});
+}
+
+function renderEvents(events) {
+  const container = document.getElementById('events-container');
+  const noEventsBox = document.getElementById('no-events-home');
+
+  container.innerHTML = '';
+
+  if (events.length === 0) {
+    noEventsBox.classList.remove('d-none');
+    return;
+  }
+
+  noEventsBox.classList.add('d-none');
+
+  // Show max 3 recent events
+  events.slice(0, 3).forEach(event => {
+    const card = `
+      <div class="col-md-6 col-lg-4">
+        <div class="event-card p-3">
+          <h5>${event.title}</h5>
+          <p class="mb-1">${event.date}</p>
+          <small>${event.desc}</small>
+        </div>
+      </div>
+    `;
+    container.innerHTML += card;
+  });
+}
+
+function renderSliders(products) {
+  const categories = {
+    toys: document.getElementById('toys-track'),
+    stationery: document.getElementById('stationery-track'),
+    books: document.getElementById('books-track')
+  };
+
+  Object.keys(categories).forEach(cat => {
+    const track = categories[cat];
+    track.innerHTML = '';
+
+    const items = products.filter(p => p.category.toLowerCase() === cat);
+
+    if (items.length === 0) {
+      // Gray placeholder box when no items
+      track.innerHTML = `
+        <div class="item">
+          <div class="placeholder-box bg-secondary-subtle d-flex align-items-center justify-content-center" style="height: 320px; border-radius: 12px;">
+            <p class="text-muted m-0">Chưa có sản phẩm</p>
+          </div>
+        </div>
+      `;
+      return;
+    }
+
+    // Repeat items 2–3 times if few
+    let repeated = items;
+    if (items.length < 4) repeated = [...items, ...items, ...items].slice(0, 12); // enough for smooth loop
+
+    repeated.forEach(p => {
+      const item = `
+        <div class="item">
+          <img src="${p.image}" alt="${p.name}">
+          <div class="price">${p.price}</div>
+        </div>
+      `;
+      track.innerHTML += item;
+    });
+  });
+}
+
+// Initial sync + auto every 10 seconds
+syncData();
+setInterval(syncData, 10000);
 </script>
 </body>
 </html>
