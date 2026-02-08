@@ -1,12 +1,23 @@
 <!DOCTYPE html>
 <html lang="vi" data-bs-theme="light">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dev - InkSpire</title>
+
+  <link rel="icon" type="image/png" href="https://avatars.githubusercontent.com/u/254457838?s=64">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Firebase SDK (from Step 1) -->
+  <!-- Firebase SDK v10 (modular) -->
   <script type="module">
     // Import needed Firebase modules
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
     import { getDatabase, ref, onValue, set, push, remove, update, query, limitToLast, get, child } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-  
+
     // Your config (paste once per page or make shared file later)
     const firebaseConfig = {
       apiKey: "AIzaSyA9XvWCZOyaSuT42HBMUgQQ7KTuQYPWLbE",
@@ -43,31 +54,22 @@
     window.get = get;
     window.child = child;
   </script>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Dev - InkSpire</title>
-
-  <link rel="icon" type="image/png" href="https://avatars.githubusercontent.com/u/254457838?s=64">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-<!-- Password screen -->
-<div id="password-screen" class="d-flex align-items-center justify-content-center vh-100 bg-light">
-  <div class="card p-5 shadow-lg" style="max-width: 420px; width: 100%;">
-    <h3 class="text-center mb-4">Dev Access</h3>
-    <p class="text-center text-muted mb-4">Nhập mật khẩu để vào khu vực quản lý</p>
-    
-    <input type="password" id="devPassword" class="form-control mb-3" placeholder="Mật khẩu..." autocomplete="off">
-    <button id="submitPassword" class="btn btn-primary w-100">Vào</button>
-    
-    <p id="errorMsg" class="text-danger text-center mt-3 d-none">Sai mật khẩu!</p>
+<!-- Login screen (staff only) -->
+<div id="login-screen" class="d-flex align-items-center justify-content-center vh-100 bg-light">
+  <div class="card p-5 shadow-lg text-center" style="max-width: 420px;">
+    <h3>Dev Access - Staff Only</h3>
+    <p class="text-muted mb-4">Đăng nhập bằng tài khoản Google để quản lý</p>
+    <button id="googleSignIn" class="btn btn-outline-danger btn-lg w-100 mb-3">
+      <i class="fab fa-google me-2"></i> Đăng nhập bằng Google
+    </button>
+    <p id="loginError" class="text-danger d-none">Đăng nhập thất bại hoặc không được phép. Vui lòng thử lại.</p>
   </div>
 </div>
 
-<!-- Real content (hidden until password correct) -->
+<!-- Main dev content (hidden until logged in) -->
 <div id="dev-content" class="d-none">
   <nav class="navbar navbar-expand-lg sticky-top shadow">
     <div class="container">
@@ -94,6 +96,7 @@
             <span class="flag en-flag" data-lang="en">🇺🇸</span>
           </div>
           <button class="theme-btn" id="themeBtn">🌙</button>
+          <button id="signOutBtn" class="btn btn-sm btn-outline-danger">Đăng xuất</button>
         </div>
       </div>
     </div>
@@ -103,18 +106,17 @@
     <h1 class="text-center mb-5">Dev Page - Quản lý Sản phẩm & Sự kiện</h1>
 
     <!-- Tabs -->
-    <ul class="nav nav-tabs mb-4" id="devTabs" role="tablist">
-      <li class="nav-item" role="presentation">
-        <button class="nav-link active" id="products-tab" data-bs-toggle="tab" data-bs-target="#products" type="button" role="tab">Sản phẩm</button>
+    <ul class="nav nav-tabs mb-4" id="devTabs">
+      <li class="nav-item">
+        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#products">Sản phẩm</button>
       </li>
-      <li class="nav-item" role="presentation">
-        <button class="nav-link" id="events-tab" data-bs-toggle="tab" data-bs-target="#events" type="button" role="tab">Sự kiện</button>
+      <li class="nav-item">
+        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#events">Sự kiện</button>
       </li>
     </ul>
 
-    <div class="tab-content" id="devTabContent">
-      <!-- Products Tab -->
-      <div class="tab-pane fade show active" id="products" role="tabpanel">
+    <div class="tab-content">
+      <div class="tab-pane fade show active" id="products">
         <h3 class="mb-4">Thêm sản phẩm mới</h3>
         <form id="productForm" class="row g-3 mb-5">
           <div class="col-md-6">
@@ -122,7 +124,7 @@
             <input type="text" class="form-control" id="productName" required>
           </div>
           <div class="col-md-3">
-            <label class="form-label">Giá (ví dụ: 220k ₫)</label>
+            <label class="form-label">Giá (ví dụ: 220k)</label>
             <input type="text" class="form-control" id="productPrice" required>
           </div>
           <div class="col-md-3">
@@ -135,7 +137,7 @@
           </div>
           <div class="col-12">
             <label class="form-label">Link ảnh (URL)</label>
-            <input type="url" class="form-control" id="productImage" placeholder="https://example.com/image.jpg" required>
+            <input type="url" class="form-control" id="productImage" required>
           </div>
           <div class="col-12 text-end">
             <button type="submit" class="btn btn-primary">Thêm sản phẩm</button>
@@ -146,8 +148,8 @@
         <div id="productList" class="list-group"></div>
       </div>
 
-      <!-- Events Tab (basic – expand later if needed) -->
-      <div class="tab-pane fade" id="events" role="tabpanel">
+      <div class="tab-pane fade" id="events">
+        <!-- Add your event form here (same as before) -->
         <h3 class="mb-4">Thêm sự kiện mới</h3>
         <form id="eventForm" class="row g-3 mb-5">
           <div class="col-md-6">
@@ -156,15 +158,15 @@
           </div>
           <div class="col-md-6">
             <label class="form-label">Ngày & giờ</label>
-            <input type="text" class="form-control" id="eventDate" placeholder="January 20, 2026 | 2:00 PM" required>
+            <input type="text" class="form-control" id="eventDate" required>
           </div>
           <div class="col-12">
             <label class="form-label">Mô tả</label>
             <textarea class="form-control" id="eventDesc" rows="3" required></textarea>
           </div>
           <div class="col-12">
-            <label class="form-label">Link ảnh (URL) – optional</label>
-            <input type="url" class="form-control" id="eventImage" placeholder="https://example.com/event.jpg">
+            <label class="form-label">Link ảnh (URL, optional)</label>
+            <input type="url" class="form-control" id="eventImage">
           </div>
           <div class="col-12 text-end">
             <button type="submit" class="btn btn-primary">Thêm sự kiện</button>
@@ -175,330 +177,111 @@
         <div id="eventList" class="list-group"></div>
       </div>
     </div>
-
-    <div class="text-center mt-5">
-      <a href="https://inkspire-vn.github.io" class="btn btn-outline-secondary btn-lg">← Quay về Trang chủ</a>
-    </div>
   </main>
-
-  <footer class="text-center py-4" style="background:var(--bs-primary); color:white;">
-    <div class="container">
-      <p class="mb-1">© 2026 InkSpire Bookstore • TP. Hồ Chí Minh</p>
-      <small>Tri thức bắt đầu từ một giọt mực</small>
-    </div>
-  </footer>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script type="module">
+  // Firebase is already initialized from head script
 
-<script>
-  // UTF-8 safe base64 helpers
-function utf8ToBase64(str) {
-  return btoa(unescape(encodeURIComponent(str)));
-}
+  const loginScreen = document.getElementById('login-screen');
+  const devContent = document.getElementById('dev-content');
+  const googleSignIn = document.getElementById('googleSignIn');
+  const signOutBtn = document.getElementById('signOutBtn');
+  const loginError = document.getElementById('loginError');
 
-function base64ToUtf8(str) {
-  return decodeURIComponent(escape(atob(str)));
-}
-// ──────────────────────────────────────────────
-// Password protection
-// ──────────────────────────────────────────────
-
-const PASSWORD = "inkspire@2025";
-const passwordScreen = document.getElementById("password-screen");
-const devContent = document.getElementById("dev-content");
-const passwordInput = document.getElementById("devPassword");
-const submitBtn = document.getElementById("submitPassword");
-const errorMsg = document.getElementById("errorMsg");
-
-submitBtn.addEventListener("click", () => {
-  if (passwordInput.value === PASSWORD) {
-    passwordScreen.classList.add("d-none");
-    devContent.classList.remove("d-none");
-    loadAllData(); // Load after successful login
-  } else {
-    errorMsg.classList.remove("d-none");
-    passwordInput.value = "";
-    passwordInput.focus();
-  }
-});
-
-passwordInput.addEventListener("keypress", e => {
-  if (e.key === "Enter") submitBtn.click();
-});
-
-// ──────────────────────────────────────────────
-// GitHub API Config
-// ──────────────────────────────────────────────
-
-// token removed for safety GITHUB
-const REPO_OWNER = "inkspire-vn";
-const REPO_NAME = "inkspire-vn.github.io";
-const PRODUCTS_FILE = "data/products.json";
-const EVENTS_FILE = "data/events.json";
-
-// ──────────────────────────────────────────────
-// Products Management
-// ──────────────────────────────────────────────
-
-let currentProducts = [];
-
-async function loadProducts() {
-  try {
-    const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${PRODUCTS_FILE}`, {
-      headers: {
-        'Accept': 'application/vnd.github.v3+json',
-        'Authorization': `token ${GITHUB_TOKEN}`
-      }
-    });
-    if (!res.ok) throw new Error(`GitHub API error: ${res.status}`);
-    const data = await res.json();
-    const content = atob(data.content);
-    currentProducts = JSON.parse(content);
-    renderProductList();
-  } catch (err) {
-    console.error(err);
-    alert('Không thể tải sản phẩm từ GitHub. Kiểm tra token hoặc file data/products.json có tồn tại chưa.');
-  }
-}
-
-function renderProductList() {
-  const list = document.getElementById('productList');
-  list.innerHTML = '';
-
-  if (currentProducts.length === 0) {
-    list.innerHTML = '<p class="text-muted text-center py-4">Chưa có sản phẩm nào.</p>';
-    return;
-  }
-
-  currentProducts.forEach((p, index) => {
-    const item = document.createElement('div');
-    item.className = 'list-group-item d-flex justify-content-between align-items-center';
-    item.innerHTML = `
-      <div>
-        <strong>${p.name}</strong> — ${p.price} (${p.category})<br>
-        <small class="text-muted">${p.image.substring(0, 60)}${p.image.length > 60 ? '...' : ''}</small>
-      </div>
-      <button class="btn btn-danger btn-sm" onclick="deleteProduct(${index})">
-        <i class="fas fa-trash"></i> Xóa
-      </button>
-    `;
-    list.appendChild(item);
+  // Listen for auth state
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      loginScreen.classList.add('d-none');
+      devContent.classList.remove('d-none');
+      loadAllData();
+      console.log('Logged in as:', user.displayName, user.email);
+    } else {
+      loginScreen.classList.remove('d-none');
+      devContent.classList.add('d-none');
+    }
   });
-}
 
-async function deleteProduct(index) {
-  if (!confirm('Bạn chắc chắn muốn xóa sản phẩm này?')) return;
-
-  currentProducts.splice(index, 1);
-  await saveToGitHub(PRODUCTS_FILE, currentProducts);
-  renderProductList();
-  alert('Đã xóa và cập nhật lên GitHub!');
-}
-
-document.getElementById('productForm').addEventListener('submit', async e => {
-  e.preventDefault();
-
-  const name = document.getElementById('productName').value.trim();
-  const price = document.getElementById('productPrice').value.trim();
-  const category = document.getElementById('productCategory').value;
-  const image = document.getElementById('productImage').value.trim();
-
-  if (!name || !price || !category || !image) {
-    alert('Vui lòng điền đầy đủ thông tin!');
-    return;
-  }
-
-  currentProducts.push({ name, price, category, image });
-  await saveToGitHub(PRODUCTS_FILE, currentProducts);
-  renderProductList();
-
-  e.target.reset();
-  alert('Đã thêm sản phẩm và cập nhật lên GitHub!');
-});
-
-// ──────────────────────────────────────────────
-// Events Management (basic – same pattern)
-// ──────────────────────────────────────────────
-
-let currentEvents = [];
-
-async function loadEvents() {
-  try {
-    const res = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${EVENTS_FILE}`, {
-      headers: {
-        'Accept': 'application/vnd.github.v3+json',
-        'Authorization': `token ${GITHUB_TOKEN}`
-      }
-    });
-    if (!res.ok) throw new Error(`GitHub API error: ${res.status}`);
-    const data = await res.json();
-    const content = atob(data.content);
-    currentEvents = JSON.parse(content);
-    renderEventList();
-  } catch (err) {
-    console.error(err);
-    alert('Không thể tải sự kiện từ GitHub. Tạo file data/events.json nếu chưa có.');
-  }
-}
-
-function renderEventList() {
-  const list = document.getElementById('eventList');
-  list.innerHTML = '';
-
-  if (currentEvents.length === 0) {
-    list.innerHTML = '<p class="text-muted text-center py-4">Chưa có sự kiện nào.</p>';
-    return;
-  }
-
-  currentEvents.forEach((e, index) => {
-    const item = document.createElement('div');
-    item.className = 'list-group-item d-flex justify-content-between align-items-center';
-    item.innerHTML = `
-      <div>
-        <strong>${e.title}</strong> — ${e.date}<br>
-        <small class="text-muted">${e.desc.substring(0, 80)}${e.desc.length > 80 ? '...' : ''}</small>
-      </div>
-      <button class="btn btn-danger btn-sm" onclick="deleteEvent(${index})">
-        <i class="fas fa-trash"></i> Xóa
-      </button>
-    `;
-    list.appendChild(item);
+  // Google sign-in
+  googleSignIn.addEventListener('click', async () => {
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (error) {
+      loginError.classList.remove('d-none');
+      console.error('Login error:', error);
+    }
   });
-}
 
-async function deleteEvent(index) {
-  if (!confirm('Bạn chắc chắn muốn xóa sự kiện này?')) return;
+  // Sign out
+  signOutBtn.addEventListener('click', async () => {
+    await signOut(auth);
+  });
 
-  currentEvents.splice(index, 1);
-  await saveToGitHub(EVENTS_FILE, currentEvents);
-  renderEventList();
-  alert('Đã xóa và cập nhật lên GitHub!');
-}
+  // Load data real-time
+  function loadAllData() {
+    onValue(ref(db, 'products'), (snapshot) => {
+      const data = snapshot.val() || {};
+      currentProducts = Object.entries(data).map(([key, val]) => ({ key, ...val }));
+      renderProductList();
+    });
 
-document.getElementById('eventForm').addEventListener('submit', async e => {
-  e.preventDefault();
-
-  const title = document.getElementById('eventTitle').value.trim();
-  const date = document.getElementById('eventDate').value.trim();
-  const desc = document.getElementById('eventDesc').value.trim();
-  const image = document.getElementById('eventImage').value.trim() || '';
-
-  if (!title || !date || !desc) {
-    alert('Vui lòng điền đầy đủ thông tin bắt buộc!');
-    return;
+    onValue(ref(db, 'events'), (snapshot) => {
+      const data = snapshot.val() || {};
+      currentEvents = Object.entries(data).map(([key, val]) => ({ key, ...val }));
+      renderEventList();
+    });
   }
 
-  currentEvents.push({ title, date, desc, image });
-  await saveToGitHub(EVENTS_FILE, currentEvents);
-  renderEventList();
+  // Render products (with delete buttons)
+  function renderProductList() {
+    const list = document.getElementById('productList');
+    list.innerHTML = '';
 
-  e.target.reset();
-  alert('Đã thêm sự kiện và cập nhật lên GitHub!');
-});
-
-// ──────────────────────────────────────────────
-// Core GitHub API save function (used by both products & events)
-// ──────────────────────────────────────────────
-
-async function saveToGitHub(filePath, data) {
-  try {
-    // Get current file info (SHA required for update)
-    const getRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${filePath}`, {
-      headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
-    });
-    if (!getRes.ok) throw new Error(`Cannot read file: ${getRes.status}`);
-    const fileInfo = await getRes.json();
-    const sha = fileInfo.sha;
-
-    // Encode new content
-    const content = btoa(JSON.stringify(data, null, 2));
-
-    // Push update
-    const updateRes = await fetch(`https://api.github.com/repos/${REPO_OWNER}/${REPO_NAME}/contents/${filePath}`, {
-      method: 'PUT',
-      headers: { 'Authorization': `token ${GITHUB_TOKEN}` },
-      body: JSON.stringify({
-        message: `Update ${filePath.split('/').pop()} from dev page (${new Date().toISOString()})`,
-        content: content,
-        sha: sha
-      })
-    });
-
-    if (!updateRes.ok) {
-      const errData = await updateRes.json();
-      throw new Error(errData.message || 'Update failed');
+    if (currentProducts.length === 0) {
+      list.innerHTML = '<p class="text-muted">Chưa có sản phẩm nào.</p>';
+      return;
     }
 
-    console.log(`Successfully updated ${filePath}`);
-  } catch (err) {
-    console.error('GitHub save error:', err);
-    alert('Lỗi khi lưu lên GitHub: ' + err.message + '\nKiểm tra token, quyền truy cập, hoặc file có tồn tại chưa.');
+    currentProducts.forEach((p) => {
+      const item = document.createElement('div');
+      item.className = 'list-group-item d-flex justify-content-between align-items-center';
+      item.innerHTML = `
+        <div>
+          <strong>${p.name}</strong> — ${p.price} (${p.category})<br>
+          <small class="text-muted">${p.image.substring(0, 60)}${p.image.length > 60 ? '...' : ''}</small>
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="deleteProduct('${p.key}')">
+          <i class="fas fa-trash"></i> Xóa
+        </button>
+      `;
+      list.appendChild(item);
+    });
   }
-}
 
-// Load everything after password success
-function loadAllData() {
-  loadProducts();
-  loadEvents();
-}
+  window.deleteProduct = async (key) => {
+    if (!confirm('Xóa sản phẩm này?')) return;
+    await remove(ref(db, `products/${key}`));
+    alert('Đã xóa!');
+  };
 
-// Theme & Language (copy from your other pages)
-const themeBtn = document.getElementById('themeBtn');
-function setTheme(mode) {
-  html.setAttribute('data-bs-theme', mode);
-  localStorage.setItem('theme', mode);
-  themeBtn.textContent = mode === 'dark' ? '☀️' : '🌙';
-}
-setTheme(localStorage.getItem('theme') || 'light');
-themeBtn.onclick = () => setTheme(html.getAttribute('data-bs-theme') === 'light' ? 'dark' : 'light');
+  // Add product
+  document.getElementById('productForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('productName').value.trim();
+    const price = document.getElementById('productPrice').value.trim();
+    const category = document.getElementById('productCategory').value;
+    const image = document.getElementById('productImage').value.trim();
 
-const langGroup = document.getElementById('langGroup');
-const langSwitch = document.getElementById('langSwitch');
+    if (!name || !price || !category || !image) return alert('Điền đầy đủ!');
 
-const dict = {
-  vi: {
-    home: "Trang chủ",
-    products: "Sản phẩm",
-    events: "Sự kiện",
-    contact: "Liên hệ",
-    "dev-title": "Dev Page - Quản lý Sản phẩm & Sự kiện",
-    footer: "Tri thức bắt đầu từ một giọt mực"
-  },
-  en: {
-    home: "Home",
-    products: "Products",
-    events: "Events",
-    contact: "Contact",
-    "dev-title": "Dev Page - Manage Products & Events",
-    footer: "Knowledge begins with a drop of ink"
-  }
-};
-
-function setLang(lang) {
-  html.lang = lang;
-  localStorage.setItem('lang', lang);
-  langSwitch.checked = (lang === 'en');
-
-  document.querySelector('.vi-flag').classList.toggle('inactive', lang !== 'vi');
-  document.querySelector('.en-flag').classList.toggle('inactive', lang !== 'en');
-
-  document.querySelectorAll('[data-lang-key]').forEach(el => {
-    const k = el.getAttribute('data-lang-key');
-    if (dict[lang][k]) el.textContent = dict[lang][k];
+    await push(ref(db, 'products'), { name, price, category, image });
+    e.target.reset();
+    alert('Đã thêm sản phẩm!');
   });
-}
 
-setLang(localStorage.getItem('lang') || 'vi');
+  // Similar for events (add your form submit listener here)
 
-langGroup.addEventListener('click', () => {
-  const cur = localStorage.getItem('lang') || 'vi';
-  setLang(cur === 'vi' ? 'en' : 'vi');
-});
-
-langSwitch.addEventListener('change', () => {
-  setLang(langSwitch.checked ? 'en' : 'vi');
-});
+  // Your theme/language code here (keep as before)
 </script>
 </body>
 </html>
