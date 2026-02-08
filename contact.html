@@ -1,6 +1,49 @@
 <!DOCTYPE html>
 <html lang="vi" data-bs-theme="light">
 <head>
+  <!-- Firebase SDK v10 (modular) -->
+  <script type="module">
+    // Import needed Firebase modules
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+    import { getDatabase, ref, onValue, set, push, remove, update, query, limitToLast, get, child } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+  
+    // Your config (paste once per page or make shared file later)
+    const firebaseConfig = {
+      apiKey: "AIzaSyA9XvWCZOyaSuT42HBMUgQQ7KTuQYPWLbE",
+      authDomain: "inkspire-vn-security.firebaseapp.com",
+      databaseURL: "https://inkspire-vn-security-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "inkspire-vn-security",
+      storageBucket: "inkspire-vn-security.firebasestorage.app",
+      messagingSenderId: "774834040534",
+      appId: "1:774834040534:web:c7b5e64826176a44b4e377",
+      measurementId: "G-MJSRBE9TY6"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    // Make them global for easy use in main script
+    window.db = db;
+    window.auth = auth;
+    window.provider = provider;
+    window.signInWithPopup = signInWithPopup;
+    window.onAuthStateChanged = onAuthStateChanged;
+    window.signOut = signOut;
+    window.ref = ref;
+    window.onValue = onValue;
+    window.set = set;
+    window.push = push;
+    window.remove = remove;
+    window.update = update;
+    window.query = query;
+    window.limitToLast = limitToLast;
+    window.get = get;
+    window.child = child;
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title data-lang-key="contact-title">Liên hệ - InkSpire Bookstore</title>
