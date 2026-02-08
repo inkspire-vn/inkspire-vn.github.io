@@ -8,18 +8,41 @@
   <link rel="icon" type="image/png" href="https://avatars.githubusercontent.com/u/254457838?s=64">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
   <style>
-    .hero { background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1507842217343-583bb7278b66?w=1600'); background-size: cover; color: white; padding: 100px 0; }
-    .slider-section { min-height: 400px; }
-    .card-img-top { object-fit: cover; height: 250px; }
+    :root {
+      --primary: #0d6efd;
+      --teal: #20c997;
+      --dark: #212529;
+      --light: #f8f9fa;
+    }
+    body { font-family: system-ui, -apple-system, sans-serif; }
+    .navbar { background-color: var(--teal) !important; }
+    .navbar-brand, .nav-link { color: white !important; }
+    .hero {
+      background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
+                  url('https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
+      color: white;
+      padding: 120px 0;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+    }
+    .slider-section { padding: 60px 0; }
+    .card-img-top { height: 220px; object-fit: cover; }
+    .card { transition: transform 0.2s; }
+    .card:hover { transform: translateY(-8px); box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
+    [data-bs-theme="dark"] .card { background: #2c3034; color: white; }
+    .theme-btn { font-size: 1.3rem; background: none; border: none; cursor: pointer; }
+    .lang-group { cursor: pointer; user-select: none; }
+    .flag { font-size: 1.4rem; transition: opacity 0.3s; }
+    .flag.inactive { opacity: 0.4; }
   </style>
 </head>
 <body>
 
 <!-- Navbar -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top shadow">
+<nav class="navbar navbar-expand-lg shadow">
   <div class="container">
-    <a class="navbar-brand fw-bold" href="/">InkSpire</a>
+    <a class="navbar-brand fw-bold fs-4" href="/">InkSpire</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -30,12 +53,17 @@
         <li class="nav-item"><a class="nav-link" href="/events">Sự kiện</a></li>
         <li class="nav-item"><a class="nav-link" href="/contact">Liên hệ</a></li>
       </ul>
-      <div class="d-flex align-items-center gap-3 ms-3">
-        <div class="lang-toggle btn-group">
-          <button class="btn btn-sm btn-outline-light" onclick="setLang('vi')">🇻🇳 VI</button>
-          <button class="btn btn-sm btn-outline-light" onclick="setLang('en')">🇺🇸 EN</button>
+
+      <div class="d-flex align-items-center gap-4 ms-4">
+        <div class="lang-group d-flex align-items-center gap-2" id="langGroup">
+          <span class="flag vi-flag" data-lang="vi">🇻🇳</span>
+          <div class="switch">
+            <input type="checkbox" id="langSwitch">
+            <span class="slider"></span>
+          </div>
+          <span class="flag en-flag inactive" data-lang="en">🇺🇸</span>
         </div>
-        <button id="themeToggle" class="btn btn-sm btn-outline-light">🌙</button>
+        <button class="theme-btn" id="themeBtn">🌙</button>
       </div>
     </div>
   </div>
@@ -44,47 +72,53 @@
 <!-- Hero -->
 <section class="hero text-center">
   <div class="container">
-    <h1 class="display-4 fw-bold mb-3">InkSpire Bookstore</h1>
-    <p class="lead mb-4">Nơi tri thức bắt đầu từ một giọt mực</p>
-    <a href="/products" class="btn btn-light btn-lg">Khám phá ngay</a>
+    <h1 class="display-3 fw-bold mb-3">InkSpire Bookstore VN</h1>
+    <p class="lead fs-4 mb-4">Nơi tri thức bắt đầu từ một giọt mực</p>
+    <a href="/products" class="btn btn-light btn-lg px-5 py-3">Khám phá ngay</a>
   </div>
 </section>
 
-<!-- Sliders -->
+<!-- Category Sliders -->
 <div class="container py-5">
 
   <!-- Books -->
   <h2 class="text-center mb-4">Sách – Books</h2>
   <div id="books-loading" class="text-center py-5">
-    <div class="spinner-border text-primary"></div>
-    <p class="mt-3">Đang tải...</p>
+    <div class="spinner-border text-primary" role="status"></div>
+    <p class="mt-3">Đang tải sách...</p>
   </div>
   <div id="books-grid" class="row g-4 d-none"></div>
-  <div id="books-empty" class="text-center py-5 d-none text-muted">Chưa có sách nào trong danh mục này</div>
+  <div id="books-empty" class="text-center py-5 d-none">
+    <p class="text-muted">Chưa có sách nào trong danh mục này</p>
+  </div>
 
   <!-- Toys -->
   <h2 class="text-center mb-4 mt-5">Đồ chơi – Toys</h2>
   <div id="toys-loading" class="text-center py-5">
-    <div class="spinner-border text-primary"></div>
-    <p class="mt-3">Đang tải...</p>
+    <div class="spinner-border text-primary" role="status"></div>
+    <p class="mt-3">Đang tải đồ chơi...</p>
   </div>
   <div id="toys-grid" class="row g-4 d-none"></div>
-  <div id="toys-empty" class="text-center py-5 d-none text-muted">Chưa có đồ chơi nào trong danh mục này</div>
+  <div id="toys-empty" class="text-center py-5 d-none">
+    <p class="text-muted">Chưa có đồ chơi nào trong danh mục này</p>
+  </div>
 
   <!-- Stationery -->
   <h2 class="text-center mb-4 mt-5">Văn phòng phẩm – Stationery</h2>
   <div id="stationery-loading" class="text-center py-5">
-    <div class="spinner-border text-primary"></div>
-    <p class="mt-3">Đang tải...</p>
+    <div class="spinner-border text-primary" role="status"></div>
+    <p class="mt-3">Đang tải văn phòng phẩm...</p>
   </div>
   <div id="stationery-grid" class="row g-4 d-none"></div>
-  <div id="stationery-empty" class="text-center py-5 d-none text-muted">Chưa có văn phòng phẩm nào trong danh mục này</div>
+  <div id="stationery-empty" class="text-center py-5 d-none">
+    <p class="text-muted">Chưa có văn phòng phẩm nào trong danh mục này</p>
+  </div>
 
 </div>
 
 <footer class="bg-dark text-white text-center py-4 mt-5">
   <div class="container">
-    <p>© 2026 InkSpire Bookstore • TP. Hồ Chí Minh</p>
+    <p class="mb-1">© 2026 InkSpire Bookstore • TP. Hồ Chí Minh</p>
     <small>Tri thức bắt đầu từ một giọt mực</small>
   </div>
 </footer>
@@ -106,21 +140,85 @@
     measurementId: "G-MJSRBE9TY6"
   };
 
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
+  initializeApp(firebaseConfig);
+  const db = getDatabase();
 
+  // Theme toggle
+  const themeBtn = document.getElementById('themeBtn');
+  themeBtn.onclick = () => {
+    const current = document.documentElement.getAttribute('data-bs-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-bs-theme', next);
+    localStorage.setItem('theme', next);
+    themeBtn.textContent = next === 'dark' ? '☀️' : '🌙';
+  };
+
+  // Language toggle
+  const langGroup = document.getElementById('langGroup');
+  const langSwitch = document.getElementById('langSwitch');
+
+  function setLang(lang) {
+    document.documentElement.lang = lang;
+    localStorage.setItem('lang', lang);
+    langSwitch.checked = (lang === 'en');
+    document.querySelector('.vi-flag').classList.toggle('inactive', lang !== 'vi');
+    document.querySelector('.en-flag').classList.toggle('inactive', lang !== 'en');
+
+    document.querySelectorAll('[data-lang-key]').forEach(el => {
+      const key = el.getAttribute('data-lang-key');
+      el.textContent = dict[lang][key] || el.textContent;
+    });
+  }
+
+  const dict = {
+    vi: {
+      home: "Trang chủ",
+      products: "Sản phẩm",
+      events: "Sự kiện",
+      contact: "Liên hệ"
+    },
+    en: {
+      home: "Home",
+      products: "Products",
+      events: "Events",
+      contact: "Contact"
+    }
+  };
+
+  setLang(localStorage.getItem('lang') || 'vi');
+
+  langGroup.addEventListener('click', () => {
+    const current = localStorage.getItem('lang') || 'vi';
+    setLang(current === 'vi' ? 'en' : 'vi');
+  });
+
+  // Firebase real-time sliders
   const productsRef = ref(db, 'products');
 
   onValue(productsRef, (snapshot) => {
-    const data = snapshot.val() || {};
-    const products = Object.values(data);
+    const products = Object.values(snapshot.val() || {});
 
-    // Hide all loading
+    // Hide all loading spinners
     document.querySelectorAll('[id$="-loading"]').forEach(el => el.classList.add('d-none'));
 
-    renderCategory('books', products.filter(p => (p.category || '').toLowerCase().includes('book') || (p.category || '').includes('sách')));
-    renderCategory('toys', products.filter(p => (p.category || '').toLowerCase().includes('toy') || (p.category || '').includes('đồ chơi')));
-    renderCategory('stationery', products.filter(p => (p.category || '').toLowerCase().includes('station') || (p.category || '').includes('văn phòng')));
+    // Books
+    renderCategory('books', products.filter(p => 
+      (p.category || '').toLowerCase().includes('book') || 
+      (p.category || '').includes('sách')
+    ));
+
+    // Toys
+    renderCategory('toys', products.filter(p => 
+      (p.category || '').toLowerCase().includes('toy') || 
+      (p.category || '').includes('đồ chơi')
+    ));
+
+    // Stationery
+    renderCategory('stationery', products.filter(p => 
+      (p.category || '').toLowerCase().includes('station') || 
+      (p.category || '').includes('văn phòng') || 
+      (p.category || '').includes('vpp')
+    ));
   });
 
   function renderCategory(id, items) {
@@ -130,6 +228,7 @@
     if (!grid || !empty) return;
 
     grid.innerHTML = '';
+
     if (items.length === 0) {
       empty.classList.remove('d-none');
       grid.classList.add('d-none');
@@ -143,22 +242,18 @@
       grid.innerHTML += `
         <div class="col-6 col-md-4 col-lg-3">
           <div class="card h-100 shadow-sm">
-            <img src="${item.image || 'https://via.placeholder.com/300x400?text=No+Image'}" class="card-img-top" alt="${item.name}" style="height:200px; object-fit:cover;">
+            <img src="${item.image || 'https://via.placeholder.com/300x400?text=No+Image'}" 
+                 class="card-img-top" alt="${item.name}" style="height:220px; object-fit:cover;">
             <div class="card-body text-center">
               <h5 class="card-title">${item.name}</h5>
               <p class="card-text fw-bold text-primary">${item.price}</p>
+              <a href="#" class="btn btn-outline-primary btn-sm">Xem chi tiết</a>
             </div>
           </div>
         </div>
       `;
     });
   }
-
-  // Theme toggle
-  const themeBtn = document.getElementById('themeBtn');
-  themeBtn.onclick = () => {
-    document.documentElement.setAttribute('data-bs-theme', document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark');
-  };
 </script>
 </body>
 </html>
