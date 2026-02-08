@@ -8,13 +8,13 @@
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="https://avatars.githubusercontent.com/u/254457838?s=64">
 
-  <!-- Bootstrap -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-  <!-- Your shared styles -->
+  <!-- Your styles -->
   <link rel="stylesheet" href="styles.css">
 
   <!-- Firebase SDK -->
@@ -43,7 +43,7 @@
 </head>
 <body>
 
-<!-- Navbar -->
+<!-- Navbar (your original) -->
 <nav class="navbar navbar-expand-lg sticky-top shadow">
   <div class="container">
     <a class="navbar-brand fw-bold fs-4" href="https://inkspire-vn.github.io">InkSpire</a>
@@ -75,7 +75,7 @@
   </div>
 </nav>
 
-<!-- Page Hero -->
+<!-- Hero -->
 <section class="page-hero" style="height: 35vh; min-height: 250px;">
   <div class="page-hero-content">
     <h1 class="display-4 fw-bold" data-lang-key="products-title">Sản phẩm</h1>
@@ -87,20 +87,20 @@
   <!-- Loading -->
   <div id="loading" class="text-center py-5">
     <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Đang tải...</span>
+      <span class="visually-hidden">Loading...</span>
     </div>
     <p class="mt-3" data-lang-key="loading">Đang tải sản phẩm...</p>
   </div>
 
-  <!-- Product Grid -->
+  <!-- Grid -->
   <div id="product-grid" class="row g-4 d-none"></div>
 
   <!-- No products -->
   <div id="no-products" class="text-center py-5 d-none">
     <i class="fas fa-box-open fa-5x text-muted mb-4"></i>
     <h4 data-lang-key="no-products">Hiện chưa có sản phẩm nào</h4>
-    <p data-lang-key="no-products-desc" class="text-muted">
-      Chúng tôi đang cập nhật danh mục sản phẩm. Vui lòng quay lại sau hoặc liên hệ trực tiếp để được tư vấn!
+    <p class="text-muted" data-lang-key="no-products-desc">
+      Chúng tôi đang cập nhật danh mục sản phẩm. Vui lòng quay lại sau hoặc liên hệ trực tiếp!
     </p>
     <a href="/contact" class="btn btn-outline-primary mt-3" data-lang-key="contact-now">Liên hệ ngay</a>
   </div>
@@ -121,8 +121,6 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script type="module">
-  // Firebase already initialized from head script
-
   // Theme toggle
   const html = document.documentElement;
   const themeBtn = document.getElementById('themeBtn');
@@ -147,12 +145,13 @@
       events: "Sự kiện",
       contact: "Liên hệ",
       "products-title": "Sản phẩm",
-      "loading": "Đang tải sản phẩm...",
+      loading: "Đang tải sản phẩm...",
       "no-products": "Hiện chưa có sản phẩm nào",
       "no-products-desc": "Chúng tôi đang cập nhật danh mục sản phẩm. Vui lòng quay lại sau hoặc liên hệ trực tiếp để được tư vấn!",
       "contact-now": "Liên hệ ngay",
       "back-home": "← Quay về Trang chủ",
-      footer: "Tri thức bắt đầu từ một giọt mực"
+      footer: "Tri thức bắt đầu từ một giọt mực",
+      "view-detail": "Xem chi tiết"
     },
     en: {
       home: "Home",
@@ -160,12 +159,13 @@
       events: "Events",
       contact: "Contact",
       "products-title": "Products",
-      "loading": "Loading products...",
+      loading: "Loading products...",
       "no-products": "No products available yet",
-      "no-products-desc": "We're updating our product catalog. Please check back later or contact us directly for more information!",
+      "no-products-desc": "We are updating our product catalog. Please check back later or contact us directly for more information!",
       "contact-now": "Contact Now",
       "back-home": "← Back to Home",
-      footer: "Knowledge begins with a drop of ink"
+      footer: "Knowledge begins with a drop of ink",
+      "view-detail": "View Detail"
     }
   };
 
@@ -194,56 +194,56 @@
     setLang(langSwitch.checked ? 'en' : 'vi');
   });
 
-  langGroup.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      langGroup.click();
-    }
-  });
-
-  // Firebase real-time product sync
+  // Firebase real-time load
   const productsRef = ref(db, 'products');
 
   onValue(productsRef, (snapshot) => {
-    const data = snapshot.val() || {};
-    const products = Object.values(data);
+    console.log('Products from Firebase:', snapshot.val());
 
-    document.getElementById('loading').classList.add('d-none');
-
+    const loading = document.getElementById('loading');
     const grid = document.getElementById('product-grid');
     const noProducts = document.getElementById('no-products');
 
+    if (loading) loading.classList.add('d-none');
+
+    const data = snapshot.val() || {};
+    const products = Object.values(data);
+
     if (products.length === 0) {
-      noProducts.classList.remove('d-none');
-      grid.classList.add('d-none');
-      grid.innerHTML = '';
+      if (noProducts) noProducts.classList.remove('d-none');
+      if (grid) grid.classList.add('d-none');
+      if (grid) grid.innerHTML = '';
       return;
     }
 
-    noProducts.classList.add('d-none');
-    grid.classList.remove('d-none');
-    grid.innerHTML = '';
+    if (noProducts) noProducts.classList.add('d-none');
+    if (grid) {
+      grid.classList.remove('d-none');
+      grid.innerHTML = '';
 
-    products.forEach(product => {
-      const card = `
-        <div class="col-6 col-md-4 col-lg-3">
-          <div class="card h-100 border-0 shadow-sm product-card">
-            <img src="${product.image}" class="card-img-top" alt="${product.name}" style="height: 280px; object-fit: cover;">
-            <div class="card-body text-center">
-              <h5 class="card-title">${product.name}</h5>
-              <p class="card-text fw-bold text-primary fs-5">${product.price}</p>
-              <p class="text-muted small">${product.category}</p>
-              <a href="#" class="btn btn-outline-primary btn-sm" data-lang-key="view-detail">Xem chi tiết</a>
+      products.forEach(product => {
+        const card = `
+          <div class="col-6 col-md-4 col-lg-3">
+            <div class="card h-100 border-0 shadow-sm product-card">
+              <img src="${product.image || 'https://via.placeholder.com/300x400?text=No+Image'}" 
+                   class="card-img-top" alt="${product.name}" 
+                   style="height: 280px; object-fit: cover;">
+              <div class="card-body text-center">
+                <h5 class="card-title">${product.name}</h5>
+                <p class="card-text fw-bold text-primary fs-5">${product.price}</p>
+                <p class="text-muted small">${product.category}</p>
+                <a href="#" class="btn btn-outline-primary btn-sm" data-lang-key="view-detail">Xem chi tiết</a>
+              </div>
             </div>
           </div>
-        </div>
-      `;
-      grid.innerHTML += card;
-    });
+        `;
+        grid.innerHTML += card;
+      });
+    }
 
-    // Re-apply language to dynamic content
     setLang(localStorage.getItem('lang') || 'vi');
   });
+
 </script>
 </body>
 </html>
