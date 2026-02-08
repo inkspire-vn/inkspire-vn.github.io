@@ -13,7 +13,7 @@
   <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-    import { getDatabase, ref, onValue, push, remove, update, child } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+    import { getDatabase, ref, onValue, push, remove } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
     const firebaseConfig = {
@@ -42,25 +42,23 @@
     window.onValue = onValue;
     window.push = push;
     window.remove = remove;
-    window.update = update;
-    window.child = child;
   </script>
 </head>
 <body>
 
-<!-- Login screen (staff only) -->
+<!-- Google Login Screen (staff only) -->
 <div id="login-screen" class="d-flex align-items-center justify-content-center vh-100 bg-light">
   <div class="card p-5 shadow-lg text-center" style="max-width: 420px;">
     <h3>Dev Access - Staff Only</h3>
-    <p class="text-muted mb-4">Đăng nhập bằng tài khoản Google để quản lý</p>
+    <p class="text-muted mb-4">Đăng nhập bằng Google để quản lý</p>
     <button id="googleSignIn" class="btn btn-outline-danger btn-lg w-100 mb-3">
       <i class="fab fa-google me-2"></i> Đăng nhập bằng Google
     </button>
-    <p id="loginError" class="text-danger d-none">Đăng nhập thất bại hoặc không được phép. Vui lòng thử lại.</p>
+    <p id="loginError" class="text-danger d-none">Đăng nhập thất bại hoặc không được phép.</p>
   </div>
 </div>
 
-<!-- Main dev content (hidden until logged in) -->
+<!-- Main content (hidden until logged in) -->
 <div id="dev-content" class="d-none">
   <nav class="navbar navbar-expand-lg sticky-top shadow">
     <div class="container">
@@ -115,7 +113,7 @@
             <input type="text" class="form-control" id="productName" required>
           </div>
           <div class="col-md-3">
-            <label class="form-label">Giá (ví dụ: 220k ₫)</label>
+            <label class="form-label">Giá (ví dụ: 220k)</label>
             <input type="text" class="form-control" id="productPrice" required>
           </div>
           <div class="col-md-3">
@@ -128,7 +126,7 @@
           </div>
           <div class="col-12">
             <label class="form-label">Link ảnh (URL)</label>
-            <input type="url" class="form-control" id="productImage" placeholder="https://example.com/image.jpg" required>
+            <input type="url" class="form-control" id="productImage" required>
           </div>
           <div class="col-12 text-end">
             <button type="submit" class="btn btn-primary">Thêm sản phẩm</button>
@@ -148,7 +146,7 @@
           </div>
           <div class="col-md-6">
             <label class="form-label">Ngày & giờ</label>
-            <input type="text" class="form-control" id="eventDate" placeholder="January 20, 2026 | 2:00 PM" required>
+            <input type="text" class="form-control" id="eventDate" required>
           </div>
           <div class="col-12">
             <label class="form-label">Mô tả</label>
@@ -156,7 +154,7 @@
           </div>
           <div class="col-12">
             <label class="form-label">Link ảnh (URL) – optional</label>
-            <input type="url" class="form-control" id="eventImage" placeholder="https://example.com/event.jpg">
+            <input type="url" class="form-control" id="eventImage">
           </div>
           <div class="col-12 text-end">
             <button type="submit" class="btn btn-primary">Thêm sự kiện</button>
@@ -167,24 +165,13 @@
         <div id="eventList" class="list-group"></div>
       </div>
     </div>
-
-    <div class="text-center mt-5">
-      <a href="https://inkspire-vn.github.io" class="btn btn-outline-secondary btn-lg">← Quay về Trang chủ</a>
-    </div>
   </main>
-
-  <footer class="text-center py-4" style="background:var(--bs-primary); color:white;">
-    <div class="container">
-      <p class="mb-1">© 2026 InkSpire Bookstore • TP. Hồ Chí Minh</p>
-      <small>Tri thức bắt đầu từ một giọt mực</small>
-    </div>
-  </footer>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script type="module">
-  // Firebase is already initialized from head script
+  // Firebase already initialized from head
 
   const loginScreen = document.getElementById('login-screen');
   const devContent = document.getElementById('dev-content');
@@ -192,20 +179,18 @@
   const signOutBtn = document.getElementById('signOutBtn');
   const loginError = document.getElementById('loginError');
 
-  // Listen for auth state
+  // Auth state listener
   onAuthStateChanged(auth, (user) => {
     if (user) {
       loginScreen.classList.add('d-none');
       devContent.classList.remove('d-none');
       loadAllData();
-      console.log('Logged in as:', user.displayName, user.email);
     } else {
       loginScreen.classList.remove('d-none');
       devContent.classList.add('d-none');
     }
   });
 
-  // Google sign-in
   googleSignIn.addEventListener('click', async () => {
     try {
       await signInWithPopup(auth, provider);
@@ -215,37 +200,37 @@
     }
   });
 
-  // Sign out
   signOutBtn.addEventListener('click', async () => {
     await signOut(auth);
   });
 
-  // Load data real-time
+  // Load products & events real-time
   function loadAllData() {
+    // Products
     onValue(ref(db, 'products'), (snapshot) => {
       const data = snapshot.val() || {};
-      currentProducts = Object.entries(data).map(([key, val]) => ({ key, ...val }));
-      renderProductList();
+      const products = Object.entries(data).map(([key, val]) => ({ key, ...val }));
+      renderProducts(products);
     });
 
+    // Events
     onValue(ref(db, 'events'), (snapshot) => {
       const data = snapshot.val() || {};
-      currentEvents = Object.entries(data).map(([key, val]) => ({ key, ...val }));
-      renderEventList();
+      const events = Object.entries(data).map(([key, val]) => ({ key, ...val }));
+      renderEvents(events);
     });
   }
 
-  // Render products (with delete buttons)
-  function renderProductList() {
+  function renderProducts(products) {
     const list = document.getElementById('productList');
     list.innerHTML = '';
 
-    if (currentProducts.length === 0) {
+    if (products.length === 0) {
       list.innerHTML = '<p class="text-muted text-center py-4">Chưa có sản phẩm nào.</p>';
       return;
     }
 
-    currentProducts.forEach((p) => {
+    products.forEach(p => {
       const item = document.createElement('div');
       item.className = 'list-group-item d-flex justify-content-between align-items-center';
       item.innerHTML = `
@@ -262,12 +247,10 @@
   }
 
   window.deleteProduct = async (key) => {
-    if (!confirm('Bạn chắc chắn muốn xóa sản phẩm này?')) return;
+    if (!confirm('Xóa sản phẩm này?')) return;
     await remove(ref(db, `products/${key}`));
-    alert('Đã xóa sản phẩm!');
   };
 
-  // Add product
   document.getElementById('productForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const name = document.getElementById('productName').value.trim();
@@ -275,24 +258,22 @@
     const category = document.getElementById('productCategory').value;
     const image = document.getElementById('productImage').value.trim();
 
-    if (!name || !price || !category || !image) return alert('Vui lòng điền đầy đủ thông tin!');
+    if (!name || !price || !category || !image) return alert('Điền đầy đủ!');
 
     await push(ref(db, 'products'), { name, price, category, image });
     e.target.reset();
-    alert('Đã thêm sản phẩm!');
   });
 
-  // Render events (similar to products)
-  function renderEventList() {
+  function renderEvents(events) {
     const list = document.getElementById('eventList');
     list.innerHTML = '';
 
-    if (currentEvents.length === 0) {
+    if (events.length === 0) {
       list.innerHTML = '<p class="text-muted text-center py-4">Chưa có sự kiện nào.</p>';
       return;
     }
 
-    currentEvents.forEach((e) => {
+    events.forEach(e => {
       const item = document.createElement('div');
       item.className = 'list-group-item d-flex justify-content-between align-items-center';
       item.innerHTML = `
@@ -309,12 +290,10 @@
   }
 
   window.deleteEvent = async (key) => {
-    if (!confirm('Bạn chắc chắn muốn xóa sự kiện này?')) return;
+    if (!confirm('Xóa sự kiện này?')) return;
     await remove(ref(db, `events/${key}`));
-    alert('Đã xóa sự kiện!');
   };
 
-  // Add event
   document.getElementById('eventForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const title = document.getElementById('eventTitle').value.trim();
@@ -322,55 +301,14 @@
     const desc = document.getElementById('eventDesc').value.trim();
     const image = document.getElementById('eventImage').value.trim() || '';
 
-    if (!title || !date || !desc) return alert('Vui lòng điền đầy đủ thông tin bắt buộc!');
+    if (!title || !date || !desc) return alert('Điền đầy đủ!');
 
     await push(ref(db, 'events'), { title, date, desc, image });
     e.target.reset();
-    alert('Đã thêm sự kiện!');
   });
 
-  // Bootstrap tabs initialization
-  document.addEventListener('DOMContentLoaded', () => {
-    var triggerTabList = [].slice.call(document.querySelectorAll('#devTabs button'));
-    triggerTabList.forEach(function (triggerEl) {
-      var tabTrigger = new bootstrap.Tab(triggerEl);
-      triggerEl.addEventListener('click', function (event) {
-        event.preventDefault();
-        tabTrigger.show();
-      });
-    });
-  });
-
-  // Your existing theme/language code (keep as before)
-  const themeBtn = document.getElementById('themeBtn');
-  function setTheme(mode) {
-    html.setAttribute('data-bs-theme', mode);
-    localStorage.setItem('theme', mode);
-    themeBtn.textContent = mode === 'dark' ? '☀️' : '🌙';
-  }
-  setTheme(localStorage.getItem('theme') || 'light');
-  themeBtn.onclick = () => setTheme(html.getAttribute('data-bs-theme') === 'light' ? 'dark' : 'light');
-
-  const langGroup = document.getElementById('langGroup');
-  const langSwitch = document.getElementById('langSwitch');
-
-  const dict = {
-    // Your existing dict...
-  };
-
-  function setLang(lang) {
-    // Your existing setLang code...
-  }
-  setLang(localStorage.getItem('lang') || 'vi');
-
-  langGroup.addEventListener('click', () => {
-    const cur = localStorage.getItem('lang') || 'vi';
-    setLang(cur === 'vi' ? 'en' : 'vi');
-  });
-
-  langSwitch.addEventListener('change', () => {
-    setLang(langSwitch.checked ? 'en' : 'vi');
-  });
+  // Theme & Language (keep your original code here)
+  // ... your themeBtn, setTheme, langGroup, setLang, dict, etc.
 </script>
 </body>
 </html>
