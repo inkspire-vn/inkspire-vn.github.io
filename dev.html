@@ -10,15 +10,12 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="styles.css">
 
-  <!-- Firebase SDK (from Step 1) -->
-  <!-- Firebase SDK v10 (modular) -->
+  <!-- Firebase SDK -->
   <script type="module">
-    // Import needed Firebase modules
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-    import { getDatabase, ref, onValue, set, push, remove, update, query, limitToLast, get, child } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+    import { getDatabase, ref, onValue, push, remove, update, child } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
-    // Your config (paste once per page or make shared file later)
     const firebaseConfig = {
       apiKey: "AIzaSyA9XvWCZOyaSuT42HBMUgQQ7KTuQYPWLbE",
       authDomain: "inkspire-vn-security.firebaseapp.com",
@@ -30,13 +27,11 @@
       measurementId: "G-MJSRBE9TY6"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
 
-    // Make them global for easy use in main script
     window.db = db;
     window.auth = auth;
     window.provider = provider;
@@ -45,13 +40,9 @@
     window.signOut = signOut;
     window.ref = ref;
     window.onValue = onValue;
-    window.set = set;
     window.push = push;
     window.remove = remove;
     window.update = update;
-    window.query = query;
-    window.limitToLast = limitToLast;
-    window.get = get;
     window.child = child;
   </script>
 </head>
@@ -106,17 +97,17 @@
     <h1 class="text-center mb-5">Dev Page - Quản lý Sản phẩm & Sự kiện</h1>
 
     <!-- Tabs -->
-    <ul class="nav nav-tabs mb-4" id="devTabs">
-      <li class="nav-item">
-        <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#products">Sản phẩm</button>
+    <ul class="nav nav-tabs mb-4" id="devTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="products-tab" data-bs-toggle="tab" data-bs-target="#products" type="button" role="tab">Sản phẩm</button>
       </li>
-      <li class="nav-item">
-        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#events">Sự kiện</button>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="events-tab" data-bs-toggle="tab" data-bs-target="#events" type="button" role="tab">Sự kiện</button>
       </li>
     </ul>
 
-    <div class="tab-content">
-      <div class="tab-pane fade show active" id="products">
+    <div class="tab-content" id="devTabContent">
+      <div class="tab-pane fade show active" id="products" role="tabpanel">
         <h3 class="mb-4">Thêm sản phẩm mới</h3>
         <form id="productForm" class="row g-3 mb-5">
           <div class="col-md-6">
@@ -124,7 +115,7 @@
             <input type="text" class="form-control" id="productName" required>
           </div>
           <div class="col-md-3">
-            <label class="form-label">Giá (ví dụ: 220k)</label>
+            <label class="form-label">Giá (ví dụ: 220k ₫)</label>
             <input type="text" class="form-control" id="productPrice" required>
           </div>
           <div class="col-md-3">
@@ -137,7 +128,7 @@
           </div>
           <div class="col-12">
             <label class="form-label">Link ảnh (URL)</label>
-            <input type="url" class="form-control" id="productImage" required>
+            <input type="url" class="form-control" id="productImage" placeholder="https://example.com/image.jpg" required>
           </div>
           <div class="col-12 text-end">
             <button type="submit" class="btn btn-primary">Thêm sản phẩm</button>
@@ -148,8 +139,7 @@
         <div id="productList" class="list-group"></div>
       </div>
 
-      <div class="tab-pane fade" id="events">
-        <!-- Add your event form here (same as before) -->
+      <div class="tab-pane fade" id="events" role="tabpanel">
         <h3 class="mb-4">Thêm sự kiện mới</h3>
         <form id="eventForm" class="row g-3 mb-5">
           <div class="col-md-6">
@@ -158,15 +148,15 @@
           </div>
           <div class="col-md-6">
             <label class="form-label">Ngày & giờ</label>
-            <input type="text" class="form-control" id="eventDate" required>
+            <input type="text" class="form-control" id="eventDate" placeholder="January 20, 2026 | 2:00 PM" required>
           </div>
           <div class="col-12">
             <label class="form-label">Mô tả</label>
             <textarea class="form-control" id="eventDesc" rows="3" required></textarea>
           </div>
           <div class="col-12">
-            <label class="form-label">Link ảnh (URL, optional)</label>
-            <input type="url" class="form-control" id="eventImage">
+            <label class="form-label">Link ảnh (URL) – optional</label>
+            <input type="url" class="form-control" id="eventImage" placeholder="https://example.com/event.jpg">
           </div>
           <div class="col-12 text-end">
             <button type="submit" class="btn btn-primary">Thêm sự kiện</button>
@@ -177,8 +167,21 @@
         <div id="eventList" class="list-group"></div>
       </div>
     </div>
+
+    <div class="text-center mt-5">
+      <a href="https://inkspire-vn.github.io" class="btn btn-outline-secondary btn-lg">← Quay về Trang chủ</a>
+    </div>
   </main>
+
+  <footer class="text-center py-4" style="background:var(--bs-primary); color:white;">
+    <div class="container">
+      <p class="mb-1">© 2026 InkSpire Bookstore • TP. Hồ Chí Minh</p>
+      <small>Tri thức bắt đầu từ một giọt mực</small>
+    </div>
+  </footer>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script type="module">
   // Firebase is already initialized from head script
@@ -238,7 +241,7 @@
     list.innerHTML = '';
 
     if (currentProducts.length === 0) {
-      list.innerHTML = '<p class="text-muted">Chưa có sản phẩm nào.</p>';
+      list.innerHTML = '<p class="text-muted text-center py-4">Chưa có sản phẩm nào.</p>';
       return;
     }
 
@@ -259,9 +262,9 @@
   }
 
   window.deleteProduct = async (key) => {
-    if (!confirm('Xóa sản phẩm này?')) return;
+    if (!confirm('Bạn chắc chắn muốn xóa sản phẩm này?')) return;
     await remove(ref(db, `products/${key}`));
-    alert('Đã xóa!');
+    alert('Đã xóa sản phẩm!');
   };
 
   // Add product
@@ -272,16 +275,102 @@
     const category = document.getElementById('productCategory').value;
     const image = document.getElementById('productImage').value.trim();
 
-    if (!name || !price || !category || !image) return alert('Điền đầy đủ!');
+    if (!name || !price || !category || !image) return alert('Vui lòng điền đầy đủ thông tin!');
 
     await push(ref(db, 'products'), { name, price, category, image });
     e.target.reset();
     alert('Đã thêm sản phẩm!');
   });
 
-  // Similar for events (add your form submit listener here)
+  // Render events (similar to products)
+  function renderEventList() {
+    const list = document.getElementById('eventList');
+    list.innerHTML = '';
 
-  // Your theme/language code here (keep as before)
+    if (currentEvents.length === 0) {
+      list.innerHTML = '<p class="text-muted text-center py-4">Chưa có sự kiện nào.</p>';
+      return;
+    }
+
+    currentEvents.forEach((e) => {
+      const item = document.createElement('div');
+      item.className = 'list-group-item d-flex justify-content-between align-items-center';
+      item.innerHTML = `
+        <div>
+          <strong>${e.title}</strong> — ${e.date}<br>
+          <small class="text-muted">${e.desc.substring(0, 80)}${e.desc.length > 80 ? '...' : ''}</small>
+        </div>
+        <button class="btn btn-danger btn-sm" onclick="deleteEvent('${e.key}')">
+          <i class="fas fa-trash"></i> Xóa
+        </button>
+      `;
+      list.appendChild(item);
+    });
+  }
+
+  window.deleteEvent = async (key) => {
+    if (!confirm('Bạn chắc chắn muốn xóa sự kiện này?')) return;
+    await remove(ref(db, `events/${key}`));
+    alert('Đã xóa sự kiện!');
+  };
+
+  // Add event
+  document.getElementById('eventForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const title = document.getElementById('eventTitle').value.trim();
+    const date = document.getElementById('eventDate').value.trim();
+    const desc = document.getElementById('eventDesc').value.trim();
+    const image = document.getElementById('eventImage').value.trim() || '';
+
+    if (!title || !date || !desc) return alert('Vui lòng điền đầy đủ thông tin bắt buộc!');
+
+    await push(ref(db, 'events'), { title, date, desc, image });
+    e.target.reset();
+    alert('Đã thêm sự kiện!');
+  });
+
+  // Bootstrap tabs initialization
+  document.addEventListener('DOMContentLoaded', () => {
+    var triggerTabList = [].slice.call(document.querySelectorAll('#devTabs button'));
+    triggerTabList.forEach(function (triggerEl) {
+      var tabTrigger = new bootstrap.Tab(triggerEl);
+      triggerEl.addEventListener('click', function (event) {
+        event.preventDefault();
+        tabTrigger.show();
+      });
+    });
+  });
+
+  // Your existing theme/language code (keep as before)
+  const themeBtn = document.getElementById('themeBtn');
+  function setTheme(mode) {
+    html.setAttribute('data-bs-theme', mode);
+    localStorage.setItem('theme', mode);
+    themeBtn.textContent = mode === 'dark' ? '☀️' : '🌙';
+  }
+  setTheme(localStorage.getItem('theme') || 'light');
+  themeBtn.onclick = () => setTheme(html.getAttribute('data-bs-theme') === 'light' ? 'dark' : 'light');
+
+  const langGroup = document.getElementById('langGroup');
+  const langSwitch = document.getElementById('langSwitch');
+
+  const dict = {
+    // Your existing dict...
+  };
+
+  function setLang(lang) {
+    // Your existing setLang code...
+  }
+  setLang(localStorage.getItem('lang') || 'vi');
+
+  langGroup.addEventListener('click', () => {
+    const cur = localStorage.getItem('lang') || 'vi';
+    setLang(cur === 'vi' ? 'en' : 'vi');
+  });
+
+  langSwitch.addEventListener('change', () => {
+    setLang(langSwitch.checked ? 'en' : 'vi');
+  });
 </script>
 </body>
 </html>
