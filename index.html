@@ -6,228 +6,130 @@
   <title>InkSpire Bookstore VN</title>
 
   <link rel="icon" type="image/png" href="https://avatars.githubusercontent.com/u/254457838?s=64">
-
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="stylesheet" href="styles.css">
-
-  <!-- Firebase SDK -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyA9XvWCZOyaSuT42HBMUgQQ7KTuQYPWLbE",
-      authDomain: "inkspire-vn-security.firebaseapp.com",
-      databaseURL: "https://inkspire-vn-security-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "inkspire-vn-security",
-      storageBucket: "inkspire-vn-security.firebasestorage.app",
-      messagingSenderId: "774834040534",
-      appId: "1:774834040534:web:c7b5e64826176a44b4e377",
-      measurementId: "G-MJSRBE9TY6"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-
-    window.db = db;
-    window.ref = ref;
-    window.onValue = onValue;
-  </script>
+  <style>
+    .hero { background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1507842217343-583bb7278b66?w=1600'); background-size: cover; color: white; padding: 100px 0; }
+    .slider-section { min-height: 400px; }
+    .card-img-top { object-fit: cover; height: 250px; }
+  </style>
 </head>
 <body>
 
 <!-- Navbar -->
-<nav class="navbar navbar-expand-lg sticky-top shadow">
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top shadow">
   <div class="container">
-    <a class="navbar-brand fw-bold fs-4" href="/">InkSpire</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
+    <a class="navbar-brand fw-bold" href="/">InkSpire</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
       <span class="navbar-toggler-icon"></span>
     </button>
-
-    <div class="collapse navbar-collapse" id="navMain">
-      <ul class="navbar-nav me-auto">
-        <li class="nav-item"><a class="nav-link active" href="/" data-lang-key="home">Trang chủ</a></li>
-        <li class="nav-item"><a class="nav-link" href="/products" data-lang-key="products">Sản phẩm</a></li>
-        <li class="nav-item"><a class="nav-link" href="/events" data-lang-key="events">Sự kiện</a></li>
-        <li class="nav-item"><a class="nav-link" href="/contact" data-lang-key="contact">Liên hệ</a></li>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link active" href="/">Trang chủ</a></li>
+        <li class="nav-item"><a class="nav-link" href="/products">Sản phẩm</a></li>
+        <li class="nav-item"><a class="nav-link" href="/events">Sự kiện</a></li>
+        <li class="nav-item"><a class="nav-link" href="/contact">Liên hệ</a></li>
       </ul>
-
-      <div class="d-flex align-items-center gap-4">
-        <div class="lang-group" id="langGroup" role="button" tabindex="0">
-          <span class="flag vi-flag" data-lang="vi">🇻🇳</span>
-          <div class="switch">
-            <input type="checkbox" id="langSwitch">
-            <span class="slider"></span>
-          </div>
-          <span class="flag en-flag" data-lang="en">🇺🇸</span>
+      <div class="d-flex align-items-center gap-3 ms-3">
+        <div class="lang-toggle btn-group">
+          <button class="btn btn-sm btn-outline-light" onclick="setLang('vi')">🇻🇳 VI</button>
+          <button class="btn btn-sm btn-outline-light" onclick="setLang('en')">🇺🇸 EN</button>
         </div>
-        <button class="theme-btn" id="themeBtn">🌙</button>
+        <button id="themeToggle" class="btn btn-sm btn-outline-light">🌙</button>
       </div>
     </div>
   </div>
 </nav>
 
 <!-- Hero -->
-<section class="hero text-center text-white">
-  <div class="hero-content">
-    <h1 class="display-3 fw-bold mb-3" data-lang-key="hero-title">InkSpire Bookstore VN</h1>
-    <p class="lead mb-4" data-lang-key="hero-subtitle">Nơi tri thức bắt đầu từ một giọt mực</p>
-    <a href="/products" class="btn btn-lg btn-primary" data-lang-key="shop-now">Khám phá ngay</a>
+<section class="hero text-center">
+  <div class="container">
+    <h1 class="display-4 fw-bold mb-3">InkSpire Bookstore</h1>
+    <p class="lead mb-4">Nơi tri thức bắt đầu từ một giọt mực</p>
+    <a href="/products" class="btn btn-light btn-lg">Khám phá ngay</a>
   </div>
 </section>
 
-<!-- Books Slider -->
-<section class="py-5">
-  <div class="container">
-    <h2 class="text-center mb-4" data-lang-key="books">Sách – Books</h2>
-    <div id="books-loading" class="text-center py-4">
-      <div class="spinner-border text-primary" role="status"></div>
-      <p class="mt-2">Đang tải...</p>
-    </div>
-    <div id="books-grid" class="row g-4 d-none"></div>
-    <div id="books-empty" class="text-center py-5 d-none">
-      <p class="text-muted">Chưa có sách nào trong danh mục này.</p>
-    </div>
-  </div>
-</section>
+<!-- Sliders -->
+<div class="container py-5">
 
-<!-- Toys Slider -->
-<section class="py-5 bg-light">
-  <div class="container">
-    <h2 class="text-center mb-4" data-lang-key="toys">Đồ chơi – Toys</h2>
-    <div id="toys-loading" class="text-center py-4">
-      <div class="spinner-border text-primary" role="status"></div>
-      <p class="mt-2">Đang tải...</p>
-    </div>
-    <div id="toys-grid" class="row g-4 d-none"></div>
-    <div id="toys-empty" class="text-center py-5 d-none">
-      <p class="text-muted">Chưa có đồ chơi nào trong danh mục này.</p>
-    </div>
+  <!-- Books -->
+  <h2 class="text-center mb-4">Sách – Books</h2>
+  <div id="books-loading" class="text-center py-5">
+    <div class="spinner-border text-primary"></div>
+    <p class="mt-3">Đang tải...</p>
   </div>
-</section>
+  <div id="books-grid" class="row g-4 d-none"></div>
+  <div id="books-empty" class="text-center py-5 d-none text-muted">Chưa có sách nào trong danh mục này</div>
 
-<!-- Stationery Slider -->
-<section class="py-5">
-  <div class="container">
-    <h2 class="text-center mb-4" data-lang-key="stationery">Văn phòng phẩm – Stationery</h2>
-    <div id="stationery-loading" class="text-center py-4">
-      <div class="spinner-border text-primary" role="status"></div>
-      <p class="mt-2">Đang tải...</p>
-    </div>
-    <div id="stationery-grid" class="row g-4 d-none"></div>
-    <div id="stationery-empty" class="text-center py-5 d-none">
-      <p class="text-muted">Chưa có văn phòng phẩm nào trong danh mục này.</p>
-    </div>
+  <!-- Toys -->
+  <h2 class="text-center mb-4 mt-5">Đồ chơi – Toys</h2>
+  <div id="toys-loading" class="text-center py-5">
+    <div class="spinner-border text-primary"></div>
+    <p class="mt-3">Đang tải...</p>
   </div>
-</section>
+  <div id="toys-grid" class="row g-4 d-none"></div>
+  <div id="toys-empty" class="text-center py-5 d-none text-muted">Chưa có đồ chơi nào trong danh mục này</div>
 
-<!-- Footer -->
-<footer class="text-center py-4" style="background:var(--bs-primary); color:white;">
+  <!-- Stationery -->
+  <h2 class="text-center mb-4 mt-5">Văn phòng phẩm – Stationery</h2>
+  <div id="stationery-loading" class="text-center py-5">
+    <div class="spinner-border text-primary"></div>
+    <p class="mt-3">Đang tải...</p>
+  </div>
+  <div id="stationery-grid" class="row g-4 d-none"></div>
+  <div id="stationery-empty" class="text-center py-5 d-none text-muted">Chưa có văn phòng phẩm nào trong danh mục này</div>
+
+</div>
+
+<footer class="bg-dark text-white text-center py-4 mt-5">
   <div class="container">
-    <p class="mb-1">© 2026 InkSpire Bookstore • TP. Hồ Chí Minh</p>
-    <small data-lang-key="footer">Tri thức bắt đầu từ một giọt mực</small>
+    <p>© 2026 InkSpire Bookstore • TP. Hồ Chí Minh</p>
+    <small>Tri thức bắt đầu từ một giọt mực</small>
   </div>
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script type="module">
-  // Theme toggle
-  const html = document.documentElement;
-  const themeBtn = document.getElementById('themeBtn');
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
 
-  function setTheme(mode) {
-    html.setAttribute('data-bs-theme', mode);
-    localStorage.setItem('theme', mode);
-    themeBtn.textContent = mode === 'dark' ? '☀️' : '🌙';
-  }
-
-  setTheme(localStorage.getItem('theme') || 'light');
-  themeBtn.onclick = () => setTheme(html.getAttribute('data-bs-theme') === 'light' ? 'dark' : 'light');
-
-  // Language toggle
-  const langGroup = document.getElementById('langGroup');
-  const langSwitch = document.getElementById('langSwitch');
-
-  const dict = {
-    vi: {
-      home: "Trang chủ",
-      products: "Sản phẩm",
-      events: "Sự kiện",
-      contact: "Liên hệ",
-      "books": "Sách – Books",
-      "toys": "Đồ chơi – Toys",
-      "stationery": "Văn phòng phẩm – Stationery",
-      footer: "Tri thức bắt đầu từ một giọt mực"
-    },
-    en: {
-      home: "Home",
-      products: "Products",
-      events: "Events",
-      contact: "Contact",
-      "books": "Books",
-      "toys": "Toys",
-      "stationery": "Stationery",
-      footer: "Knowledge begins with a drop of ink"
-    }
+  const firebaseConfig = {
+    apiKey: "AIzaSyA9XvWCZOyaSuT42HBMUgQQ7KTuQYPWLbE",
+    authDomain: "inkspire-vn-security.firebaseapp.com",
+    databaseURL: "https://inkspire-vn-security-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "inkspire-vn-security",
+    storageBucket: "inkspire-vn-security.firebasestorage.app",
+    messagingSenderId: "774834040534",
+    appId: "1:774834040534:web:c7b5e64826176a44b4e377",
+    measurementId: "G-MJSRBE9TY6"
   };
 
-  function setLang(lang) {
-    html.lang = lang;
-    localStorage.setItem('lang', lang);
-    langSwitch.checked = (lang === 'en');
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
 
-    document.querySelector('.vi-flag').classList.toggle('inactive', lang !== 'vi');
-    document.querySelector('.en-flag').classList.toggle('inactive', lang !== 'en');
-
-    document.querySelectorAll('[data-lang-key]').forEach(el => {
-      const k = el.getAttribute('data-lang-key');
-      if (dict[lang][k]) el.textContent = dict[lang][k];
-    });
-  }
-
-  setLang(localStorage.getItem('lang') || 'vi');
-
-  langGroup.addEventListener('click', () => {
-    const cur = localStorage.getItem('lang') || 'vi';
-    setLang(cur === 'vi' ? 'en' : 'vi');
-  });
-
-  langSwitch.addEventListener('change', () => {
-    setLang(langSwitch.checked ? 'en' : 'vi');
-  });
-
-  // Firebase real-time sliders
   const productsRef = ref(db, 'products');
 
   onValue(productsRef, (snapshot) => {
-    console.log('Homepage: Products loaded', snapshot.val());
-
     const data = snapshot.val() || {};
     const products = Object.values(data);
 
-    // Hide all loading spinners
+    // Hide all loading
     document.querySelectorAll('[id$="-loading"]').forEach(el => el.classList.add('d-none'));
 
-    // Books
-    renderSlider('books', products.filter(p => p.category === 'Books'));
-
-    // Toys
-    renderSlider('toys', products.filter(p => p.category === 'Toys'));
-
-    // Stationery
-    renderSlider('stationery', products.filter(p => p.category === 'Stationery'));
+    renderCategory('books', products.filter(p => (p.category || '').toLowerCase().includes('book') || (p.category || '').includes('sách')));
+    renderCategory('toys', products.filter(p => (p.category || '').toLowerCase().includes('toy') || (p.category || '').includes('đồ chơi')));
+    renderCategory('stationery', products.filter(p => (p.category || '').toLowerCase().includes('station') || (p.category || '').includes('văn phòng')));
   });
 
-  function renderSlider(type, items) {
-    const grid = document.getElementById(`${type}-grid`);
-    const empty = document.getElementById(`${type}-empty`);
+  function renderCategory(id, items) {
+    const grid = document.getElementById(id + '-grid');
+    const empty = document.getElementById(id + '-empty');
 
     if (!grid || !empty) return;
 
     grid.innerHTML = '';
-
     if (items.length === 0) {
       empty.classList.remove('d-none');
       grid.classList.add('d-none');
@@ -238,25 +140,25 @@
     grid.classList.remove('d-none');
 
     items.forEach(item => {
-      const card = `
+      grid.innerHTML += `
         <div class="col-6 col-md-4 col-lg-3">
-          <div class="card h-100 border-0 shadow-sm product-card">
-            <img src="${item.image || 'https://via.placeholder.com/300x400?text=No+Image'}" 
-                 class="card-img-top" alt="${item.name}" 
-                 style="height: 280px; object-fit: cover;">
+          <div class="card h-100 shadow-sm">
+            <img src="${item.image || 'https://via.placeholder.com/300x400?text=No+Image'}" class="card-img-top" alt="${item.name}" style="height:200px; object-fit:cover;">
             <div class="card-body text-center">
               <h5 class="card-title">${item.name}</h5>
-              <p class="card-text fw-bold text-primary fs-5">${item.price}</p>
-              <a href="#" class="btn btn-outline-primary btn-sm">Xem chi tiết</a>
+              <p class="card-text fw-bold text-primary">${item.price}</p>
             </div>
           </div>
         </div>
       `;
-      grid.innerHTML += card;
     });
-
-    setLang(localStorage.getItem('lang') || 'vi');
   }
+
+  // Theme toggle
+  const themeBtn = document.getElementById('themeBtn');
+  themeBtn.onclick = () => {
+    document.documentElement.setAttribute('data-bs-theme', document.documentElement.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark');
+  };
 </script>
 </body>
 </html>
