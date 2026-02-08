@@ -1,48 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi" data-bs-theme="light">
 <head>
-  <script type="module">
-    // Import needed Firebase modules
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-    import { getDatabase, ref, onValue, set, push, remove, update, query, limitToLast, get, child } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-  
-    // Your config (paste once per page or make shared file later)
-    const firebaseConfig = {
-      apiKey: "AIzaSyA9XvWCZOyaSuT42HBMUgQQ7KTuQYPWLbE",
-      authDomain: "inkspire-vn-security.firebaseapp.com",
-      databaseURL: "https://inkspire-vn-security-default-rtdb.asia-southeast1.firebasedatabase.app",
-      projectId: "inkspire-vn-security",
-      storageBucket: "inkspire-vn-security.firebasestorage.app",
-      messagingSenderId: "774834040534",
-      appId: "1:774834040534:web:c7b5e64826176a44b4e377",
-      measurementId: "G-MJSRBE9TY6"
-    };
-
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
-
-    // Make them global for easy use in main script
-    window.db = db;
-    window.auth = auth;
-    window.provider = provider;
-    window.signInWithPopup = signInWithPopup;
-    window.onAuthStateChanged = onAuthStateChanged;
-    window.signOut = signOut;
-    window.ref = ref;
-    window.onValue = onValue;
-    window.set = set;
-    window.push = push;
-    window.remove = remove;
-    window.update = update;
-    window.query = query;
-    window.limitToLast = limitToLast;
-    window.get = get;
-    window.child = child;
-  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title data-lang-key="products-title">Sản phẩm - InkSpire Bookstore</title>
@@ -58,6 +16,30 @@
 
   <!-- Your shared styles -->
   <link rel="stylesheet" href="styles.css">
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA9XvWCZOyaSuT42HBMUgQQ7KTuQYPWLbE",
+      authDomain: "inkspire-vn-security.firebaseapp.com",
+      databaseURL: "https://inkspire-vn-security-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "inkspire-vn-security",
+      storageBucket: "inkspire-vn-security.firebasestorage.app",
+      messagingSenderId: "774834040534",
+      appId: "1:774834040534:web:c7b5e64826176a44b4e377",
+      measurementId: "G-MJSRBE9TY6"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    window.db = db;
+    window.ref = ref;
+    window.onValue = onValue;
+  </script>
 </head>
 <body>
 
@@ -138,128 +120,130 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-<script>
-// Theme toggle
-const html = document.documentElement;
-const themeBtn = document.getElementById('themeBtn');
+<script type="module">
+  // Firebase already initialized from head script
 
-function setTheme(mode) {
-  html.setAttribute('data-bs-theme', mode);
-  localStorage.setItem('theme', mode);
-  themeBtn.textContent = mode === 'dark' ? '☀️' : '🌙';
-}
+  // Theme toggle
+  const html = document.documentElement;
+  const themeBtn = document.getElementById('themeBtn');
 
-setTheme(localStorage.getItem('theme') || 'light');
-themeBtn.onclick = () => setTheme(html.getAttribute('data-bs-theme') === 'light' ? 'dark' : 'light');
-
-// Language toggle
-const langGroup = document.getElementById('langGroup');
-const langSwitch = document.getElementById('langSwitch');
-
-const dict = {
-  vi: {
-    home: "Trang chủ",
-    products: "Sản phẩm",
-    events: "Sự kiện",
-    contact: "Liên hệ",
-    "products-title": "Sản phẩm",
-    "loading": "Đang tải sản phẩm...",
-    "no-products": "Hiện chưa có sản phẩm nào",
-    "no-products-desc": "Chúng tôi đang cập nhật danh mục sản phẩm. Vui lòng quay lại sau hoặc liên hệ trực tiếp để được tư vấn!",
-    "contact-now": "Liên hệ ngay",
-    "back-home": "← Quay về Trang chủ",
-    footer: "Tri thức bắt đầu từ một giọt mực"
-  },
-  en: {
-    home: "Home",
-    products: "Products",
-    events: "Events",
-    contact: "Contact",
-    "products-title": "Products",
-    "loading": "Loading products...",
-    "no-products": "No products available yet",
-    "no-products-desc": "We're updating our product catalog. Please check back later or contact us directly for more information!",
-    "contact-now": "Contact Now",
-    "back-home": "← Back to Home",
-    footer: "Knowledge begins with a drop of ink"
+  function setTheme(mode) {
+    html.setAttribute('data-bs-theme', mode);
+    localStorage.setItem('theme', mode);
+    themeBtn.textContent = mode === 'dark' ? '☀️' : '🌙';
   }
-};
 
-function setLang(lang) {
-  html.lang = lang;
-  localStorage.setItem('lang', lang);
-  langSwitch.checked = (lang === 'en');
+  setTheme(localStorage.getItem('theme') || 'light');
+  themeBtn.onclick = () => setTheme(html.getAttribute('data-bs-theme') === 'light' ? 'dark' : 'light');
 
-  document.querySelector('.vi-flag').classList.toggle('inactive', lang !== 'vi');
-  document.querySelector('.en-flag').classList.toggle('inactive', lang !== 'en');
+  // Language toggle
+  const langGroup = document.getElementById('langGroup');
+  const langSwitch = document.getElementById('langSwitch');
 
-  document.querySelectorAll('[data-lang-key]').forEach(el => {
-    const k = el.getAttribute('data-lang-key');
-    if (dict[lang][k]) el.textContent = dict[lang][k];
+  const dict = {
+    vi: {
+      home: "Trang chủ",
+      products: "Sản phẩm",
+      events: "Sự kiện",
+      contact: "Liên hệ",
+      "products-title": "Sản phẩm",
+      "loading": "Đang tải sản phẩm...",
+      "no-products": "Hiện chưa có sản phẩm nào",
+      "no-products-desc": "Chúng tôi đang cập nhật danh mục sản phẩm. Vui lòng quay lại sau hoặc liên hệ trực tiếp để được tư vấn!",
+      "contact-now": "Liên hệ ngay",
+      "back-home": "← Quay về Trang chủ",
+      footer: "Tri thức bắt đầu từ một giọt mực"
+    },
+    en: {
+      home: "Home",
+      products: "Products",
+      events: "Events",
+      contact: "Contact",
+      "products-title": "Products",
+      "loading": "Loading products...",
+      "no-products": "No products available yet",
+      "no-products-desc": "We're updating our product catalog. Please check back later or contact us directly for more information!",
+      "contact-now": "Contact Now",
+      "back-home": "← Back to Home",
+      footer: "Knowledge begins with a drop of ink"
+    }
+  };
+
+  function setLang(lang) {
+    html.lang = lang;
+    localStorage.setItem('lang', lang);
+    langSwitch.checked = (lang === 'en');
+
+    document.querySelector('.vi-flag').classList.toggle('inactive', lang !== 'vi');
+    document.querySelector('.en-flag').classList.toggle('inactive', lang !== 'en');
+
+    document.querySelectorAll('[data-lang-key]').forEach(el => {
+      const k = el.getAttribute('data-lang-key');
+      if (dict[lang][k]) el.textContent = dict[lang][k];
+    });
+  }
+
+  setLang(localStorage.getItem('lang') || 'vi');
+
+  langGroup.addEventListener('click', () => {
+    const cur = localStorage.getItem('lang') || 'vi';
+    setLang(cur === 'vi' ? 'en' : 'vi');
   });
-}
 
-setLang(localStorage.getItem('lang') || 'vi');
+  langSwitch.addEventListener('change', () => {
+    setLang(langSwitch.checked ? 'en' : 'vi');
+  });
 
-langGroup.addEventListener('click', () => {
-  const cur = localStorage.getItem('lang') || 'vi';
-  setLang(cur === 'vi' ? 'en' : 'vi');
-});
+  langGroup.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      langGroup.click();
+    }
+  });
 
-langSwitch.addEventListener('change', () => {
-  setLang(langSwitch.checked ? 'en' : 'vi');
-});
+  // Firebase real-time product sync
+  const productsRef = ref(db, 'products');
 
-langGroup.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' || e.key === ' ') {
-    e.preventDefault();
-    langGroup.click();
-  }
-});
-// Firebase real-time product sync (instant, no polling)
-const productsRef = ref(db, 'products');
+  onValue(productsRef, (snapshot) => {
+    const data = snapshot.val() || {};
+    const products = Object.values(data);
 
-onValue(productsRef, (snapshot) => {
-  const data = snapshot.val() || {};
-  const products = Object.values(data); // convert object to array
+    document.getElementById('loading').classList.add('d-none');
 
-  // Hide loading spinner
-  document.getElementById('loading').classList.add('d-none');
+    const grid = document.getElementById('product-grid');
+    const noProducts = document.getElementById('no-products');
 
-  const grid = document.getElementById('product-grid');
-  const noProducts = document.getElementById('no-products');
+    if (products.length === 0) {
+      noProducts.classList.remove('d-none');
+      grid.classList.add('d-none');
+      grid.innerHTML = '';
+      return;
+    }
 
-  if (products.length === 0) {
-    noProducts.classList.remove('d-none');
-    grid.classList.add('d-none');
+    noProducts.classList.add('d-none');
+    grid.classList.remove('d-none');
     grid.innerHTML = '';
-    return;
-  }
 
-  noProducts.classList.add('d-none');
-  grid.classList.remove('d-none');
-  grid.innerHTML = '';
-
-  products.forEach(product => {
-    const card = `
-      <div class="col-6 col-md-4 col-lg-3">
-        <div class="card h-100 border-0 shadow-sm product-card">
-          <img src="${product.image}" class="card-img-top" alt="${product.name}" style="height: 280px; object-fit: cover;">
-          <div class="card-body text-center">
-            <h5 class="card-title">${product.name}</h5>
-            <p class="card-text fw-bold text-primary fs-5">${product.price}</p>
-            <p class="text-muted small">${product.category}</p>
-            <a href="#" class="btn btn-outline-primary btn-sm" data-lang-key="view-detail">Xem chi tiết</a>
+    products.forEach(product => {
+      const card = `
+        <div class="col-6 col-md-4 col-lg-3">
+          <div class="card h-100 border-0 shadow-sm product-card">
+            <img src="${product.image}" class="card-img-top" alt="${product.name}" style="height: 280px; object-fit: cover;">
+            <div class="card-body text-center">
+              <h5 class="card-title">${product.name}</h5>
+              <p class="card-text fw-bold text-primary fs-5">${product.price}</p>
+              <p class="text-muted small">${product.category}</p>
+              <a href="#" class="btn btn-outline-primary btn-sm" data-lang-key="view-detail">Xem chi tiết</a>
+            </div>
           </div>
         </div>
-      </div>
-    `;
-    grid.innerHTML += card;
-  });
+      `;
+      grid.innerHTML += card;
+    });
 
-  // Re-apply language to newly added dynamic content
-  setLang(localStorage.getItem('lang') || 'vi');
-});
+    // Re-apply language to dynamic content
+    setLang(localStorage.getItem('lang') || 'vi');
+  });
 </script>
 </body>
 </html>
