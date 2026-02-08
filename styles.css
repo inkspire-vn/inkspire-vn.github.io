@@ -1,4 +1,12 @@
 /* styles.css - shared across all pages */
+.nav-tabs .nav-link {
+  color: var(--bs-body-color) !important;
+}
+.nav-tabs .nav-link.active {
+  color: var(--bs-primary) !important;
+  background-color: var(--bs-body-bg) !important;
+  border-color: var(--bs-border-color) var(--bs-border-color) var(--bs-body-bg) !important;
+}
 
 :root {
   --green-light: #00c4b4;
