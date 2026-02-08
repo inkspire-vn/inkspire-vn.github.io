@@ -197,11 +197,11 @@
 
     .track {
       display: flex;
-      animation: slide-left 55s linear infinite;
+      animation: slide-left 30s linear infinite;
       width: max-content;
     }
 
-    .reverse .track { animation: slide-right 55s linear infinite; }
+    .reverse .track { animation: slide-right 30s linear infinite; }
 
     .item {
       width: 240px;
@@ -296,23 +296,7 @@
 <a href="/events" class="events-box text-decoration-none" id="eventsBox">
   <h3 data-lang-key="ongoing">Sự kiện đang diễn ra</h3>
   
-  <div class="event-card">
-    <h5>Book Signing with Local Authors</h5>
-    <p>January 20, 2026 | 2:00 PM - 5:00 PM</p>
-    <small>Join us for an inspiring afternoon with featured writers from Ho Chi Minh City!</small>
-  </div>
-
-  <div class="event-card">
-    <h5>Storytime for Kids</h5>
-    <p>Every Saturday | 10:00 AM</p>
-    <small>Fun stories, activities, and free snacks for children under 10.</small>
-  </div>
-
-  <div class="event-card">
-    <h5>20% Off All Novels</h5>
-    <p>January 15 - 22, 2026</p>
-    <small>Explore our collection of novels, comics, and bestsellers with this limited-time discount!</small>
-  </div>
+  <div id="events-list"></div>
 
   <div class="text-center mt-4 small fw-bold" style="color: var(--bs-primary);">
     Click để xem chi tiết tất cả sự kiện →
@@ -324,25 +308,19 @@
   <!-- Toys Slider -->
   <h2 class="mb-4" data-lang-key="toys">Đồ chơi – Toys</h2>
   <div class="slider-wrap">
-    <div class="track" id="toys-track">
-      <!-- Will be filled by JS -->
-    </div>
+    <div class="track" id="toys-track"></div>
   </div>
 
   <!-- Stationery Slider -->
   <h2 class="mb-5 mt-5" data-lang-key="stationery">Văn phòng phẩm – Stationery</h2>
   <div class="slider-wrap reverse">
-    <div class="track" id="stationery-track">
-      <!-- Will be filled by JS -->
-    </div>
+    <div class="track" id="stationery-track"></div>
   </div>
 
   <!-- Books Slider -->
   <h2 class="mb-5 mt-5" data-lang-key="books">Sách – Books</h2>
   <div class="slider-wrap">
-    <div class="track" id="books-track">
-      <!-- Will be filled by JS -->
-    </div>
+    <div class="track" id="books-track"></div>
   </div>
 
 </main>
@@ -373,49 +351,6 @@
 
   initializeApp(firebaseConfig);
   const db = getDatabase();
-
-  const productsRef = ref(db, 'products');
-
-  onValue(productsRef, (snapshot) => {
-    const products = Object.values(snapshot.val() || {});
-
-    // Toys slider
-    const toys = products.filter(p => (p.category || '').toLowerCase().includes('toy') || (p.category || '').includes('đồ chơi'));
-    renderSlider('toys-track', toys);
-
-    // Stationery slider
-    const stationery = products.filter(p => (p.category || '').toLowerCase().includes('station') || (p.category || '').includes('văn phòng'));
-    renderSlider('stationery-track', stationery);
-
-    // Books slider
-    const books = products.filter(p => (p.category || '').toLowerCase().includes('book') || (p.category || '').includes('sách'));
-    renderSlider('books-track', books);
-  });
-
-  function renderSlider(trackId, items) {
-    const track = document.getElementById(trackId);
-    if (!track) return;
-
-    track.innerHTML = '';
-
-    if (items.length === 0) {
-      track.innerHTML = '<p class="text-center text-muted py-4">Chưa có sản phẩm trong danh mục này</p>';
-      return;
-    }
-
-    items.forEach(item => {
-      const itemHtml = `
-        <div class="item">
-          <img src="${item.image || 'https://via.placeholder.com/240/320?text=No+Image'}" alt="${item.name}">
-          <div class="price">${item.price}</div>
-        </div>
-      `;
-      track.innerHTML += itemHtml;
-    });
-
-    // Duplicate for infinite loop
-    track.innerHTML += track.innerHTML;
-  }
 
   // Theme toggle
   const html = document.documentElement;
@@ -483,6 +418,70 @@
   langSwitch.addEventListener('change', () => {
     setLang(langSwitch.checked ? 'en' : 'vi');
   });
+
+  // Firebase real-time sliders + events
+  const productsRef = ref(db, 'products');
+  const eventsRef = ref(db, 'events');
+
+  // Products sliders
+  onValue(productsRef, (snapshot) => {
+    const products = Object.values(snapshot.val() || {});
+
+    // Toys
+    renderSlider('toys-track', products.filter(p => (p.category || '').toLowerCase().includes('toy') || (p.category || '').includes('đồ chơi')));
+
+    // Stationery
+    renderSlider('stationery-track', products.filter(p => (p.category || '').toLowerCase().includes('station') || (p.category || '').includes('văn phòng')));
+
+    // Books
+    renderSlider('books-track', products.filter(p => (p.category || '').toLowerCase().includes('book') || (p.category || '').includes('sách')));
+  });
+
+  // Events box (max 3 recent)
+  onValue(eventsRef, (snapshot) => {
+    const events = Object.values(snapshot.val() || {}).slice(0, 3); // latest 3
+    const list = document.getElementById('events-list');
+    list.innerHTML = '';
+
+    if (events.length === 0) {
+      list.innerHTML = '<p class="text-muted text-center">Chưa có sự kiện nào</p>';
+      return;
+    }
+
+    events.forEach(e => {
+      list.innerHTML += `
+        <div class="event-card">
+          <h5>${e.title}</h5>
+          <p>${e.date}</p>
+          <small>${e.desc.substring(0, 100)}${e.desc.length > 100 ? '...' : ''}</small>
+        </div>
+      `;
+    });
+  });
+
+  function renderSlider(trackId, items) {
+    const track = document.getElementById(trackId);
+    if (!track) return;
+
+    track.innerHTML = '';
+
+    if (items.length === 0) {
+      track.innerHTML = '<p class="text-center text-muted py-4">Chưa có sản phẩm trong danh mục này</p>';
+      return;
+    }
+
+    items.forEach(item => {
+      track.innerHTML += `
+        <div class="item">
+          <img src="${item.image || 'https://via.placeholder.com/240/320?text=No+Image'}" alt="${item.name}">
+          <div class="price">${item.price}</div>
+        </div>
+      `;
+    });
+
+    // Duplicate for infinite loop
+    track.innerHTML += track.innerHTML;
+  }
 </script>
 </body>
 </html>
