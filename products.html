@@ -216,90 +216,50 @@ langGroup.addEventListener('keydown', (e) => {
     langGroup.click();
   }
 });
+// Firebase real-time product sync (instant, no polling)
+const productsRef = ref(db, 'products');
 
-// ──────────────────────────────────────────────
-// Real-time product sync from GitHub JSON
-// ──────────────────────────────────────────────
+onValue(productsRef, (snapshot) => {
+  const data = snapshot.val() || {};
+  const products = Object.values(data); // convert object to array
 
-const PRODUCT_JSON_URL = '/data/products.json';  
-let lastKnownProducts = null; // To detect changes
+  // Hide loading spinner
+  document.getElementById('loading').classList.add('d-none');
 
-async function loadProducts(forceRefresh = false) {
-  try {
-    // Strong cache busting
-    const cacheBuster = '?t=' + Date.now() + Math.random().toString(36).substring(2, 10);
-    const response = await fetch(PRODUCT_JSON_URL + cacheBuster, {
-      cache: 'no-store',
-      headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0'
-      }
-    });
+  const grid = document.getElementById('product-grid');
+  const noProducts = document.getElementById('no-products');
 
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-    const products = await response.json();
-
-    // Hide loading
-    document.getElementById('loading').classList.add('d-none');
-
-    // Check if content changed → only update if different
-    const currentJson = JSON.stringify(products);
-    if (lastKnownProducts === currentJson && !forceRefresh) {
-      return; // No change → skip render
-    }
-    lastKnownProducts = currentJson;
-
-    const grid = document.getElementById('product-grid');
-    const noProducts = document.getElementById('no-products');
-
-    if (products.length === 0) {
-      noProducts.classList.remove('d-none');
-      grid.classList.add('d-none');
-      grid.innerHTML = '';
-      return;
-    }
-
-    noProducts.classList.add('d-none');
-    grid.classList.remove('d-none');
+  if (products.length === 0) {
+    noProducts.classList.remove('d-none');
+    grid.classList.add('d-none');
     grid.innerHTML = '';
+    return;
+  }
 
-    products.forEach(product => {
-      const card = `
-        <div class="col-6 col-md-4 col-lg-3">
-          <div class="card h-100 border-0 shadow-sm product-card">
-            <img src="${product.image}" class="card-img-top" alt="${product.name}" style="height: 280px; object-fit: cover;">
-            <div class="card-body text-center">
-              <h5 class="card-title">${product.name}</h5>
-              <p class="card-text fw-bold text-primary fs-5">${product.price}</p>
-              <p class="text-muted small">${product.category}</p>
-              <a href="#" class="btn btn-outline-primary btn-sm" data-lang-key="view-detail">Xem chi tiết</a>
-            </div>
+  noProducts.classList.add('d-none');
+  grid.classList.remove('d-none');
+  grid.innerHTML = '';
+
+  products.forEach(product => {
+    const card = `
+      <div class="col-6 col-md-4 col-lg-3">
+        <div class="card h-100 border-0 shadow-sm product-card">
+          <img src="${product.image}" class="card-img-top" alt="${product.name}" style="height: 280px; object-fit: cover;">
+          <div class="card-body text-center">
+            <h5 class="card-title">${product.name}</h5>
+            <p class="card-text fw-bold text-primary fs-5">${product.price}</p>
+            <p class="text-muted small">${product.category}</p>
+            <a href="#" class="btn btn-outline-primary btn-sm" data-lang-key="view-detail">Xem chi tiết</a>
           </div>
         </div>
-      `;
-      grid.innerHTML += card;
-    });
+      </div>
+    `;
+    grid.innerHTML += card;
+  });
 
-    // Re-apply language to new dynamic content
-    setLang(localStorage.getItem('lang') || 'vi');
-  } catch (err) {
-    console.error('Error loading products:', err);
-    document.getElementById('loading').innerHTML = '<p class="text-danger">Không thể tải sản phẩm. Vui lòng thử lại sau.</p>';
-  }
-}
-
-// Initial load
-loadProducts();
-
-// Auto-refresh every 10 seconds (near real-time)
-setInterval(() => loadProducts(), 10000);
-
-// Optional: force full page refresh every 2 minutes (if you prefer hard refresh)
-setInterval(() => {
-  window.location.reload();
-}, 120000);
+  // Re-apply language to newly added dynamic content
+  setLang(localStorage.getItem('lang') || 'vi');
+});
 </script>
 </body>
 </html>
