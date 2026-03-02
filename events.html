@@ -60,7 +60,7 @@
     }
     .event-desc.short {
       display: -webkit-box;
-      -webkit-line-clamp: 4; /* ≈4 lines */
+      -webkit-line-clamp: 4;
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
@@ -189,7 +189,7 @@
   setTheme(localStorage.getItem('theme') || 'light');
   themeBtn.onclick = () => setTheme(html.getAttribute('data-bs-theme') === 'light' ? 'dark' : 'light');
 
-  // Language toggle (updated with "See more" / "Show less")
+  // Language toggle
   const langGroup = document.getElementById('langGroup');
   const langSwitch = document.getElementById('langSwitch');
 
@@ -243,9 +243,12 @@
     setLang(langSwitch.checked ? 'en' : 'vi');
   });
 
+  // Global variable for events (so toggleDesc can access it)
+  let currentEvents = [];
+  let currentlyExpandedKey = null;
+
   // Firebase real-time events
   const eventsRef = ref(db, 'events');
-  let currentlyExpandedKey = null;
 
   onValue(eventsRef, (snapshot) => {
     const loading = document.getElementById('loading');
@@ -255,9 +258,9 @@
     if (loading) loading.classList.add('d-none');
 
     const data = snapshot.val() || {};
-    const events = Object.values(data);
+    currentEvents = Object.values(data); // ← assign to global variable
 
-    if (events.length === 0) {
+    if (currentEvents.length === 0) {
       if (noEvents) noEvents.classList.remove('d-none');
       if (grid) grid.classList.add('d-none');
       if (grid) grid.innerHTML = '';
@@ -271,7 +274,7 @@
 
       const now = new Date();
 
-      events.forEach(event => {
+      currentEvents.forEach(event => {
         const start = new Date(event.start);
         const end = new Date(event.end);
 
