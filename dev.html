@@ -1,3 +1,200 @@
+<!DOCTYPE html>
+<html lang="vi" data-bs-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dev - InkSpire</title>
+
+  <link rel="icon" type="image/png" href="https://avatars.githubusercontent.com/u/254457838?s=64">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/styles.css">
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+    import { getDatabase, ref, onValue, push, remove, update } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA9XvWCZOyaSuT42HBMUgQQ7KTuQYPWLbE",
+      authDomain: "inkspire-vn-security.firebaseapp.com",
+      databaseURL: "https://inkspire-vn-security-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "inkspire-vn-security",
+      storageBucket: "inkspire-vn-security.firebasestorage.app",
+      messagingSenderId: "774834040534",
+      appId: "1:774834040534:web:c7b5e64826176a44b4e377",
+      measurementId: "G-MJSRBE9TY6"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const auth = getAuth(app);
+    const provider = new GoogleAuthProvider();
+
+    window.db = db;
+    window.auth = auth;
+    window.provider = provider;
+    window.signInWithPopup = signInWithPopup;
+    window.onAuthStateChanged = onAuthStateChanged;
+    window.signOut = signOut;
+    window.ref = ref;
+    window.onValue = onValue;
+    window.push = push;
+    window.remove = remove;
+    window.update = update;
+
+    // Force logout on every load to avoid session carry-over issues
+    signOut(auth).catch(() => {});
+  </script>
+</head>
+<body>
+
+<!-- Login screen -->
+<div id="login-screen" class="d-flex align-items-center justify-content-center vh-100 bg-light">
+  <div class="card p-5 shadow-lg text-center" style="max-width: 420px;">
+    <h3>Dev Access - Staff Only</h3>
+    <p class="text-muted mb-4">Đăng nhập bằng Google để quản lý</p>
+    <button id="googleSignIn" class="btn btn-outline-danger btn-lg w-100 mb-3">
+      <i class="fab fa-google me-2"></i> Đăng nhập bằng Google
+    </button>
+    <p id="loginError" class="text-danger d-none">Đăng nhập thất bại hoặc không được phép.</p>
+  </div>
+</div>
+
+<!-- Main content -->
+<div id="dev-content" class="d-none">
+  <nav class="navbar navbar-expand-lg sticky-top shadow">
+    <div class="container">
+      <a class="navbar-brand fw-bold fs-4" href="https://inkspire-vn.github.io">InkSpire</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navMain">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item"><a class="nav-link" href="https://inkspire-vn.github.io">Trang chủ</a></li>
+          <li class="nav-item"><a class="nav-link" href="/products">Sản phẩm</a></li>
+          <li class="nav-item"><a class="nav-link" href="/events">Sự kiện</a></li>
+          <li class="nav-item"><a class="nav-link" href="/contact">Liên hệ</a></li>
+        </ul>
+
+        <div class="d-flex align-items-center gap-4">
+          <div class="lang-group" id="langGroup" role="button" tabindex="0">
+            <span class="flag vi-flag" data-lang="vi">🇻🇳</span>
+            <div class="switch">
+              <input type="checkbox" id="langSwitch">
+              <span class="slider"></span>
+            </div>
+            <span class="flag en-flag" data-lang="en">🇺🇸</span>
+          </div>
+          <button class="theme-btn" id="themeBtn">🌙</button>
+          <button id="signOutBtn" class="btn btn-sm btn-outline-danger">Đăng xuất</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container py-5">
+    <h1 class="text-center mb-5">Dev - Quản lý Sản phẩm & Sự kiện</h1>
+
+    <div class="mb-4">
+      <input type="text" id="searchInput" class="form-control" placeholder="Tìm theo tên, danh mục, tiêu đề...">
+    </div>
+
+    <ul class="nav nav-tabs mb-4" id="devTabs" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="products-tab" data-bs-toggle="tab" data-bs-target="#products" type="button" role="tab">Sản phẩm</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="events-tab" data-bs-toggle="tab" data-bs-target="#events" type="button" role="tab">Sự kiện</button>
+      </li>
+    </ul>
+
+    <div class="tab-content" id="devTabContent">
+      <!-- Products tab -->
+      <div class="tab-pane fade show active" id="products" role="tabpanel">
+        <h3 class="mb-4">Thêm / Sửa sản phẩm</h3>
+        <form id="productForm" class="row g-3 mb-5">
+          <div class="col-md-6">
+            <label class="form-label">Tên sản phẩm</label>
+            <input type="text" class="form-control" id="productName" placeholder="Ví dụ: Sách Harry Potter" required>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Giá</label>
+            <input type="text" class="form-control" id="productPrice" placeholder="Ví dụ: 220k" required>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Danh mục</label>
+            <select class="form-select" id="productCategory" required>
+              <option value="Books">Sách – Books</option>
+              <option value="Stationery">Văn phòng phẩm – Stationery</option>
+              <option value="Toys">Đồ chơi – Toys</option>
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Link ảnh (URL)</label>
+            <input type="url" class="form-control" id="productImage" placeholder="https://example.com/hinh-anh.jpg" required>
+          </div>
+          <div class="col-12">
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" id="productOutOfStock">
+              <label class="form-check-label" for="productOutOfStock">
+                Hết hàng (Out of Stock)
+              </label>
+            </div>
+          </div>
+          <div class="col-12 text-end">
+            <button type="submit" class="btn btn-primary" id="productSubmitBtn">Thêm sản phẩm</button>
+          </div>
+        </form>
+
+        <h4 class="mt-5 mb-3">Sản phẩm hiện tại</h4>
+        <div id="productList" class="list-group"></div>
+      </div>
+
+      <!-- Events tab -->
+      <div class="tab-pane fade" id="events" role="tabpanel">
+        <h3 class="mb-4">Thêm / Sửa sự kiện</h3>
+        <form id="eventForm" class="row g-3 mb-5">
+          <div class="col-12">
+            <label class="form-label">Tiêu đề sự kiện</label>
+            <input type="text" class="form-control" id="eventTitle" placeholder="Ví dụ: Storytime for Kids" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Bắt đầu</label>
+            <input type="text" class="form-control" id="eventStart" placeholder="Ví dụ: 20/01/2026 10:00 AM" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Kết thúc</label>
+            <input type="text" class="form-control" id="eventEnd" placeholder="Ví dụ: 20/01/2026 12:00 PM" required>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Mô tả</label>
+            <textarea class="form-control" id="eventDesc" rows="3" placeholder="Ví dụ: Buổi kể chuyện vui nhộn cho trẻ em..." required></textarea>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Link ảnh (URL) – optional</label>
+            <input type="url" class="form-control" id="eventImage" placeholder="https://example.com/su-kien.jpg">
+          </div>
+          <div class="col-12">
+            <label><input type="checkbox" id="eventAborted"> Aborted (Bị hủy)</label><br>
+            <label><input type="checkbox" id="eventDelayed"> Delayed (Bị hoãn)</label>
+          </div>
+          <div class="col-12 text-end">
+            <button type="submit" class="btn btn-primary" id="eventSubmitBtn">Thêm sự kiện</button>
+          </div>
+        </form>
+
+        <h4 class="mt-5 mb-3">Sự kiện hiện tại</h4>
+        <div id="eventList" class="list-group"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 <script type="module">
   const html = document.documentElement;
 
@@ -13,7 +210,7 @@
   const loginError = document.getElementById('loginError');
   const searchInput = document.getElementById('searchInput');
 
-  // Auth
+  // Auth state
   onAuthStateChanged(auth, (user) => {
     if (user) {
       if (user.email !== 'inkspire.bookstore.vn@gmail.com') {
@@ -37,31 +234,34 @@
       await signInWithPopup(auth, provider);
     } catch (error) {
       loginError.classList.remove('d-none');
-      console.error(error);
+      console.error('Login error:', error);
     }
   });
 
-  signOutBtn.addEventListener('click', () => signOut(auth));
+  signOutBtn.addEventListener('click', async () => {
+    await signOut(auth);
+  });
 
   function loadAllData() {
     onValue(ref(db, 'products'), (snapshot) => {
-      currentProducts = Object.entries(snapshot.val() || {}).map(([k, v]) => ({ key: k, ...v }));
-      renderProducts();
+      currentProducts = Object.entries(snapshot.val() || {}).map(([key, val]) => ({ key, ...val }));
+      renderProducts(currentProducts);
     });
 
     onValue(ref(db, 'events'), (snapshot) => {
-      currentEvents = Object.entries(snapshot.val() || {}).map(([k, v]) => ({ key: k, ...v }));
-      renderEvents();
+      currentEvents = Object.entries(snapshot.val() || {}).map(([key, val]) => ({ key, ...val }));
+      renderEvents(currentEvents);
     });
   }
 
-  // Products render
-  function renderProducts() {
+  // Products
+  function renderProducts(products) {
     const list = document.getElementById('productList');
-    list.innerHTML = currentProducts.map(p => `
+    list.innerHTML = products.map(p => `
       <div class="list-group-item d-flex justify-content-between align-items-center">
         <div>
-          <strong>${p.name}</strong> — ${p.price} (${p.category})
+          <strong>${p.name}</strong> — ${p.price} (${p.category})<br>
+          <small class="text-muted">${p.image.substring(0, 60)}${p.image.length > 60 ? '...' : ''}</small>
           ${p.outOfStock ? '<span class="badge bg-danger ms-2">Hết hàng</span>' : ''}
         </div>
         <div>
@@ -73,15 +273,15 @@
   }
 
   window.editProduct = (key) => {
-    const product = currentProducts.find(p => p.key === key);
-    if (!product) return;
+    const p = currentProducts.find(x => x.key === key);
+    if (!p) return;
 
     editingProductKey = key;
-    document.getElementById('productName').value = product.name || '';
-    document.getElementById('productPrice').value = product.price || '';
-    document.getElementById('productCategory').value = product.category || 'Books';
-    document.getElementById('productImage').value = product.image || '';
-    document.getElementById('productOutOfStock').checked = !!product.outOfStock;
+    document.getElementById('productName').value = p.name || '';
+    document.getElementById('productPrice').value = p.price || '';
+    document.getElementById('productCategory').value = p.category || 'Books';
+    document.getElementById('productImage').value = p.image || '';
+    document.getElementById('productOutOfStock').checked = !!p.outOfStock;
     document.getElementById('productSubmitBtn').textContent = 'Cập nhật sản phẩm';
   };
 
@@ -92,17 +292,13 @@
 
   document.getElementById('productForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-
     const name = document.getElementById('productName').value.trim();
     const price = document.getElementById('productPrice').value.trim();
     const category = document.getElementById('productCategory').value;
     const image = document.getElementById('productImage').value.trim();
     const outOfStock = document.getElementById('productOutOfStock').checked;
 
-    if (!name || !price || !category || !image) {
-      alert('Vui lòng điền đầy đủ thông tin!');
-      return;
-    }
+    if (!name || !price || !category || !image) return alert('Điền đầy đủ!');
 
     const data = { name, price, category, image, outOfStock };
 
@@ -127,12 +323,12 @@
     editingProductKey = null;
   }
 
-  // Events render with status
-  function renderEvents() {
+  // Events
+  function renderEvents(events) {
     const list = document.getElementById('eventList');
     const now = new Date();
 
-    list.innerHTML = currentEvents.map(e => {
+    list.innerHTML = events.map(e => {
       const start = new Date(e.start);
       const end = new Date(e.end);
       let status = '';
@@ -161,17 +357,17 @@
   }
 
   window.editEvent = (key) => {
-    const event = currentEvents.find(e => e.key === key);
-    if (!event) return;
+    const e = currentEvents.find(x => x.key === key);
+    if (!e) return;
 
     editingEventKey = key;
-    document.getElementById('eventTitle').value = event.title || '';
-    document.getElementById('eventStart').value = event.start || '';
-    document.getElementById('eventEnd').value = event.end || '';
-    document.getElementById('eventDesc').value = event.desc || '';
-    document.getElementById('eventImage').value = event.image || '';
-    document.getElementById('eventAborted').checked = !!event.aborted;
-    document.getElementById('eventDelayed').checked = !!event.delayed;
+    document.getElementById('eventTitle').value = e.title || '';
+    document.getElementById('eventStart').value = e.start || '';
+    document.getElementById('eventEnd').value = e.end || '';
+    document.getElementById('eventDesc').value = e.desc || '';
+    document.getElementById('eventImage').value = e.image || '';
+    document.getElementById('eventAborted').checked = !!e.aborted;
+    document.getElementById('eventDelayed').checked = !!e.delayed;
     document.getElementById('eventSubmitBtn').textContent = 'Cập nhật sự kiện';
   };
 
@@ -182,17 +378,16 @@
 
   document.getElementById('eventForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-
     const title = document.getElementById('eventTitle').value.trim();
     const start = document.getElementById('eventStart').value.trim();
     const end = document.getElementById('eventEnd').value.trim();
     const desc = document.getElementById('eventDesc').value.trim();
-    const image = document.getElementById('eventImage').value.trim();
+    const image = document.getElementById('eventImage').value.trim() || '';
     const aborted = document.getElementById('eventAborted').checked;
     const delayed = document.getElementById('eventDelayed').checked;
 
     if (!title || !start || !end || !desc) {
-      alert('Vui lòng điền đầy đủ thông tin!');
+      alert('Vui lòng điền đầy đủ!');
       return;
     }
 
@@ -221,7 +416,7 @@
     editingEventKey = null;
   }
 
-  // Search filter
+  // Search
   searchInput.addEventListener('input', (e) => {
     const term = e.target.value.toLowerCase().trim();
     renderProducts(currentProducts.filter(p => 
@@ -232,7 +427,7 @@
     ));
   });
 
-  // Theme & Language
+  // Theme toggle
   const themeBtn = document.getElementById('themeBtn');
   function setTheme(mode) {
     html.setAttribute('data-bs-theme', mode);
@@ -242,36 +437,16 @@
   setTheme(localStorage.getItem('theme') || 'light');
   themeBtn.onclick = () => setTheme(html.getAttribute('data-bs-theme') === 'light' ? 'dark' : 'light');
 
+  // Language toggle
   const langGroup = document.getElementById('langGroup');
   const langSwitch = document.getElementById('langSwitch');
-
-  const dict = {
-    vi: {
-      home: "Trang chủ",
-      products: "Sản phẩm",
-      events: "Sự kiện",
-      contact: "Liên hệ"
-    },
-    en: {
-      home: "Home",
-      products: "Products",
-      events: "Events",
-      contact: "Contact"
-    }
-  };
 
   function setLang(lang) {
     html.lang = lang;
     localStorage.setItem('lang', lang);
     langSwitch.checked = (lang === 'en');
-
     document.querySelector('.vi-flag').classList.toggle('inactive', lang !== 'vi');
     document.querySelector('.en-flag').classList.toggle('inactive', lang !== 'en');
-
-    document.querySelectorAll('[data-lang-key]').forEach(el => {
-      const k = el.getAttribute('data-lang-key');
-      if (dict[lang][k]) el.textContent = dict[lang][k];
-    });
   }
 
   setLang(localStorage.getItem('lang') || 'vi');
@@ -285,3 +460,5 @@
     setLang(langSwitch.checked ? 'en' : 'vi');
   });
 </script>
+</body>
+</html>
