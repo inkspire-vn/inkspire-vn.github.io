@@ -1,13 +1,20 @@
 <!DOCTYPE html>
 <html lang="vi" data-bs-theme="light">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sự kiện - InkSpire Bookstore</title>
+
+  <link rel="icon" type="image/png" href="https://avatars.githubusercontent.com/u/254457838?s=64">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/styles.css">
+
+  <!-- Firebase SDK -->
   <script type="module">
-    // Import needed Firebase modules
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-    import { getDatabase, ref, onValue, set, push, remove, update, query, limitToLast, get, child } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
-    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-  
-    // Your config (paste once per page or make shared file later)
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+
     const firebaseConfig = {
       apiKey: "AIzaSyA9XvWCZOyaSuT42HBMUgQQ7KTuQYPWLbE",
       authDomain: "inkspire-vn-security.firebaseapp.com",
@@ -19,45 +26,61 @@
       measurementId: "G-MJSRBE9TY6"
     };
 
-    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
-    const auth = getAuth(app);
-    const provider = new GoogleAuthProvider();
 
-    // Make them global for easy use in main script
     window.db = db;
-    window.auth = auth;
-    window.provider = provider;
-    window.signInWithPopup = signInWithPopup;
-    window.onAuthStateChanged = onAuthStateChanged;
-    window.signOut = signOut;
     window.ref = ref;
     window.onValue = onValue;
-    window.set = set;
-    window.push = push;
-    window.remove = remove;
-    window.update = update;
-    window.query = query;
-    window.limitToLast = limitToLast;
-    window.get = get;
-    window.child = child;
   </script>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title data-lang-key="events-title">Sự kiện - InkSpire Bookstore</title>
 
-  <!-- Favicon -->
-  <link rel="icon" type="image/png" href="https://avatars.githubusercontent.com/u/254457838?s=64">
-
-  <!-- Bootstrap -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-
-  <!-- Shared styles -->
-  <link rel="stylesheet" href="styles.css">
+  <style>
+    .event-card {
+      transition: transform 0.25s, box-shadow 0.25s;
+      border: none;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    }
+    .event-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.15);
+    }
+    .event-card .card-img-top {
+      height: 220px;
+      object-fit: cover;
+    }
+    .event-time {
+      font-weight: 600;
+      color: var(--bs-primary);
+    }
+    .status-badge {
+      font-size: 0.95rem;
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-weight: 600;
+    }
+    .status-upcoming { background: #0dcaf0; color: white; }
+    .status-current  { background: #198754; color: white; }
+    .status-expired  { background: #dc3545; color: white; }
+    .status-aborted  { background: #6c757d; color: white; }
+    .status-delayed  { background: #fd7e14; color: white; }
+    .page-hero {
+      background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)),
+                  url('https://images.unsplash.com/photo-1507842217343-583bb7278b66?w=1600') center/cover;
+      color: white;
+      height: 35vh;
+      min-height: 250px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-shadow: 1px 1px 4px rgba(0,0,0,0.7);
+    }
+    footer {
+      background: var(--bs-primary);
+      color: white;
+    }
+  </style>
 </head>
 <body>
 
@@ -86,50 +109,40 @@
           </div>
           <span class="flag en-flag" data-lang="en">🇺🇸</span>
         </div>
-
         <button class="theme-btn" id="themeBtn">🌙</button>
       </div>
     </div>
   </div>
 </nav>
 
-<!-- Page Hero -->
-<section class="page-hero" style="height: 35vh; min-height: 250px;">
-  <div class="page-hero-content">
-    <h1 class="display-4 fw-bold" data-lang-key="events-title">Sự kiện</h1>
+<!-- Hero -->
+<section class="page-hero text-center">
+  <div class="container h-100 d-flex align-items-center justify-content-center">
+    <h1 class="display-4 fw-bold text-white" data-lang-key="events">Sự kiện</h1>
   </div>
 </section>
 
 <main class="container py-5">
 
-  <!-- Loading -->
   <div id="loading" class="text-center py-5">
-    <div class="spinner-border text-primary" role="status">
-      <span class="visually-hidden">Đang tải...</span>
-    </div>
-    <p class="mt-3" data-lang-key="loading">Đang tải sự kiện...</p>
+    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"></div>
+    <p class="mt-4 fs-5" data-lang-key="loading">Đang tải sự kiện...</p>
   </div>
 
-  <!-- Events Grid -->
   <div id="event-grid" class="row g-4 d-none"></div>
 
-  <!-- No events -->
   <div id="no-events" class="text-center py-5 d-none">
     <i class="fas fa-calendar-times fa-5x text-muted mb-4"></i>
-    <h4 data-lang-key="no-events">Hiện chưa có sự kiện nào</h4>
-    <p data-lang-key="no-events-desc" class="text-muted">
-      Chúng tôi đang cập nhật lịch sự kiện. Vui lòng quay lại sau hoặc theo dõi nhóm Zalo để nhận thông báo!
+    <h4 class="mb-3">Chưa có sự kiện nào</h4>
+    <p class="text-muted fs-5 mb-4">
+      Hiện tại chưa có sự kiện nào được lên lịch. Vui lòng theo dõi lại sau!
     </p>
-    <a href="https://zalo.me/g/yuncpx035" target="_blank" class="btn btn-primary mt-3" data-lang-key="join-zalo">Tham gia nhóm Zalo</a>
-  </div>
-
-  <div class="text-center mt-5">
-    <a href="https://inkspire-vn.github.io" class="btn btn-outline-secondary btn-lg" data-lang-key="back-home">← Quay về Trang chủ</a>
+    <a href="/contact" class="btn btn-outline-primary btn-lg px-5">Liên hệ để biết thêm</a>
   </div>
 
 </main>
 
-<footer class="text-center py-4" style="background:var(--bs-primary); color:white;">
+<footer class="text-center py-4 text-white">
   <div class="container">
     <p class="mb-1">© 2026 InkSpire Bookstore • TP. Hồ Chí Minh</p>
     <small data-lang-key="footer">Tri thức bắt đầu từ một giọt mực</small>
@@ -138,158 +151,143 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-<script>
-// Theme toggle
-const html = document.documentElement;
-const themeBtn = document.getElementById('themeBtn');
+<script type="module">
+  // Theme toggle
+  const html = document.documentElement;
+  const themeBtn = document.getElementById('themeBtn');
 
-function setTheme(mode) {
-  html.setAttribute('data-bs-theme', mode);
-  localStorage.setItem('theme', mode);
-  themeBtn.textContent = mode === 'dark' ? '☀️' : '🌙';
-}
-
-setTheme(localStorage.getItem('theme') || 'light');
-themeBtn.onclick = () => setTheme(html.getAttribute('data-bs-theme') === 'light' ? 'dark' : 'light');
-
-// Language toggle
-const langGroup = document.getElementById('langGroup');
-const langSwitch = document.getElementById('langSwitch');
-
-const dict = {
-  vi: {
-    home: "Trang chủ",
-    products: "Sản phẩm",
-    events: "Sự kiện",
-    contact: "Liên hệ",
-    "events-title": "Sự kiện",
-    "loading": "Đang tải sự kiện...",
-    "no-events": "Hiện chưa có sự kiện nào",
-    "no-events-desc": "Chúng tôi đang cập nhật lịch sự kiện. Vui lòng quay lại sau hoặc theo dõi nhóm Zalo để nhận thông báo!",
-    "join-zalo": "Tham gia nhóm Zalo",
-    "back-home": "← Quay về Trang chủ",
-    footer: "Tri thức bắt đầu từ một giọt mực"
-  },
-  en: {
-    home: "Home",
-    products: "Products",
-    events: "Events",
-    contact: "Contact",
-    "events-title": "Events",
-    "loading": "Loading events...",
-    "no-events": "No events available yet",
-    "no-events-desc": "We're updating our event schedule. Please check back later or join our Zalo group for updates!",
-    "join-zalo": "Join Zalo Group",
-    "back-home": "← Back to Home",
-    footer: "Knowledge begins with a drop of ink"
+  function setTheme(mode) {
+    html.setAttribute('data-bs-theme', mode);
+    localStorage.setItem('theme', mode);
+    themeBtn.textContent = mode === 'dark' ? '☀️' : '🌙';
   }
-};
 
-function setLang(lang) {
-  html.lang = lang;
-  localStorage.setItem('lang', lang);
-  langSwitch.checked = (lang === 'en');
+  setTheme(localStorage.getItem('theme') || 'light');
+  themeBtn.onclick = () => setTheme(html.getAttribute('data-bs-theme') === 'light' ? 'dark' : 'light');
 
-  document.querySelector('.vi-flag').classList.toggle('inactive', lang !== 'vi');
-  document.querySelector('.en-flag').classList.toggle('inactive', lang !== 'en');
+  // Language toggle
+  const langGroup = document.getElementById('langGroup');
+  const langSwitch = document.getElementById('langSwitch');
 
-  document.querySelectorAll('[data-lang-key]').forEach(el => {
-    const k = el.getAttribute('data-lang-key');
-    if (dict[lang][k]) el.textContent = dict[lang][k];
-  });
-}
+  const dict = {
+    vi: {
+      home: "Trang chủ",
+      products: "Sản phẩm",
+      events: "Sự kiện",
+      contact: "Liên hệ",
+      loading: "Đang tải sự kiện...",
+      "no-events": "Chưa có sự kiện nào",
+      footer: "Tri thức bắt đầu từ một giọt mực"
+    },
+    en: {
+      home: "Home",
+      products: "Products",
+      events: "Events",
+      contact: "Contact",
+      loading: "Loading events...",
+      "no-events": "No events scheduled yet",
+      footer: "Knowledge begins with a drop of ink"
+    }
+  };
 
-setLang(localStorage.getItem('lang') || 'vi');
+  function setLang(lang) {
+    html.lang = lang;
+    localStorage.setItem('lang', lang);
+    langSwitch.checked = (lang === 'en');
 
-langGroup.addEventListener('click', () => {
-  const cur = localStorage.getItem('lang') || 'vi';
-  setLang(cur === 'vi' ? 'en' : 'vi');
-});
+    document.querySelector('.vi-flag').classList.toggle('inactive', lang !== 'vi');
+    document.querySelector('.en-flag').classList.toggle('inactive', lang !== 'en');
 
-langSwitch.addEventListener('change', () => {
-  setLang(langSwitch.checked ? 'en' : 'vi');
-});
-
-langGroup.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' || e.key === ' ') {
-    e.preventDefault();
-    langGroup.click();
-  }
-});
-
-// ──────────────────────────────────────────────
-// Real-time events sync from GitHub JSON
-// ──────────────────────────────────────────────
-
-const EVENTS_JSON_URL = '/data/events.json';  // Relative path – same domain, no CORS
-
-let lastKnownEvents = null;
-
-async function loadEvents() {
-  try {
-    const cacheBuster = '?t=' + Date.now() + Math.random().toString(36).substring(2, 10);
-    const response = await fetch(EVENTS_JSON_URL + cacheBuster, {
-      cache: 'no-store',
-      headers: {
-        'Cache-Control': 'no-cache, no-store, must-revalidate',
-        'Pragma': 'no-cache',
-        'Expires': '0'
-      }
+    document.querySelectorAll('[data-lang-key]').forEach(el => {
+      const k = el.getAttribute('data-lang-key');
+      if (dict[lang][k]) el.textContent = dict[lang][k];
     });
+  }
 
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+  setLang(localStorage.getItem('lang') || 'vi');
 
-    const events = await response.json();
+  langGroup.addEventListener('click', () => {
+    const cur = localStorage.getItem('lang') || 'vi';
+    setLang(cur === 'vi' ? 'en' : 'vi');
+  });
 
-    // Hide loading
-    document.getElementById('loading').classList.add('d-none');
+  langSwitch.addEventListener('change', () => {
+    setLang(langSwitch.checked ? 'en' : 'vi');
+  });
 
-    // Change detection
-    const currentJson = JSON.stringify(events);
-    if (lastKnownEvents === currentJson) return;
-    lastKnownEvents = currentJson;
+  // Firebase real-time events
+  const eventsRef = ref(db, 'events');
 
+  onValue(eventsRef, (snapshot) => {
+    const loading = document.getElementById('loading');
     const grid = document.getElementById('event-grid');
     const noEvents = document.getElementById('no-events');
 
+    if (loading) loading.classList.add('d-none');
+
+    const data = snapshot.val() || {};
+    const events = Object.values(data);
+
     if (events.length === 0) {
-      noEvents.classList.remove('d-none');
-      grid.classList.add('d-none');
-      grid.innerHTML = '';
+      if (noEvents) noEvents.classList.remove('d-none');
+      if (grid) grid.classList.add('d-none');
+      if (grid) grid.innerHTML = '';
       return;
     }
 
-    noEvents.classList.add('d-none');
-    grid.classList.remove('d-none');
-    grid.innerHTML = '';
+    if (noEvents) noEvents.classList.add('d-none');
+    if (grid) {
+      grid.classList.remove('d-none');
+      grid.innerHTML = '';
 
-    events.forEach(event => {
-      const card = `
-        <div class="col-md-6 col-lg-4">
-          <div class="card h-100 border-0 shadow-sm event-card">
-            ${event.image ? `<img src="${event.image}" class="card-img-top" alt="${event.title}" style="height: 200px; object-fit: cover;">` : ''}
-            <div class="card-body">
-              <h5 class="card-title text-primary">${event.title}</h5>
-              <p class="card-text fw-bold">${event.date}</p>
-              <p class="card-text">${event.desc}</p>
-              <a href="#" class="btn btn-outline-primary btn-sm">Chi tiết</a>
+      const now = new Date();
+
+      events.forEach(event => {
+        const start = new Date(event.start);
+        const end = new Date(event.end);
+
+        let statusClass = '';
+        let statusText = '';
+
+        if (event.aborted) {
+          statusClass = 'status-aborted';
+          statusText = 'Bị hủy';
+        } else if (event.delayed) {
+          statusClass = 'status-delayed';
+          statusText = 'Bị hoãn';
+        } else if (now < start) {
+          statusClass = 'status-upcoming';
+          statusText = 'Sắp diễn ra';
+        } else if (now > end) {
+          statusClass = 'status-expired';
+          statusText = 'Đã kết thúc';
+        } else {
+          statusClass = 'status-current';
+          statusText = 'Đang diễn ra';
+        }
+
+        const card = `
+          <div class="col-12 col-md-6 col-lg-4">
+            <div class="card h-100 event-card position-relative">
+              ${event.image ? `<img src="${event.image}" class="card-img-top" alt="${event.title}">` : ''}
+              <div class="card-body">
+                <h5 class="card-title fw-bold">${event.title}</h5>
+                <p class="event-time mb-2">
+                  <i class="fas fa-clock me-2"></i>
+                  ${event.start} → ${event.end}
+                </p>
+                <p class="card-text mb-3">${event.desc}</p>
+                <span class="status-badge ${statusClass}">${statusText}</span>
+              </div>
             </div>
           </div>
-        </div>
-      `;
-      grid.innerHTML += card;
-    });
+        `;
+        grid.innerHTML += card;
+      });
+    }
 
     setLang(localStorage.getItem('lang') || 'vi');
-  } catch (err) {
-    console.error('Error loading events:', err);
-    document.getElementById('loading').innerHTML = '<p class="text-danger">Không thể tải sự kiện. Vui lòng thử lại sau.</p>';
-  }
-}
-
-// Initial load + auto-refresh every 10 seconds
-loadEvents();
-setInterval(loadEvents, 10000);
+  });
 </script>
 </body>
 </html>
