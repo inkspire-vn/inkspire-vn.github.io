@@ -55,14 +55,13 @@
       color: var(--bs-primary);
     }
     .event-desc {
-      transition: all 0.3s ease;
+      max-height: 4.5em;           /* ~4 lines */
+      overflow: hidden;
+      transition: max-height 0.4s ease;
       line-height: 1.6;
     }
-    .event-desc.short {
-      display: -webkit-box;
-      -webkit-line-clamp: 4;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
+    .event-desc.expanded {
+      max-height: 500px;           /* enough for long text */
     }
     .toggle-btn {
       background: none;
@@ -72,11 +71,6 @@
       cursor: pointer;
       padding: 0 4px;
       margin-left: 6px;
-      transition: color 0.2s;
-    }
-    .toggle-btn:hover {
-      color: var(--bs-primary-dark);
-      text-decoration: underline;
     }
     .status-badge {
       font-size: 0.95rem;
@@ -108,7 +102,7 @@
 </head>
 <body>
 
-<!-- Navbar -->
+<!-- Navbar (same as before) -->
 <nav class="navbar navbar-expand-lg sticky-top shadow">
   <div class="container">
     <a class="navbar-brand fw-bold fs-4" href="https://inkspire-vn.github.io">InkSpire</a>
@@ -176,7 +170,6 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script type="module">
-  // Theme toggle
   const html = document.documentElement;
   const themeBtn = document.getElementById('themeBtn');
 
@@ -185,7 +178,6 @@
     localStorage.setItem('theme', mode);
     themeBtn.textContent = mode === 'dark' ? '☀️' : '🌙';
   }
-
   setTheme(localStorage.getItem('theme') || 'light');
   themeBtn.onclick = () => setTheme(html.getAttribute('data-bs-theme') === 'light' ? 'dark' : 'light');
 
@@ -194,27 +186,17 @@
   const langSwitch = document.getElementById('langSwitch');
 
   const dict = {
-    vi: {
-      home: "Trang chủ",
-      products: "Sản phẩm",
-      events: "Sự kiện",
-      contact: "Liên hệ",
-      loading: "Đang tải sự kiện...",
-      "no-events": "Chưa có sự kiện nào",
+    vi: { 
+      home: "Trang chủ", products: "Sản phẩm", events: "Sự kiện", contact: "Liên hệ",
+      loading: "Đang tải sự kiện...", "no-events": "Chưa có sự kiện nào",
       footer: "Tri thức bắt đầu từ một giọt mực",
-      "see-more": "Xem thêm",
-      "show-less": "Thu gọn"
+      "see-more": "Xem thêm", "show-less": "Thu gọn"
     },
-    en: {
-      home: "Home",
-      products: "Products",
-      events: "Events",
-      contact: "Contact",
-      loading: "Loading events...",
-      "no-events": "No events scheduled yet",
+    en: { 
+      home: "Home", products: "Products", events: "Events", contact: "Contact",
+      loading: "Loading events...", "no-events": "No events scheduled yet",
       footer: "Knowledge begins with a drop of ink",
-      "see-more": "See more",
-      "show-less": "Show less"
+      "see-more": "See more", "show-less": "Show less"
     }
   };
 
@@ -229,17 +211,6 @@
     document.querySelectorAll('[data-lang-key]').forEach(el => {
       const k = el.getAttribute('data-lang-key');
       if (dict[lang][k]) el.textContent = dict[lang][k];
-    });
-
-    // Update all toggle buttons after language change
-    document.querySelectorAll('.toggle-btn').forEach(btn => {
-      const key = btn.dataset.key;
-      const descEl = document.getElementById(`desc-${key}`);
-      if (descEl) {
-        btn.textContent = descEl.classList.contains('short') 
-          ? dict[lang]['see-more'] 
-          : dict[lang]['show-less'];
-      }
     });
   }
 
@@ -269,7 +240,7 @@
     if (loading) loading.classList.add('d-none');
 
     const data = snapshot.val() || {};
-    currentEvents = Object.values(data); // safe: always array
+    currentEvents = Object.values(data);
 
     if (currentEvents.length === 0) {
       if (noEvents) noEvents.classList.remove('d-none');
@@ -289,48 +260,30 @@
         const start = new Date(event.start);
         const end = new Date(event.end);
 
-        let statusClass = '';
-        let statusText = '';
+        let statusClass = '', statusText = '';
 
-        if (event.aborted) {
-          statusClass = 'status-aborted';
-          statusText = langSwitch.checked ? 'Aborted' : 'Bị hủy';
-        } else if (event.delayed) {
-          statusClass = 'status-delayed';
-          statusText = langSwitch.checked ? 'Delayed' : 'Bị hoãn';
-        } else if (now < start) {
-          statusClass = 'status-upcoming';
-          statusText = langSwitch.checked ? 'Upcoming' : 'Sắp diễn ra';
-        } else if (now > end) {
-          statusClass = 'status-expired';
-          statusText = langSwitch.checked ? 'Expired' : 'Đã kết thúc';
-        } else {
-          statusClass = 'status-current';
-          statusText = langSwitch.checked ? 'Ongoing' : 'Đang diễn ra';
-        }
+        if (event.aborted) { statusClass = 'status-aborted'; statusText = langSwitch.checked ? 'Aborted' : 'Bị hủy'; }
+        else if (event.delayed) { statusClass = 'status-delayed'; statusText = langSwitch.checked ? 'Delayed' : 'Bị hoãn'; }
+        else if (now < start) { statusClass = 'status-upcoming'; statusText = langSwitch.checked ? 'Upcoming' : 'Sắp diễn ra'; }
+        else if (now > end) { statusClass = 'status-expired'; statusText = langSwitch.checked ? 'Expired' : 'Đã kết thúc'; }
+        else { statusClass = 'status-current'; statusText = langSwitch.checked ? 'Ongoing' : 'Đang diễn ra'; }
 
         const shortDesc = event.desc && event.desc.length > 150 
-          ? event.desc.substring(0, 150) + '...'
+          ? event.desc.substring(0, 150) + '...' 
           : (event.desc || '');
 
         const hasMore = event.desc && event.desc.length > 150;
-
-        const seeMoreText = langSwitch.checked ? dict.en['see-more'] : dict.vi['see-more'];
-        const showLessText = langSwitch.checked ? dict.en['show-less'] : dict.vi['show-less'];
 
         const card = `
           <div class="col-12 col-md-6 col-lg-4">
             <div class="card h-100 event-card position-relative">
               ${event.image ? `<img src="${event.image}" class="card-img-top" alt="${event.title}">` : ''}
               <div class="card-body">
-                <h5 class="card-title fw-bold">${event.title || 'Không có tiêu đề'}</h5>
-                <p class="event-time mb-2">
-                  <i class="fas fa-clock me-2"></i>
-                  ${event.start || 'N/A'} → ${event.end || 'N/A'}
-                </p>
+                <h5 class="card-title fw-bold">${event.title}</h5>
+                <p class="event-time mb-2"><i class="fas fa-clock me-2"></i>${event.start} → ${event.end}</p>
                 <p class="card-text event-desc ${hasMore ? 'short' : ''}" id="desc-${event.key}">
                   ${shortDesc}
-                  ${hasMore ? `<button class="toggle-btn" data-key="${event.key}">${seeMoreText}</button>` : ''}
+                  ${hasMore ? `<button class="toggle-btn" data-key="${event.key}">Xem thêm</button>` : ''}
                 </p>
                 <span class="status-badge ${statusClass}">${statusText}</span>
               </div>
@@ -340,10 +293,12 @@
         grid.innerHTML += card;
       });
 
-      // Re-attach click listeners after render
-      document.querySelectorAll('.toggle-btn').forEach(btn => {
-        btn.onclick = () => toggleDesc(btn.dataset.key);
-      });
+      // Event delegation for toggle buttons (most reliable for dynamic content)
+      grid.onclick = (e) => {
+        if (e.target.classList.contains('toggle-btn')) {
+          toggleDesc(e.target.dataset.key);
+        }
+      };
     }
 
     setLang(localStorage.getItem('lang') || 'vi');
@@ -357,30 +312,23 @@
     const event = currentEvents.find(e => e.key === key);
     if (!event) return;
 
-    const seeMoreText = langSwitch.checked ? dict.en['see-more'] : dict.vi['see-more'];
-    const showLessText = langSwitch.checked ? dict.en['show-less'] : dict.vi['show-less'];
+    const isExpanded = !descEl.classList.contains('short');
+    const btn = descEl.querySelector('.toggle-btn');
 
-    // Collapse any other expanded
+    // Collapse any other expanded event
     if (currentlyExpandedKey && currentlyExpandedKey !== key) {
-      const prevEl = document.getElementById(`desc-${currentlyExpandedKey}`);
-      if (prevEl) {
-        prevEl.classList.add('short');
-        const btn = prevEl.querySelector('.toggle-btn');
-        if (btn) btn.textContent = seeMoreText;
-      }
+      const prev = document.getElementById(`desc-${currentlyExpandedKey}`);
+      if (prev) prev.classList.add('short');
     }
 
-    // Toggle current
-    if (descEl.classList.contains('short')) {
-      descEl.classList.remove('short');
-      const btn = descEl.querySelector('.toggle-btn');
-      if (btn) btn.textContent = showLessText;
-      currentlyExpandedKey = key;
-    } else {
+    if (isExpanded) {
       descEl.classList.add('short');
-      const btn = descEl.querySelector('.toggle-btn');
-      if (btn) btn.textContent = seeMoreText;
+      if (btn) btn.textContent = langSwitch.checked ? "See more" : "Xem thêm";
       currentlyExpandedKey = null;
+    } else {
+      descEl.classList.remove('short');
+      if (btn) btn.textContent = langSwitch.checked ? "Show less" : "Thu gọn";
+      currentlyExpandedKey = key;
     }
   };
 </script>
