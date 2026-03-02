@@ -231,11 +231,15 @@
       if (dict[lang][k]) el.textContent = dict[lang][k];
     });
 
-    // Re-render toggle buttons after lang change (important!)
+    // Update all toggle buttons after language change
     document.querySelectorAll('.toggle-btn').forEach(btn => {
-      const key = btn.getAttribute('onclick').match(/'([^']+)'/)[1];
-      const isExpanded = !document.getElementById(`desc-${key}`).classList.contains('short');
-      btn.textContent = isExpanded ? dict[lang]['show-less'] : dict[lang]['see-more'];
+      const key = btn.dataset.key;
+      const descEl = document.getElementById(`desc-${key}`);
+      if (descEl) {
+        btn.textContent = descEl.classList.contains('short') 
+          ? dict[lang]['see-more'] 
+          : dict[lang]['show-less'];
+      }
     });
   }
 
@@ -265,7 +269,7 @@
     if (loading) loading.classList.add('d-none');
 
     const data = snapshot.val() || {};
-    currentEvents = Object.values(data); // update global
+    currentEvents = Object.values(data); // safe: always array
 
     if (currentEvents.length === 0) {
       if (noEvents) noEvents.classList.remove('d-none');
@@ -305,11 +309,11 @@
           statusText = langSwitch.checked ? 'Ongoing' : 'Đang diễn ra';
         }
 
-        const shortDesc = event.desc.length > 150 
+        const shortDesc = event.desc && event.desc.length > 150 
           ? event.desc.substring(0, 150) + '...'
-          : event.desc;
+          : (event.desc || '');
 
-        const hasMore = event.desc.length > 150;
+        const hasMore = event.desc && event.desc.length > 150;
 
         const seeMoreText = langSwitch.checked ? dict.en['see-more'] : dict.vi['see-more'];
         const showLessText = langSwitch.checked ? dict.en['show-less'] : dict.vi['show-less'];
@@ -319,10 +323,10 @@
             <div class="card h-100 event-card position-relative">
               ${event.image ? `<img src="${event.image}" class="card-img-top" alt="${event.title}">` : ''}
               <div class="card-body">
-                <h5 class="card-title fw-bold">${event.title}</h5>
+                <h5 class="card-title fw-bold">${event.title || 'Không có tiêu đề'}</h5>
                 <p class="event-time mb-2">
                   <i class="fas fa-clock me-2"></i>
-                  ${event.start} → ${event.end}
+                  ${event.start || 'N/A'} → ${event.end || 'N/A'}
                 </p>
                 <p class="card-text event-desc ${hasMore ? 'short' : ''}" id="desc-${event.key}">
                   ${shortDesc}
@@ -336,16 +340,16 @@
         grid.innerHTML += card;
       });
 
-      // Re-attach click listeners after re-render (important!)
+      // Re-attach click listeners after render
       document.querySelectorAll('.toggle-btn').forEach(btn => {
-        btn.onclick = () => toggleDesc(btn.getAttribute('data-key'));
+        btn.onclick = () => toggleDesc(btn.dataset.key);
       });
     }
 
     setLang(localStorage.getItem('lang') || 'vi');
   });
 
-  // Toggle function - now using data-key attribute
+  // Toggle function
   window.toggleDesc = (key) => {
     const descEl = document.getElementById(`desc-${key}`);
     if (!descEl) return;
@@ -356,23 +360,26 @@
     const seeMoreText = langSwitch.checked ? dict.en['see-more'] : dict.vi['see-more'];
     const showLessText = langSwitch.checked ? dict.en['show-less'] : dict.vi['show-less'];
 
-    // Collapse any other expanded one
+    // Collapse any other expanded
     if (currentlyExpandedKey && currentlyExpandedKey !== key) {
       const prevEl = document.getElementById(`desc-${currentlyExpandedKey}`);
       if (prevEl) {
         prevEl.classList.add('short');
-        prevEl.querySelector('.toggle-btn').textContent = seeMoreText;
+        const btn = prevEl.querySelector('.toggle-btn');
+        if (btn) btn.textContent = seeMoreText;
       }
     }
 
     // Toggle current
     if (descEl.classList.contains('short')) {
       descEl.classList.remove('short');
-      descEl.querySelector('.toggle-btn').textContent = showLessText;
+      const btn = descEl.querySelector('.toggle-btn');
+      if (btn) btn.textContent = showLessText;
       currentlyExpandedKey = key;
     } else {
       descEl.classList.add('short');
-      descEl.querySelector('.toggle-btn').textContent = seeMoreText;
+      const btn = descEl.querySelector('.toggle-btn');
+      if (btn) btn.textContent = seeMoreText;
       currentlyExpandedKey = null;
     }
   };
