@@ -55,12 +55,14 @@
       color: var(--bs-primary);
     }
     .event-desc {
-      max-height: 4.5em; /* ≈3-4 lines */
-      overflow: hidden;
-      transition: max-height 0.3s ease;
+      transition: all 0.3s ease;
+      line-height: 1.5;
     }
-    .event-desc.expanded {
-      max-height: none;
+    .event-desc.short {
+      display: -webkit-box;
+      -webkit-line-clamp: 4; /* max 4 lines */
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
     .toggle-btn {
       background: none;
@@ -68,8 +70,11 @@
       color: var(--bs-primary);
       font-weight: 600;
       cursor: pointer;
-      padding: 0;
+      padding: 0 4px;
       margin-left: 4px;
+    }
+    .toggle-btn:hover {
+      text-decoration: underline;
     }
     .status-badge {
       font-size: 0.95rem;
@@ -234,7 +239,7 @@
 
   // Firebase real-time events
   const eventsRef = ref(db, 'events');
-  let currentlyExpandedKey = null; // Track which one is expanded
+  let currentlyExpandedKey = null;
 
   onValue(eventsRef, (snapshot) => {
     const loading = document.getElementById('loading');
@@ -288,6 +293,8 @@
           ? event.desc.substring(0, 150) + '...'
           : event.desc;
 
+        const hasMore = event.desc.length > 150;
+
         const card = `
           <div class="col-12 col-md-6 col-lg-4">
             <div class="card h-100 event-card position-relative">
@@ -298,9 +305,9 @@
                   <i class="fas fa-clock me-2"></i>
                   ${event.start} → ${event.end}
                 </p>
-                <p class="card-text event-desc" id="desc-${event.key}">
+                <p class="card-text event-desc ${hasMore ? 'short' : ''}" id="desc-${event.key}">
                   ${shortDesc}
-                  ${event.desc.length > 150 ? `<button class="toggle-btn" onclick="toggleDesc('${event.key}')">Xem thêm</button>` : ''}
+                  ${hasMore ? `<button class="toggle-btn" onclick="toggleDesc('${event.key}')">Xem thêm</button>` : ''}
                 </p>
                 <span class="status-badge ${statusClass}">${statusText}</span>
               </div>
@@ -317,24 +324,30 @@
   // Toggle description - only one expanded at a time
   window.toggleDesc = (key) => {
     const descEl = document.getElementById(`desc-${key}`);
+    if (!descEl) return;
+
+    // Get the event data (we need full desc)
     const event = currentEvents.find(e => e.key === key);
     if (!event) return;
 
-    // Collapse any currently expanded one
+    // Collapse any currently expanded one (except the one we're toggling)
     if (currentlyExpandedKey && currentlyExpandedKey !== key) {
       const prevEl = document.getElementById(`desc-${currentlyExpandedKey}`);
       if (prevEl) {
-        prevEl.innerHTML = event.desc.substring(0, 150) + '...' +
+        prevEl.classList.add('short');
+        prevEl.innerHTML = currentEvents.find(e => e.key === currentlyExpandedKey).desc.substring(0, 150) + '...' +
           ` <button class="toggle-btn" onclick="toggleDesc('${currentlyExpandedKey}')">Xem thêm</button>`;
       }
     }
 
     // Toggle the clicked one
-    if (descEl.innerHTML.includes('...')) {
+    if (descEl.classList.contains('short')) {
+      descEl.classList.remove('short');
       descEl.innerHTML = event.desc +
         ` <button class="toggle-btn" onclick="toggleDesc('${key}')">Thu gọn</button>`;
       currentlyExpandedKey = key;
     } else {
+      descEl.classList.add('short');
       descEl.innerHTML = event.desc.substring(0, 150) + '...' +
         ` <button class="toggle-btn" onclick="toggleDesc('${key}')">Xem thêm</button>`;
       currentlyExpandedKey = null;
