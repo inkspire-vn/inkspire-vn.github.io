@@ -54,6 +54,23 @@
       font-weight: 600;
       color: var(--bs-primary);
     }
+    .event-desc {
+      max-height: 4.5em; /* ≈3-4 lines */
+      overflow: hidden;
+      transition: max-height 0.3s ease;
+    }
+    .event-desc.expanded {
+      max-height: none;
+    }
+    .toggle-btn {
+      background: none;
+      border: none;
+      color: var(--bs-primary);
+      font-weight: 600;
+      cursor: pointer;
+      padding: 0;
+      margin-left: 4px;
+    }
     .status-badge {
       font-size: 0.95rem;
       padding: 6px 14px;
@@ -217,6 +234,7 @@
 
   // Firebase real-time events
   const eventsRef = ref(db, 'events');
+  let currentlyExpandedKey = null; // Track which one is expanded
 
   onValue(eventsRef, (snapshot) => {
     const loading = document.getElementById('loading');
@@ -266,6 +284,10 @@
           statusText = 'Đang diễn ra';
         }
 
+        const shortDesc = event.desc.length > 150 
+          ? event.desc.substring(0, 150) + '...'
+          : event.desc;
+
         const card = `
           <div class="col-12 col-md-6 col-lg-4">
             <div class="card h-100 event-card position-relative">
@@ -276,7 +298,10 @@
                   <i class="fas fa-clock me-2"></i>
                   ${event.start} → ${event.end}
                 </p>
-                <p class="card-text mb-3">${event.desc}</p>
+                <p class="card-text event-desc" id="desc-${event.key}">
+                  ${shortDesc}
+                  ${event.desc.length > 150 ? `<button class="toggle-btn" onclick="toggleDesc('${event.key}')">Xem thêm</button>` : ''}
+                </p>
                 <span class="status-badge ${statusClass}">${statusText}</span>
               </div>
             </div>
@@ -288,6 +313,33 @@
 
     setLang(localStorage.getItem('lang') || 'vi');
   });
+
+  // Toggle description - only one expanded at a time
+  window.toggleDesc = (key) => {
+    const descEl = document.getElementById(`desc-${key}`);
+    const event = currentEvents.find(e => e.key === key);
+    if (!event) return;
+
+    // Collapse any currently expanded one
+    if (currentlyExpandedKey && currentlyExpandedKey !== key) {
+      const prevEl = document.getElementById(`desc-${currentlyExpandedKey}`);
+      if (prevEl) {
+        prevEl.innerHTML = event.desc.substring(0, 150) + '...' +
+          ` <button class="toggle-btn" onclick="toggleDesc('${currentlyExpandedKey}')">Xem thêm</button>`;
+      }
+    }
+
+    // Toggle the clicked one
+    if (descEl.innerHTML.includes('...')) {
+      descEl.innerHTML = event.desc +
+        ` <button class="toggle-btn" onclick="toggleDesc('${key}')">Thu gọn</button>`;
+      currentlyExpandedKey = key;
+    } else {
+      descEl.innerHTML = event.desc.substring(0, 150) + '...' +
+        ` <button class="toggle-btn" onclick="toggleDesc('${key}')">Xem thêm</button>`;
+      currentlyExpandedKey = null;
+    }
+  };
 </script>
 </body>
 </html>
