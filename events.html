@@ -56,11 +56,11 @@
     }
     .event-desc {
       transition: all 0.3s ease;
-      line-height: 1.5;
+      line-height: 1.6;
     }
     .event-desc.short {
       display: -webkit-box;
-      -webkit-line-clamp: 4; /* max 4 lines */
+      -webkit-line-clamp: 4; /* ≈4 lines */
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
@@ -71,9 +71,11 @@
       font-weight: 600;
       cursor: pointer;
       padding: 0 4px;
-      margin-left: 4px;
+      margin-left: 6px;
+      transition: color 0.2s;
     }
     .toggle-btn:hover {
+      color: var(--bs-primary-dark);
       text-decoration: underline;
     }
     .status-badge {
@@ -187,7 +189,7 @@
   setTheme(localStorage.getItem('theme') || 'light');
   themeBtn.onclick = () => setTheme(html.getAttribute('data-bs-theme') === 'light' ? 'dark' : 'light');
 
-  // Language toggle
+  // Language toggle (updated with "See more" / "Show less")
   const langGroup = document.getElementById('langGroup');
   const langSwitch = document.getElementById('langSwitch');
 
@@ -199,7 +201,9 @@
       contact: "Liên hệ",
       loading: "Đang tải sự kiện...",
       "no-events": "Chưa có sự kiện nào",
-      footer: "Tri thức bắt đầu từ một giọt mực"
+      footer: "Tri thức bắt đầu từ một giọt mực",
+      "see-more": "Xem thêm",
+      "show-less": "Thu gọn"
     },
     en: {
       home: "Home",
@@ -208,7 +212,9 @@
       contact: "Contact",
       loading: "Loading events...",
       "no-events": "No events scheduled yet",
-      footer: "Knowledge begins with a drop of ink"
+      footer: "Knowledge begins with a drop of ink",
+      "see-more": "See more",
+      "show-less": "Show less"
     }
   };
 
@@ -274,19 +280,19 @@
 
         if (event.aborted) {
           statusClass = 'status-aborted';
-          statusText = 'Bị hủy';
+          statusText = langSwitch.checked ? 'Aborted' : 'Bị hủy';
         } else if (event.delayed) {
           statusClass = 'status-delayed';
-          statusText = 'Bị hoãn';
+          statusText = langSwitch.checked ? 'Delayed' : 'Bị hoãn';
         } else if (now < start) {
           statusClass = 'status-upcoming';
-          statusText = 'Sắp diễn ra';
+          statusText = langSwitch.checked ? 'Upcoming' : 'Sắp diễn ra';
         } else if (now > end) {
           statusClass = 'status-expired';
-          statusText = 'Đã kết thúc';
+          statusText = langSwitch.checked ? 'Expired' : 'Đã kết thúc';
         } else {
           statusClass = 'status-current';
-          statusText = 'Đang diễn ra';
+          statusText = langSwitch.checked ? 'Ongoing' : 'Đang diễn ra';
         }
 
         const shortDesc = event.desc.length > 150 
@@ -294,6 +300,9 @@
           : event.desc;
 
         const hasMore = event.desc.length > 150;
+
+        const seeMoreText = langSwitch.checked ? dict.en['see-more'] : dict.vi['see-more'];
+        const showLessText = langSwitch.checked ? dict.en['show-less'] : dict.vi['show-less'];
 
         const card = `
           <div class="col-12 col-md-6 col-lg-4">
@@ -307,7 +316,7 @@
                 </p>
                 <p class="card-text event-desc ${hasMore ? 'short' : ''}" id="desc-${event.key}">
                   ${shortDesc}
-                  ${hasMore ? `<button class="toggle-btn" onclick="toggleDesc('${event.key}')">Xem thêm</button>` : ''}
+                  ${hasMore ? `<button class="toggle-btn" onclick="toggleDesc('${event.key}')">${seeMoreText}</button>` : ''}
                 </p>
                 <span class="status-badge ${statusClass}">${statusText}</span>
               </div>
@@ -326,17 +335,19 @@
     const descEl = document.getElementById(`desc-${key}`);
     if (!descEl) return;
 
-    // Get the event data (we need full desc)
     const event = currentEvents.find(e => e.key === key);
     if (!event) return;
 
-    // Collapse any currently expanded one (except the one we're toggling)
+    const seeMoreText = langSwitch.checked ? dict.en['see-more'] : dict.vi['see-more'];
+    const showLessText = langSwitch.checked ? dict.en['show-less'] : dict.vi['show-less'];
+
+    // Collapse any other expanded event first
     if (currentlyExpandedKey && currentlyExpandedKey !== key) {
       const prevEl = document.getElementById(`desc-${currentlyExpandedKey}`);
       if (prevEl) {
         prevEl.classList.add('short');
         prevEl.innerHTML = currentEvents.find(e => e.key === currentlyExpandedKey).desc.substring(0, 150) + '...' +
-          ` <button class="toggle-btn" onclick="toggleDesc('${currentlyExpandedKey}')">Xem thêm</button>`;
+          ` <button class="toggle-btn" onclick="toggleDesc('${currentlyExpandedKey}')">${seeMoreText}</button>`;
       }
     }
 
@@ -344,12 +355,12 @@
     if (descEl.classList.contains('short')) {
       descEl.classList.remove('short');
       descEl.innerHTML = event.desc +
-        ` <button class="toggle-btn" onclick="toggleDesc('${key}')">Thu gọn</button>`;
+        ` <button class="toggle-btn" onclick="toggleDesc('${key}')">${showLessText}</button>`;
       currentlyExpandedKey = key;
     } else {
       descEl.classList.add('short');
       descEl.innerHTML = event.desc.substring(0, 150) + '...' +
-        ` <button class="toggle-btn" onclick="toggleDesc('${key}')">Xem thêm</button>`;
+        ` <button class="toggle-btn" onclick="toggleDesc('${key}')">${seeMoreText}</button>`;
       currentlyExpandedKey = null;
     }
   };
