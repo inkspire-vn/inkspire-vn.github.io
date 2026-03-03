@@ -343,6 +343,7 @@
       const prevDesc = document.getElementById(`desc-${currentlyExpandedKey}`);
       if (prevBtn && prevDesc) {
         prevDesc.textContent = decodeURIComponent(prevBtn.dataset.short);
+        prevDesc.classList.remove('expanded');
         prevBtn.textContent = seeMoreText;
         prevBtn.dataset.expanded = 'false';
       }
@@ -351,11 +352,13 @@
     // Toggle current
     if (!isExpanded) {
       descEl.textContent = decodeURIComponent(btn.dataset.full);
+      descEl.classList.add('expanded');
       btn.textContent = showLessText;
       btn.dataset.expanded = 'true';
       currentlyExpandedKey = key;
     } else {
       descEl.textContent = decodeURIComponent(btn.dataset.short);
+      descEl.classList.remove('expanded');
       btn.textContent = seeMoreText;
       btn.dataset.expanded = 'false';
       currentlyExpandedKey = null;
