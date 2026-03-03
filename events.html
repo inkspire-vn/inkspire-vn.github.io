@@ -294,14 +294,10 @@
           statusText = langSwitch.checked ? 'Ongoing' : 'Đang diễn ra';
         }
 
-        const shortDesc = event.desc && event.desc.length > 150 
-          ? event.desc.substring(0, 150) + '...'
-          : (event.desc || '');
-
-        const hasMore = event.desc && event.desc.length > 150;
-
+        const fullDesc = event.desc || '';
+        const hasMore = fullDesc.length > 150;
+        const shortDesc = hasMore ? fullDesc.substring(0, 150) + '...' : fullDesc;
         const seeMoreText = langSwitch.checked ? dict.en['see-more'] : dict.vi['see-more'];
-        const showLessText = langSwitch.checked ? dict.en['show-less'] : dict.vi['show-less'];
 
         const card = `
           <div class="col-12 col-md-6 col-lg-4">
@@ -313,11 +309,10 @@
                   <i class="fas fa-clock me-2"></i>
                   ${event.start || 'N/A'} → ${event.end || 'N/A'}
                 </p>
-                <p class="card-text event-desc ${hasMore ? 'short' : ''}" id="desc-${event.key}" data-full-desc="${event.desc || ''}">
-                  ${shortDesc}
-                  ${hasMore ? `<button class="toggle-btn" data-key="${event.key}">${seeMoreText}</button>` : ''}
-                </p>
-                <span class="status-badge ${statusClass}">${statusText}</span>
+                <p class="card-text event-desc mb-1" id="desc-${event.key}">${shortDesc}</p>
+                ${hasMore ? `<button class="toggle-btn" data-key="${event.key}" data-full="${encodeURIComponent(fullDesc)}" data-short="${encodeURIComponent(shortDesc)}">${seeMoreText}</button>` : ''}
+                <br>
+                <span class="status-badge ${statusClass} mt-2 d-inline-block">${statusText}</span>
               </div>
             </div>
           </div>
@@ -329,37 +324,41 @@
     setLang(localStorage.getItem('lang') || 'vi');
   });
 
-  // Event delegation for toggle buttons (click anywhere in grid, but only act on .toggle-btn)
+  // Event delegation for toggle buttons
   document.getElementById('event-grid').addEventListener('click', (e) => {
-    if (e.target.classList.contains('toggle-btn')) {
-      const key = e.target.dataset.key;
-      const descEl = document.getElementById(`desc-${key}`);
-      if (!descEl) return;
+    const btn = e.target.closest('.toggle-btn');
+    if (!btn) return;
 
-      const fullDesc = descEl.dataset.fullDesc || '';
-      const seeMoreText = langSwitch.checked ? dict.en['see-more'] : dict.vi['see-more'];
-      const showLessText = langSwitch.checked ? dict.en['show-less'] : dict.vi['show-less'];
+    const key = btn.dataset.key;
+    const descEl = document.getElementById(`desc-${key}`);
+    if (!descEl) return;
 
-      // Collapse any other
-      if (currentlyExpandedKey && currentlyExpandedKey !== key) {
-        const prevDesc = document.getElementById(`desc-${currentlyExpandedKey}`);
-        if (prevDesc) {
-          prevDesc.classList.add('short');
-          const prevBtn = prevDesc.querySelector('.toggle-btn');
-          if (prevBtn) prevBtn.textContent = seeMoreText;
-        }
+    const seeMoreText = langSwitch.checked ? dict.en['see-more'] : dict.vi['see-more'];
+    const showLessText = langSwitch.checked ? dict.en['show-less'] : dict.vi['show-less'];
+    const isExpanded = btn.dataset.expanded === 'true';
+
+    // Collapse previously expanded card
+    if (currentlyExpandedKey && currentlyExpandedKey !== key) {
+      const prevBtn = document.querySelector(`.toggle-btn[data-key="${currentlyExpandedKey}"]`);
+      const prevDesc = document.getElementById(`desc-${currentlyExpandedKey}`);
+      if (prevBtn && prevDesc) {
+        prevDesc.textContent = decodeURIComponent(prevBtn.dataset.short);
+        prevBtn.textContent = seeMoreText;
+        prevBtn.dataset.expanded = 'false';
       }
+    }
 
-      // Toggle current
-      if (descEl.classList.contains('short')) {
-        descEl.classList.remove('short');
-        descEl.innerHTML = fullDesc + ` <button class="toggle-btn" data-key="${key}">${showLessText}</button>`;
-        currentlyExpandedKey = key;
-      } else {
-        descEl.classList.add('short');
-        descEl.innerHTML = fullDesc.substring(0, 150) + '...' + ` <button class="toggle-btn" data-key="${key}">${seeMoreText}</button>`;
-        currentlyExpandedKey = null;
-      }
+    // Toggle current
+    if (!isExpanded) {
+      descEl.textContent = decodeURIComponent(btn.dataset.full);
+      btn.textContent = showLessText;
+      btn.dataset.expanded = 'true';
+      currentlyExpandedKey = key;
+    } else {
+      descEl.textContent = decodeURIComponent(btn.dataset.short);
+      btn.textContent = seeMoreText;
+      btn.dataset.expanded = 'false';
+      currentlyExpandedKey = null;
     }
   });
 </script>
