@@ -110,6 +110,9 @@
       <li class="nav-item" role="presentation">
         <button class="nav-link" id="events-tab" data-bs-toggle="tab" data-bs-target="#events" type="button" role="tab">Sự kiện</button>
       </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="status-tab" data-bs-toggle="tab" data-bs-target="#web-status" type="button" role="tab">🚦 Web Status</button>
+      </li>
     </ul>
 
     <div class="tab-content" id="devTabContent">
@@ -195,6 +198,25 @@
 
         <h4 class="mt-5 mb-3">Sự kiện hiện tại</h4>
         <div id="eventList" class="list-group"></div>
+      </div>
+      <!-- Web Status tab -->
+      <div class="tab-pane fade" id="web-status" role="tabpanel">
+        <h3 class="mb-1">🚦 Web Status</h3>
+        <p class="text-muted mb-4">Set a status for any page — a banner will appear for visitors automatically.</p>
+
+        <div id="statusForm">
+          <!-- rows rendered by JS -->
+        </div>
+
+        <div class="text-end mt-4">
+          <button class="btn btn-primary px-5" id="saveStatusBtn">
+            <i class="fas fa-save me-2"></i>Save Status
+          </button>
+        </div>
+
+        <div id="statusSaved" class="alert alert-success mt-3 d-none">
+          ✅ Status saved! Banners will update on all pages.
+        </div>
       </div>
     </div>
   </main>
@@ -488,6 +510,82 @@
 
   langSwitch.addEventListener('change', () => {
     setLang(langSwitch.checked ? 'en' : 'vi');
+  });
+
+  // ── Web Status ─────────────────────────────────────────────────────────────
+
+  const STATUS_PAGES = [
+    { key: 'home',     label: 'Home (index)',   icon: '🏠' },
+    { key: 'products', label: 'Products',        icon: '📦' },
+    { key: 'events',   label: 'Events',          icon: '📅' },
+    { key: 'contact',  label: 'Contact',         icon: '✉️'  },
+  ];
+
+  const STATUS_TYPES = [
+    { value: 'none',         label: 'All clear',               color: 'success'   },
+    { value: 'construction', label: '🚧 Under Construction',    color: 'warning'   },
+    { value: 'update',       label: '🔄 Updating',              color: 'info'      },
+    { value: 'bugfix',       label: '🐛 Bug Fix in Progress',   color: 'danger'    },
+    { value: 'maintenance',  label: '🔧 Maintenance',           color: 'warning'   },
+    { value: 'coming_soon',  label: '⏳ Coming Soon',            color: 'secondary' },
+    { value: 'limited',      label: '⚠️ Limited Availability',  color: 'warning'   },
+  ];
+
+  let currentSiteStatus = {};
+
+  onValue(ref(db, 'siteStatus'), (snapshot) => {
+    currentSiteStatus = snapshot.val() || {};
+    renderStatusForm();
+  });
+
+  function renderStatusForm() {
+    const container = document.getElementById('statusForm');
+    if (!container) return;
+    container.innerHTML = STATUS_PAGES.map(page => {
+      const ps = currentSiteStatus[page.key] || { type: 'none', message: '' };
+      const activeType = STATUS_TYPES.find(t => t.value === ps.type) || STATUS_TYPES[0];
+      return `
+        <div class="card mb-3 border-0 shadow-sm">
+          <div class="card-body">
+            <div class="row align-items-center g-3">
+              <div class="col-md-2">
+                <span class="fs-5">${page.icon}</span>
+                <strong class="ms-2">${page.label}</strong>
+              </div>
+              <div class="col-md-3">
+                <select class="form-select" id="status-type-${page.key}">
+                  ${STATUS_TYPES.map(t => `<option value="${t.value}" ${ps.type === t.value ? 'selected' : ''}>${t.label}</option>`).join('')}
+                </select>
+              </div>
+              <div class="col-md-5">
+                <input type="text" class="form-control" id="status-msg-${page.key}"
+                  placeholder="Optional custom message for visitors..."
+                  value="${ps.message || ''}">
+              </div>
+              <div class="col-md-2 text-center">
+                ${ps.type !== 'none'
+                  ? `<span class="badge bg-${activeType.color} px-3 py-2">Active</span>`
+                  : `<span class="badge bg-success px-3 py-2">✅ Clear</span>`}
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  document.getElementById('saveStatusBtn').addEventListener('click', async () => {
+    const updates = {};
+    STATUS_PAGES.forEach(page => {
+      updates[page.key] = {
+        type: document.getElementById(`status-type-${page.key}`).value,
+        message: document.getElementById(`status-msg-${page.key}`).value.trim(),
+      };
+    });
+    await update(ref(db, 'siteStatus'), updates);
+    const saved = document.getElementById('statusSaved');
+    saved.classList.remove('d-none');
+    setTimeout(() => saved.classList.add('d-none'), 3000);
   });
 </script>
 </body>
