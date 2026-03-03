@@ -55,13 +55,13 @@
       color: var(--bs-primary);
     }
     .event-desc {
-      max-height: 4.5em;
+      max-height: 4.5em; /* ~4 lines */
       overflow: hidden;
       transition: max-height 0.4s ease;
       line-height: 1.6;
     }
     .event-desc.expanded {
-      max-height: 800px;
+      max-height: 1000px; /* large enough for long text */
     }
     .toggle-btn {
       background: none;
@@ -135,6 +135,32 @@
     </div>
   </div>
 </nav>
+<!-- Site Status Banner -->
+<div id="site-status-banner" class="d-none" style="position:sticky;top:56px;z-index:1020;"></div>
+<script type="module">
+  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+  const _fbc={apiKey:"AIzaSyA9XvWCZOyaSuT42HBMUgQQ7KTuQYPWLbE",authDomain:"inkspire-vn-security.firebaseapp.com",databaseURL:"https://inkspire-vn-security-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"inkspire-vn-security",storageBucket:"inkspire-vn-security.firebasestorage.app",messagingSenderId:"774834040534",appId:"1:774834040534:web:c7b5e64826176a44b4e377"};
+  const _app=getApps().length?getApps()[0]:initializeApp(_fbc);
+  const _db=getDatabase(_app);
+  const _SM={
+    construction:{color:"#fff3cd",border:"#ffc107",icon:"🚧",label:"This page is under construction"},
+    update:{color:"#cff4fc",border:"#0dcaf0",icon:"🔄",label:"This page is currently being updated"},
+    bugfix:{color:"#f8d7da",border:"#dc3545",icon:"🐛",label:"A bug fix is in progress on this page"},
+    maintenance:{color:"#fff3cd",border:"#fd7e14",icon:"🔧",label:"This page is under maintenance"},
+    coming_soon:{color:"#e2e3e5",border:"#6c757d",icon:"⏳",label:"Coming soon — stay tuned!"},
+    limited:{color:"#fff3cd",border:"#ffc107",icon:"⚠️",label:"Limited availability on this page"},
+  };
+  onValue(ref(_db,"siteStatus/events"),(snap)=>{
+    const banner=document.getElementById("site-status-banner");
+    const data=snap.val();
+    if(!data||!data.type||data.type==="none"){banner.classList.add("d-none");banner.innerHTML="";return;}
+    const m=_SM[data.type]||{color:"#e2e3e5",border:"#6c757d",icon:"ℹ️",label:data.type};
+    const msg=data.message||m.label;
+    banner.innerHTML=`<div style="background:${m.color};border-bottom:3px solid ${m.border};padding:10px 24px;text-align:center;font-weight:600;font-size:0.95rem;">${m.icon}&nbsp;${msg}<button onclick="document.getElementById('site-status-banner').classList.add('d-none')" style="background:none;border:none;float:right;font-size:1.2rem;cursor:pointer;opacity:0.5;line-height:1;">✕</button></div>`;
+    banner.classList.remove("d-none");
+  });
+</script>
 
 <!-- Hero -->
 <section class="page-hero text-center">
@@ -173,6 +199,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script type="module">
+  // Theme & Language (unchanged)
   const html = document.documentElement;
   const themeBtn = document.getElementById('themeBtn');
 
@@ -181,6 +208,7 @@
     localStorage.setItem('theme', mode);
     themeBtn.textContent = mode === 'dark' ? '☀️' : '🌙';
   }
+
   setTheme(localStorage.getItem('theme') || 'light');
   themeBtn.onclick = () => setTheme(html.getAttribute('data-bs-theme') === 'light' ? 'dark' : 'light');
 
@@ -237,9 +265,11 @@
     setLang(langSwitch.checked ? 'en' : 'vi');
   });
 
+  // Global events array
   let currentEvents = [];
   let currentlyExpandedKey = null;
 
+  // Firebase listener
   const eventsRef = ref(db, 'events');
 
   onValue(eventsRef, (snapshot) => {
@@ -290,27 +320,25 @@
           statusText = langSwitch.checked ? 'Ongoing' : 'Đang diễn ra';
         }
 
-        const shortDesc = event.desc && event.desc.length > 150 
-          ? event.desc.substring(0, 150) + '...' 
-          : (event.desc || '');
-
-        const hasMore = event.desc && event.desc.length > 150;
+        const fullDesc = event.desc || '';
+        const hasMore = fullDesc.length > 150;
+        const shortDesc = hasMore ? fullDesc.substring(0, 150) + '...' : fullDesc;
+        const seeMoreText = langSwitch.checked ? dict.en['see-more'] : dict.vi['see-more'];
 
         const card = `
           <div class="col-12 col-md-6 col-lg-4">
             <div class="card h-100 event-card position-relative">
               ${event.image ? `<img src="${event.image}" class="card-img-top" alt="${event.title}">` : ''}
               <div class="card-body">
-                <h5 class="card-title fw-bold">${event.title}</h5>
+                <h5 class="card-title fw-bold">${event.title || 'Không có tiêu đề'}</h5>
                 <p class="event-time mb-2">
                   <i class="fas fa-clock me-2"></i>
-                  ${event.start} → ${event.end}
+                  ${event.start || 'N/A'} → ${event.end || 'N/A'}
                 </p>
-                <p class="card-text event-desc ${hasMore ? 'short' : ''}" id="desc-${event.key}" data-full="${event.desc || ''}">
-                  ${shortDesc}
-                  ${hasMore ? `<button class="toggle-btn" data-key="${event.key}">Xem thêm</button>` : ''}
-                </p>
-                <span class="status-badge ${statusClass}">${statusText}</span>
+                <p class="card-text event-desc mb-1" id="desc-${event.key}">${shortDesc}</p>
+                ${hasMore ? `<button class="toggle-btn" data-key="${event.key}" data-full="${encodeURIComponent(fullDesc)}" data-short="${encodeURIComponent(shortDesc)}">${seeMoreText}</button>` : ''}
+                <br>
+                <span class="status-badge ${statusClass} mt-2 d-inline-block">${statusText}</span>
               </div>
             </div>
           </div>
@@ -322,36 +350,37 @@
     setLang(localStorage.getItem('lang') || 'vi');
   });
 
-  // Single click listener on the grid (event delegation - most reliable)
+  // Event delegation for toggle buttons
   document.getElementById('event-grid').addEventListener('click', (e) => {
-    if (!e.target.classList.contains('toggle-btn')) return;
-
-    const key = e.target.dataset.key;
+    const btn = e.target.closest('.toggle-btn');
+    if (!btn) return;
+    const key = btn.dataset.key;
     const descEl = document.getElementById(`desc-${key}`);
     if (!descEl) return;
-
-    const fullText = descEl.dataset.full || '';
-    const isShort = descEl.classList.contains('short');
-    const seeMoreText = langSwitch.checked ? "See more" : "Xem thêm";
-    const showLessText = langSwitch.checked ? "Show less" : "Thu gọn";
-
-    // Collapse any other open one
+    const seeMoreText = langSwitch.checked ? dict.en['see-more'] : dict.vi['see-more'];
+    const showLessText = langSwitch.checked ? dict.en['show-less'] : dict.vi['show-less'];
+    const isExpanded = btn.dataset.expanded === 'true';
     if (currentlyExpandedKey && currentlyExpandedKey !== key) {
-      const prev = document.getElementById(`desc-${currentlyExpandedKey}`);
-      if (prev) {
-        prev.classList.add('short');
-        const prevBtn = prev.querySelector('.toggle-btn');
-        if (prevBtn) prevBtn.textContent = seeMoreText;
+      const prevBtn = document.querySelector(`.toggle-btn[data-key="${currentlyExpandedKey}"]`);
+      const prevDesc = document.getElementById(`desc-${currentlyExpandedKey}`);
+      if (prevBtn && prevDesc) {
+        prevDesc.textContent = decodeURIComponent(prevBtn.dataset.short);
+        prevDesc.classList.remove('expanded');
+        prevBtn.textContent = seeMoreText;
+        prevBtn.dataset.expanded = 'false';
       }
     }
-
-    if (isShort) {
-      descEl.classList.remove('short');
-      descEl.innerHTML = fullText + ` <button class="toggle-btn" data-key="${key}">${showLessText}</button>`;
+    if (!isExpanded) {
+      descEl.textContent = decodeURIComponent(btn.dataset.full);
+      descEl.classList.add('expanded');
+      btn.textContent = showLessText;
+      btn.dataset.expanded = 'true';
       currentlyExpandedKey = key;
     } else {
-      descEl.classList.add('short');
-      descEl.innerHTML = fullText.substring(0, 150) + '...' + ` <button class="toggle-btn" data-key="${key}">${seeMoreText}</button>`;
+      descEl.textContent = decodeURIComponent(btn.dataset.short);
+      descEl.classList.remove('expanded');
+      btn.textContent = seeMoreText;
+      btn.dataset.expanded = 'false';
       currentlyExpandedKey = null;
     }
   });
