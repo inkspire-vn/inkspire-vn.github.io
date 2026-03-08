@@ -3,265 +3,55 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>InkSpire Bookstore</title>
+  <title>InkSpire Bookstore VN</title>
 
+  <link rel="icon" type="image/png" href="https://avatars.githubusercontent.com/u/254457838?s=64">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/styles.css">
 
-  <style>
-    :root {
-      --green-light: #00c4b4;
-      --green-dark:  #3de0c2;
-      --green:       var(--green-light);
-    }
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
 
-    [data-bs-theme="dark"] {
-      --green: var(--green-dark);
-      --bs-body-bg: #0a0f14;
-      --bs-body-color: #e0e6ed;
-      --bs-primary: var(--green);
-    }
+    const firebaseConfig = {
+      apiKey: "AIzaSyA9XvWCZOyaSuT42HBMUgQQ7KTuQYPWLbE",
+      authDomain: "inkspire-vn-security.firebaseapp.com",
+      databaseURL: "https://inkspire-vn-security-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "inkspire-vn-security",
+      storageBucket: "inkspire-vn-security.firebasestorage.app",
+      messagingSenderId: "774834040534",
+      appId: "1:774834040534:web:c7b5e64826176a44b4e377",
+      measurementId: "G-MJSRBE9TY6"
+    };
 
-    [data-bs-theme="light"] {
-      --green: var(--green-light);
-      --bs-body-bg: #ffffff;
-      --bs-body-color: #1a1f25;
-      --bs-primary: var(--green);
-    }
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-    body { transition: background-color 0.35s, color 0.35s; }
-
-    .navbar { background-color: var(--bs-primary) !important; }
-    .navbar-brand, .nav-link { color: white !important; }
-
-    .hero {
-      position: relative;
-      height: 65vh;
-      min-height: 420px;
-      background: url('https://images.unsplash.com/photo-1507842217343-583bb7278b66?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
-      color: white;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.75);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .hero::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.45), rgba(0,0,0,0.75));
-    }
-
-    .hero-content { position: relative; z-index: 2; text-align: center; }
-
-    .logo-round {
-      width: 148px;
-      height: 148px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 5px solid rgba(255,255,255,0.92);
-      box-shadow: 0 5px 22px rgba(0,0,0,0.45);
-      margin-bottom: 1.25rem;
-    }
-
-    /* Language Toggle */
-    .lang-group {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-      user-select: none;
-      padding: 6px 14px;
-      border-radius: 999px;
-      transition: background 0.25s;
-    }
-
-    .lang-group:hover { background: rgba(255,255,255,0.15); }
-
-    .flag { font-size: 1.55rem; transition: opacity 0.3s; }
-    .flag.inactive { opacity: 0.48; }
-
-    .switch {
-      position: relative;
-      width: 56px;
-      height: 28px;
-      flex-shrink: 0;
-    }
-
-    .switch input { opacity: 0; width: 0; height: 0; position: absolute; }
-
-    .switch .slider {
-      position: absolute;
-      inset: 0;
-      background: rgba(255,255,255,0.38);
-      border-radius: 34px;
-      border: 2px solid white;
-      transition: background 0.38s;
-      cursor: pointer;
-    }
-
-    .switch .slider:before {
-      content: "";
-      position: absolute;
-      height: 20px;
-      width: 20px;
-      left: 4px;
-      bottom: 4px;
-      background: white;
-      border-radius: 50%;
-      transition: transform 0.38s;
-      box-shadow: 0 1px 5px rgba(0,0,0,0.25);
-    }
-
-    .switch input:checked + .slider { background: white; }
-    .switch input:checked + .slider:before {
-      transform: translateX(28px);
-      background: var(--bs-primary);
-    }
-
-    /* Events Box */
-    .events-box {
-      background: rgba(255,255,255,0.95);
-      border-radius: 16px;
-      padding: 2.2rem;
-      margin: 3rem auto;
-      max-width: 960px;
-      box-shadow: 0 10px 35px rgba(0,0,0,0.2);
-      border: 3px solid var(--green);
-      transition: all 0.3s ease;
-      cursor: pointer;
-      text-decoration: none;
-      color: inherit;
-      display: block;
-    }
-
-    .events-box:hover {
-      transform: translateY(-6px);
-      box-shadow: 0 16px 45px rgba(0,0,0,0.28);
-    }
-
-    [data-bs-theme="dark"] .events-box {
-      background: #1e293b;
-      border-color: var(--green);
-      color: #e2e8f0;
-    }
-
-    .events-box h3 {
-      color: var(--bs-primary);
-      margin-bottom: 2rem;
-      text-align: center;
-      font-weight: 700;
-    }
-
-    .event-card {
-      background: #f8fafc;
-      border-radius: 12px;
-      padding: 1.4rem;
-      margin-bottom: 1.4rem;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.1);
-      transition: background 0.3s;
-    }
-
-    [data-bs-theme="dark"] .event-card {
-      background: #334155;
-    }
-
-    .event-card h5 {
-      color: var(--bs-primary);
-      margin-bottom: 0.6rem;
-      font-size: 1.3rem;
-    }
-
-    .event-card p {
-      margin: 0.4rem 0;
-      font-size: 1rem;
-    }
-
-    .event-card small {
-      color: #64748b;
-      display: block;
-      margin-top: 0.8rem;
-      font-size: 0.92rem;
-    }
-
-    [data-bs-theme="dark"] .event-card small {
-      color: #94a3b8;
-    }
-
-    /* Product sliders */
-    .slider-wrap {
-      overflow: hidden;
-      margin: 3rem 0;
-    }
-
-    .track {
-      display: flex;
-      animation: slide-left 30s linear infinite;
-      width: max-content;
-    }
-
-    .reverse .track { animation: slide-right 30s linear infinite; }
-
-    .item {
-      width: 240px;
-      margin: 0 14px;
-      position: relative;
-      flex-shrink: 0;
-      text-align: center;
-    }
-
-    .item img {
-      width: 100%;
-      height: 320px;
-      object-fit: cover;
-      border-radius: 12px;
-      box-shadow: 0 5px 18px rgba(0,0,0,0.22);
-      transition: transform 0.28s;
-    }
-
-    .item:hover img { transform: scale(1.065); }
-
-    .price {
-      position: absolute;
-      bottom: 16px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--bs-primary);
-      color: white;
-      font-weight: 600;
-      padding: 6px 16px;
-      border-radius: 999px;
-      box-shadow: 0 3px 10px rgba(0,0,0,0.35);
-      white-space: nowrap;
-    }
-
-    @keyframes slide-left  { 0% { transform: translateX(0);    } 100% { transform: translateX(-50%); } }
-    @keyframes slide-right { 0% { transform: translateX(-50%); } 100% { transform: translateX(0);    } }
-
-    .slider-wrap:hover .track { animation-play-state: paused; }
-
-    .theme-btn {
-      font-size: 1.5rem;
-      background: none;
-      border: none;
-      color: white;
-      cursor: pointer;
-    }
-  </style>
+    window.db = db;
+    window.ref = ref;
+    window.onValue = onValue;
+  </script>
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg sticky-top shadow">
+<!-- Website Status Banner (new) -->
+<div id="statusBanner" class="alert alert-warning text-center d-none mb-0 rounded-0">
+  <strong>Thông báo:</strong> <span id="statusMessage">Website đang được bảo trì...</span>
+</div>
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg sticky-top shadow bg-primary navbar-dark">
   <div class="container">
-    <a class="navbar-brand fw-bold fs-4" href="https://inkspire-vn.github.io">InkSpire</a>
+    <a class="navbar-brand fw-bold fs-4" href="/">InkSpire</a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
       <span class="navbar-toggler-icon"></span>
     </button>
 
     <div class="collapse navbar-collapse" id="navMain">
       <ul class="navbar-nav me-auto">
-        <li class="nav-item"><a class="nav-link active" href="https://inkspire-vn.github.io" data-lang-key="home">Trang chủ</a></li>
+        <li class="nav-item"><a class="nav-link active" href="/" data-lang-key="home">Trang chủ</a></li>
         <li class="nav-item"><a class="nav-link" href="/products" data-lang-key="products">Sản phẩm</a></li>
         <li class="nav-item"><a class="nav-link" href="/events" data-lang-key="events">Sự kiện</a></li>
         <li class="nav-item"><a class="nav-link" href="/contact" data-lang-key="contact">Liên hệ</a></li>
@@ -276,82 +66,49 @@
           </div>
           <span class="flag en-flag" data-lang="en">🇺🇸</span>
         </div>
-
-        <button class="theme-btn" id="themeBtn">🌙</button>
+        <button class="theme-btn btn btn-sm btn-outline-light" id="themeBtn">🌙</button>
       </div>
     </div>
   </div>
 </nav>
-<!-- Site Status Banner -->
-<div id="site-status-banner" class="d-none" style="position:sticky;top:56px;z-index:1020;"></div>
-<script type="module">
-  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
-  const _fbc={apiKey:"AIzaSyA9XvWCZOyaSuT42HBMUgQQ7KTuQYPWLbE",authDomain:"inkspire-vn-security.firebaseapp.com",databaseURL:"https://inkspire-vn-security-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"inkspire-vn-security",storageBucket:"inkspire-vn-security.firebasestorage.app",messagingSenderId:"774834040534",appId:"1:774834040534:web:c7b5e64826176a44b4e377"};
-  const _app=getApps().length?getApps()[0]:initializeApp(_fbc);
-  const _db=getDatabase(_app);
-  const _SM={
-    construction:{color:"#fff3cd",border:"#ffc107",icon:"🚧",label:"This page is under construction"},
-    update:{color:"#cff4fc",border:"#0dcaf0",icon:"🔄",label:"This page is currently being updated"},
-    bugfix:{color:"#f8d7da",border:"#dc3545",icon:"🐛",label:"A bug fix is in progress on this page"},
-    maintenance:{color:"#fff3cd",border:"#fd7e14",icon:"🔧",label:"This page is under maintenance"},
-    coming_soon:{color:"#e2e3e5",border:"#6c757d",icon:"⏳",label:"Coming soon — stay tuned!"},
-    limited:{color:"#fff3cd",border:"#ffc107",icon:"⚠️",label:"Limited availability on this page"},
-  };
-  onValue(ref(_db,"siteStatus/home"),(snap)=>{
-    const banner=document.getElementById("site-status-banner");
-    const data=snap.val();
-    if(!data||!data.type||data.type==="none"){banner.classList.add("d-none");banner.innerHTML="";return;}
-    const m=_SM[data.type]||{color:"#e2e3e5",border:"#6c757d",icon:"ℹ️",label:data.type};
-    const msg=data.message||m.label;
-    banner.innerHTML=`<div style="background:${m.color};border-bottom:3px solid ${m.border};padding:10px 24px;text-align:center;font-weight:600;font-size:0.95rem;">${m.icon}&nbsp;${msg}<button onclick="document.getElementById('site-status-banner').classList.add('d-none')" style="background:none;border:none;float:right;font-size:1.2rem;cursor:pointer;opacity:0.5;line-height:1;">✕</button></div>`;
-    banner.classList.remove("d-none");
-  });
-</script>
 
-<section class="hero">
-  <div class="hero-content">
-    <img src="https://avatars.githubusercontent.com/u/254457838?s=400&u=d271803ce1ed1461b2e12d95271a5bf30613734c&v=4" 
-         alt="InkSpire Logo" class="logo-round">
-    <h1 class="display-4 fw-bold" data-lang-key="title">InkSpire Bookstore</h1>
-    <p class="lead" data-lang-key="slogan">Nơi ý tưởng bắt đầu • Where ideas begin</p>
+<!-- Hero -->
+<section class="hero text-center text-white">
+  <div class="container">
+    <h1 class="display-4 fw-bold mb-3" data-lang-key="welcome">Chào mừng đến InkSpire Bookstore</h1>
+    <p class="lead mb-4" data-lang-key="tagline">Nơi tri thức bắt đầu từ một giọt mực</p>
+    <a href="/products" class="btn btn-light btn-lg px-5" data-lang-key="shop-now">Mua sắm ngay</a>
   </div>
 </section>
 
-<!-- Ongoing Events Box -->
-<a href="/events" class="events-box text-decoration-none" id="eventsBox">
-  <h3 data-lang-key="ongoing">Sự kiện đang diễn ra</h3>
-  
-  <div id="events-list"></div>
-
-  <div class="text-center mt-4 small fw-bold" style="color: var(--bs-primary);">
-    Click để xem chi tiết tất cả sự kiện →
+<!-- Products Slider -->
+<section class="py-5 bg-light">
+  <div class="container">
+    <h2 class="text-center mb-5" data-lang-key="featured-products">Sản phẩm nổi bật</h2>
+    <div id="productSlider" class="carousel slide" data-bs-ride="carousel">
+      <div class="carousel-inner" id="productSliderInner"></div>
+      <button class="carousel-control-prev" type="button" data-bs-target="#productSlider" data-bs-slide="prev">
+        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Previous</span>
+      </button>
+      <button class="carousel-control-next" type="button" data-bs-target="#productSlider" data-bs-slide="next">
+        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+        <span class="visually-hidden">Next</span>
+      </button>
+    </div>
   </div>
-</a>
+</section>
 
-<main class="container py-5">
-
-  <!-- Toys Slider -->
-  <h2 class="mb-4" data-lang-key="toys">Đồ chơi – Toys</h2>
-  <div class="slider-wrap">
-    <div class="track" id="toys-track"></div>
+<!-- Events Section -->
+<section class="py-5">
+  <div class="container">
+    <h2 class="text-center mb-5" data-lang-key="upcoming-events">Sự kiện sắp tới</h2>
+    <div id="eventList" class="row g-4"></div>
   </div>
+</section>
 
-  <!-- Stationery Slider -->
-  <h2 class="mb-5 mt-5" data-lang-key="stationery">Văn phòng phẩm – Stationery</h2>
-  <div class="slider-wrap reverse">
-    <div class="track" id="stationery-track"></div>
-  </div>
-
-  <!-- Books Slider -->
-  <h2 class="mb-5 mt-5" data-lang-key="books">Sách – Books</h2>
-  <div class="slider-wrap">
-    <div class="track" id="books-track"></div>
-  </div>
-
-</main>
-
-<footer class="text-center py-4" style="background:var(--bs-primary); color:white;">
+<!-- Footer -->
+<footer class="text-center py-4 text-white">
   <div class="container">
     <p class="mb-1">© 2026 InkSpire Bookstore • TP. Hồ Chí Minh</p>
     <small data-lang-key="footer">Tri thức bắt đầu từ một giọt mực</small>
@@ -361,24 +118,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyA9XvWCZOyaSuT42HBMUgQQ7KTuQYPWLbE",
-    authDomain: "inkspire-vn-security.firebaseapp.com",
-    databaseURL: "https://inkspire-vn-security-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "inkspire-vn-security",
-    storageBucket: "inkspire-vn-security.firebasestorage.app",
-    messagingSenderId: "774834040534",
-    appId: "1:774834040534:web:c7b5e64826176a44b4e377",
-    measurementId: "G-MJSRBE9TY6"
-  };
-
-  initializeApp(firebaseConfig);
-  const db = getDatabase();
-
-  // Theme toggle
+  // Theme & Language
   const html = document.documentElement;
   const themeBtn = document.getElementById('themeBtn');
 
@@ -391,7 +131,6 @@
   setTheme(localStorage.getItem('theme') || 'light');
   themeBtn.onclick = () => setTheme(html.getAttribute('data-bs-theme') === 'light' ? 'dark' : 'light');
 
-  // Language toggle
   const langGroup = document.getElementById('langGroup');
   const langSwitch = document.getElementById('langSwitch');
 
@@ -401,22 +140,24 @@
       products: "Sản phẩm",
       events: "Sự kiện",
       contact: "Liên hệ",
-      toys: "Đồ chơi – Toys",
-      stationery: "Văn phòng phẩm – Stationery",
-      books: "Sách – Books",
-      footer: "Tri thức bắt đầu từ một giọt mực",
-      ongoing: "Sự kiện đang diễn ra"
+      welcome: "Chào mừng đến InkSpire Bookstore",
+      tagline: "Nơi tri thức bắt đầu từ một giọt mực",
+      "shop-now": "Mua sắm ngay",
+      "featured-products": "Sản phẩm nổi bật",
+      "upcoming-events": "Sự kiện sắp tới",
+      footer: "Tri thức bắt đầu từ một giọt mực"
     },
     en: {
       home: "Home",
       products: "Products",
       events: "Events",
       contact: "Contact",
-      toys: "Toys",
-      stationery: "Stationery",
-      books: "Books",
-      footer: "Knowledge begins with a drop of ink",
-      ongoing: "Ongoing Events"
+      welcome: "Welcome to InkSpire Bookstore",
+      tagline: "Where knowledge begins with a drop of ink",
+      "shop-now": "Shop Now",
+      "featured-products": "Featured Products",
+      "upcoming-events": "Upcoming Events",
+      footer: "Knowledge begins with a drop of ink"
     }
   };
 
@@ -445,69 +186,99 @@
     setLang(langSwitch.checked ? 'en' : 'vi');
   });
 
-  // Firebase real-time sliders + events
+  // Firebase real-time data
   const productsRef = ref(db, 'products');
   const eventsRef = ref(db, 'events');
+  const statusRef = ref(db, 'siteStatus');
 
-  // Products sliders
+  // Website Status Banner
+  onValue(statusRef, (snapshot) => {
+    const data = snapshot.val() || { status: 'live', message: '' };
+    const banner = document.getElementById('statusBanner');
+    const msgEl = document.getElementById('statusMessage');
+
+    if (data.status !== 'live') {
+      banner.classList.remove('d-none');
+      if (data.status === 'maintenance' || data.status === 'fixing') {
+        banner.classList.add('alert-danger');
+        banner.classList.remove('alert-warning');
+      } else {
+        banner.classList.add('alert-warning');
+        banner.classList.remove('alert-danger');
+      }
+      msgEl.textContent = data.message || 'Website đang được bảo trì...';
+    } else {
+      banner.classList.add('d-none');
+    }
+  });
+
+  // Products slider (show first 6 or all if less)
   onValue(productsRef, (snapshot) => {
-    const products = Object.values(snapshot.val() || {});
+    const data = snapshot.val() || {};
+    const products = Object.values(data);
+    const sliderInner = document.getElementById('productSliderInner');
 
-    // Toys
-    renderSlider('toys-track', products.filter(p => (p.category || '').toLowerCase().includes('toy') || (p.category || '').includes('đồ chơi')));
+    if (products.length === 0) {
+      sliderInner.innerHTML = '<div class="carousel-item active text-center py-5"><h5>Chưa có sản phẩm nào</h5></div>';
+      return;
+    }
 
-    // Stationery
-    renderSlider('stationery-track', products.filter(p => (p.category || '').toLowerCase().includes('station') || (p.category || '').includes('văn phòng')));
-
-    // Books
-    renderSlider('books-track', products.filter(p => (p.category || '').toLowerCase().includes('book') || (p.category || '').includes('sách')));
+    sliderInner.innerHTML = products.slice(0, 6).map((p, index) => `
+      <div class="carousel-item ${index === 0 ? 'active' : ''}">
+        <div class="text-center">
+          <img src="${p.image || 'https://via.placeholder.com/800x400?text=InkSpire'}" class="d-block w-100 rounded" alt="${p.name}" style="max-height: 500px; object-fit: cover;">
+          <div class="carousel-caption d-none d-md-block">
+            <h5>${p.name}</h5>
+            <p>${p.price} • ${p.category}</p>
+            ${p.outOfStock ? '<span class="badge bg-danger">Hết hàng</span>' : ''}
+          </div>
+        </div>
+      </div>
+    `).join('');
   });
 
-  // Events box (max 3 recent)
+  // Upcoming & current events
   onValue(eventsRef, (snapshot) => {
-    const events = Object.values(snapshot.val() || {}).slice(0, 3); // latest 3
-    const list = document.getElementById('events-list');
-    list.innerHTML = '';
+    const data = snapshot.val() || {};
+    const events = Object.values(data);
+    const eventList = document.getElementById('eventList');
+    const now = new Date();
 
-    if (events.length === 0) {
-      list.innerHTML = '<p class="text-muted text-center">Chưa có sự kiện nào</p>';
+    eventList.innerHTML = '';
+
+    const activeEvents = events.filter(e => {
+      if (e.aborted) return false;
+      const start = new Date(e.start);
+      const end = new Date(e.end);
+      return now <= end; // show upcoming & ongoing
+    });
+
+    if (activeEvents.length === 0) {
+      eventList.innerHTML = '<div class="col-12 text-center py-5"><h5>Chưa có sự kiện sắp tới</h5></div>';
       return;
     }
 
-    events.forEach(e => {
-      list.innerHTML += `
-        <div class="event-card">
-          <h5>${e.title}</h5>
-          <p>${e.date}</p>
-          <small>${e.desc.substring(0, 100)}${e.desc.length > 100 ? '...' : ''}</small>
+    activeEvents.forEach(e => {
+      const start = new Date(e.start);
+      const end = new Date(e.end);
+      let status = now < start ? 'Sắp diễn ra' : 'Đang diễn ra';
+
+      const card = `
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="card h-100 event-card">
+            ${e.image ? `<img src="${e.image}" class="card-img-top" alt="${e.title}">` : ''}
+            <div class="card-body">
+              <h5 class="card-title">${e.title}</h5>
+              <p class="event-time"><i class="fas fa-clock me-2"></i>${e.start} → ${e.end}</p>
+              <p class="card-text">${e.desc.substring(0, 150)}${e.desc.length > 150 ? '...' : ''}</p>
+              <span class="badge bg-success">${status}</span>
+            </div>
+          </div>
         </div>
       `;
+      eventList.innerHTML += card;
     });
   });
-
-  function renderSlider(trackId, items) {
-    const track = document.getElementById(trackId);
-    if (!track) return;
-
-    track.innerHTML = '';
-
-    if (items.length === 0) {
-      track.innerHTML = '<p class="text-center text-muted py-4">Chưa có sản phẩm trong danh mục này</p>';
-      return;
-    }
-
-    items.forEach(item => {
-      track.innerHTML += `
-        <div class="item">
-          <img src="${item.image || 'https://via.placeholder.com/240/320?text=No+Image'}" alt="${item.name}">
-          <div class="price">${item.price}</div>
-        </div>
-      `;
-    });
-
-    // Duplicate for infinite loop
-    track.innerHTML += track.innerHTML;
-  }
 </script>
 </body>
 </html>
