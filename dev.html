@@ -115,7 +115,7 @@
     </ul>
 
     <div class="tab-content" id="devTabContent">
-      <!-- Products tab (your existing code - adjust if needed) -->
+      <!-- Products tab -->
       <div class="tab-pane fade show active" id="products" role="tabpanel">
         <h3 class="mb-4">Thêm / Sửa sản phẩm</h3>
         <form id="productForm" class="row g-3 mb-5">
@@ -156,12 +156,12 @@
         <div id="productList" class="list-group"></div>
       </div>
 
-      <!-- Events tab (your existing code - adjust if needed) -->
+      <!-- Events tab -->
       <div class="tab-pane fade" id="events" role="tabpanel">
         <h3 class="mb-4">Thêm / Sửa sự kiện</h3>
         <form id="eventForm" class="row g-3 mb-5">
           <div class="col-12">
-            <label class="form-label">Tiêu đề sự kiện</label>
+            <label class="form-label">Tiêu đề</label>
             <input type="text" class="form-control" id="eventTitle" placeholder="Ví dụ: Storytime for Kids" required>
           </div>
           <div class="col-md-6">
@@ -199,7 +199,7 @@
         <div id="eventList" class="list-group"></div>
       </div>
 
-      <!-- Website Status tab -->
+      <!-- Website Status tab (improved UI) -->
       <div class="tab-pane fade" id="status" role="tabpanel">
         <h3 class="mb-4">Trạng thái Website (hiển thị cho tất cả người dùng)</h3>
         <form id="statusForm" class="row g-3 mb-5">
@@ -223,9 +223,7 @@
         </form>
 
         <h4 class="mt-5 mb-3">Xem trước (những gì người dùng sẽ thấy)</h4>
-        <div id="statusPreview" class="alert alert-info">
-          Đang tải trạng thái...
-        </div>
+        <div id="statusPreview" class="alert alert-info">Đang tải...</div>
       </div>
     </div>
   </main>
@@ -291,7 +289,7 @@
       renderEvents(currentEvents);
     });
 
-    // Load website status
+    // Website status
     onValue(ref(db, 'siteStatus'), (snapshot) => {
       const data = snapshot.val() || { status: 'live', message: '' };
       document.getElementById('siteStatus').value = data.status;
@@ -299,6 +297,7 @@
 
       const preview = document.getElementById('statusPreview');
       preview.className = 'alert';
+      preview.innerHTML = '';
       if (data.status === 'live') {
         preview.classList.add('alert-success');
         preview.innerHTML = 'Website đang hoạt động bình thường.';
@@ -328,20 +327,161 @@
     alert('Đã cập nhật trạng thái website!');
   });
 
-  // Your existing products render/edit/submit code here (add it back if removed)
-  // Example placeholder:
+  // Products render
   function renderProducts(products) {
-    document.getElementById('productList').innerHTML = products.map(p => `
-      <div class="list-group-item">
-        <strong>${p.name}</strong> - ${p.price} (${p.category})
-        ${p.outOfStock ? '<span class="badge bg-danger ms-2">Hết hàng</span>' : ''}
+    const list = document.getElementById('productList');
+    list.innerHTML = products.map(p => `
+      <div class="list-group-item d-flex justify-content-between align-items-center">
+        <div>
+          <strong>${p.name}</strong> — ${p.price} (${p.category})<br>
+          <small class="text-muted">${p.image.substring(0, 60)}${p.image.length > 60 ? '...' : ''}</small>
+          ${p.outOfStock ? '<span class="badge bg-danger ms-2">Hết hàng</span>' : ''}
+        </div>
+        <div>
+          <button class="btn btn-warning btn-sm me-2" onclick="editProduct('${p.key}')">Sửa</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteProduct('${p.key}')">Xóa</button>
+        </div>
       </div>
     `).join('');
   }
 
-  // Your existing events render/edit/submit code here...
+  // Events render
+  function renderEvents(events) {
+    const list = document.getElementById('eventList');
+    const now = new Date();
 
-  // Theme & Language (unchanged)
+    list.innerHTML = events.map(e => {
+      const start = new Date(e.start);
+      const end = new Date(e.end);
+      let status = '';
+
+      if (e.aborted) status = '<span class="badge bg-secondary">Bị hủy</span>';
+      else if (e.delayed) status = '<span class="badge bg-warning">Bị hoãn</span>';
+      else if (now < start) status = '<span class="badge bg-info">Sắp diễn ra</span>';
+      else if (now > end) status = '<span class="badge bg-danger">Đã kết thúc</span>';
+      else status = '<span class="badge bg-success">Đang diễn ra</span>';
+
+      return `
+        <div class="list-group-item d-flex justify-content-between align-items-center">
+          <div>
+            <strong>${e.title}</strong><br>
+            <small>${e.start} → ${e.end}</small><br>
+            <small>${e.desc.substring(0, 80)}${e.desc.length > 80 ? '...' : ''}</small><br>
+            ${status}
+          </div>
+          <div>
+            <button class="btn btn-warning btn-sm me-2" onclick="editEvent('${e.key}')">Sửa</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteEvent('${e.key}')">Xóa</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Reset functions
+  function resetProductForm() {
+    document.getElementById('productForm').reset();
+    document.getElementById('productSubmitBtn').textContent = 'Thêm sản phẩm';
+    document.getElementById('productOutOfStock').checked = false;
+    editingProductKey = null;
+  }
+
+  function resetEventForm() {
+    document.getElementById('eventForm').reset();
+    document.getElementById('eventSubmitBtn').textContent = 'Thêm sự kiện';
+    document.getElementById('eventAborted').checked = false;
+    document.getElementById('eventDelayed').checked = false;
+    editingEventKey = null;
+  }
+
+  // Edit & delete functions (placeholder - adjust as needed)
+  window.editProduct = (key) => {
+    const p = currentProducts.find(x => x.key === key);
+    if (!p) return;
+
+    editingProductKey = key;
+    document.getElementById('productName').value = p.name;
+    document.getElementById('productPrice').value = p.price;
+    document.getElementById('productCategory').value = p.category;
+    document.getElementById('productImage').value = p.image;
+    document.getElementById('productOutOfStock').checked = p.outOfStock;
+    document.getElementById('productSubmitBtn').textContent = 'Cập nhật sản phẩm';
+  };
+
+  window.deleteProduct = async (key) => {
+    if (!confirm('Xóa sản phẩm?')) return;
+    await remove(ref(db, `products/${key}`));
+  };
+
+  window.editEvent = (key) => {
+    const e = currentEvents.find(x => x.key === key);
+    if (!e) return;
+
+    editingEventKey = key;
+    document.getElementById('eventTitle').value = e.title;
+    document.getElementById('eventStart').value = e.start;
+    document.getElementById('eventEnd').value = e.end;
+    document.getElementById('eventDesc').value = e.desc;
+    document.getElementById('eventImage').value = e.image;
+    document.getElementById('eventAborted').checked = e.aborted;
+    document.getElementById('eventDelayed').checked = e.delayed;
+    document.getElementById('eventSubmitBtn').textContent = 'Cập nhật sự kiện';
+  };
+
+  window.deleteEvent = async (key) => {
+    if (!confirm('Xóa sự kiện?')) return;
+    await remove(ref(db, `events/${key}`));
+  };
+
+  // Form submits (placeholder - adjust as needed)
+  document.getElementById('productForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = {
+      name: document.getElementById('productName').value,
+      price: document.getElementById('productPrice').value,
+      category: document.getElementById('productCategory').value,
+      image: document.getElementById('productImage').value,
+      outOfStock: document.getElementById('productOutOfStock').checked
+    };
+    if (editingProductKey) {
+      await update(ref(db, `products/${editingProductKey}`), data);
+      editingProductKey = null;
+    } else {
+      await push(ref(db, 'products'), data);
+    }
+    e.target.reset();
+    resetProductForm();
+  });
+
+  document.getElementById('eventForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = {
+      title: document.getElementById('eventTitle').value,
+      start: document.getElementById('eventStart').value,
+      end: document.getElementById('eventEnd').value,
+      desc: document.getElementById('eventDesc').value,
+      image: document.getElementById('eventImage').value,
+      aborted: document.getElementById('eventAborted').checked,
+      delayed: document.getElementById('eventDelayed').checked
+    };
+    if (editingEventKey) {
+      await update(ref(db, `events/${editingEventKey}`), data);
+      editingEventKey = null;
+    } else {
+      await push(ref(db, 'events'), data);
+    }
+    e.target.reset();
+    resetEventForm();
+  });
+
+  // Search filter
+  searchInput.addEventListener('input', (e) => {
+    const term = e.target.value.toLowerCase().trim();
+    renderProducts(currentProducts.filter(p => p.name.toLowerCase().includes(term) || p.category.toLowerCase().includes(term)));
+    renderEvents(currentEvents.filter(e => e.title.toLowerCase().includes(term) || e.desc.toLowerCase().includes(term)));
+  });
+
+  // Theme & Language
   const themeBtn = document.getElementById('themeBtn');
   function setTheme(mode) {
     html.setAttribute('data-bs-theme', mode);
