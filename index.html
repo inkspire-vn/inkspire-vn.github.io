@@ -33,12 +33,36 @@
     window.ref = ref;
     window.onValue = onValue;
   </script>
+
+  <style>
+    .hero {
+      background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)),
+                  url('https://images.unsplash.com/photo-1507842217343-583bb7278b66?w=1600') center/cover;
+      color: white;
+      height: 60vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-shadow: 1px 1px 4px rgba(0,0,0,0.7);
+    }
+    .carousel-inner img {
+      height: 400px;
+      object-fit: cover;
+    }
+    .event-card, .product-card {
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      transition: transform 0.3s;
+    }
+    .event-card:hover, .product-card:hover {
+      transform: translateY(-5px);
+    }
+  </style>
 </head>
 <body>
 
-<!-- Website Status Banner (new) -->
+<!-- Website Status Banner -->
 <div id="statusBanner" class="alert alert-warning text-center d-none mb-0 rounded-0">
-  <strong>Thông báo:</strong> <span id="statusMessage">Website đang được bảo trì...</span>
+  <strong>Thông báo:</strong> <span id="statusMessage"></span>
 </div>
 
 <!-- Navbar -->
@@ -73,7 +97,7 @@
 </nav>
 
 <!-- Hero -->
-<section class="hero text-center text-white">
+<section class="hero text-center">
   <div class="container">
     <h1 class="display-4 fw-bold mb-3" data-lang-key="welcome">Chào mừng đến InkSpire Bookstore</h1>
     <p class="lead mb-4" data-lang-key="tagline">Nơi tri thức bắt đầu từ một giọt mực</p>
@@ -81,12 +105,16 @@
   </div>
 </section>
 
-<!-- Products Slider -->
+<!-- Featured Products Slider -->
 <section class="py-5 bg-light">
   <div class="container">
     <h2 class="text-center mb-5" data-lang-key="featured-products">Sản phẩm nổi bật</h2>
     <div id="productSlider" class="carousel slide" data-bs-ride="carousel">
-      <div class="carousel-inner" id="productSliderInner"></div>
+      <div class="carousel-inner" id="productSliderInner">
+        <div class="carousel-item active text-center py-5">
+          <h5>Đang tải sản phẩm...</h5>
+        </div>
+      </div>
       <button class="carousel-control-prev" type="button" data-bs-target="#productSlider" data-bs-slide="prev">
         <span class="carousel-control-prev-icon" aria-hidden="true"></span>
         <span class="visually-hidden">Previous</span>
@@ -99,16 +127,20 @@
   </div>
 </section>
 
-<!-- Events Section -->
+<!-- Upcoming Events -->
 <section class="py-5">
   <div class="container">
     <h2 class="text-center mb-5" data-lang-key="upcoming-events">Sự kiện sắp tới</h2>
-    <div id="eventList" class="row g-4"></div>
+    <div id="eventList" class="row g-4">
+      <div class="col-12 text-center py-5">
+        <h5>Đang tải sự kiện...</h5>
+      </div>
+    </div>
   </div>
 </section>
 
 <!-- Footer -->
-<footer class="text-center py-4 text-white">
+<footer class="text-center py-4 text-white bg-primary">
   <div class="container">
     <p class="mb-1">© 2026 InkSpire Bookstore • TP. Hồ Chí Minh</p>
     <small data-lang-key="footer">Tri thức bắt đầu từ một giọt mực</small>
@@ -118,7 +150,6 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script type="module">
-  // Theme & Language
   const html = document.documentElement;
   const themeBtn = document.getElementById('themeBtn');
 
@@ -187,58 +218,29 @@
   });
 
   // Firebase real-time data
-  const productsRef = ref(db, 'products');
-  const eventsRef = ref(db, 'events');
-  const statusRef = ref(db, 'siteStatus');
-
-  // Website Status Banner
-  onValue(statusRef, (snapshot) => {
-    const data = snapshot.val() || { status: 'live', message: '' };
-    const banner = document.getElementById('statusBanner');
-    const msgEl = document.getElementById('statusMessage');
-
-    if (data.status !== 'live') {
-      banner.classList.remove('d-none');
-      if (data.status === 'maintenance' || data.status === 'fixing') {
-        banner.classList.add('alert-danger');
-        banner.classList.remove('alert-warning');
-      } else {
-        banner.classList.add('alert-warning');
-        banner.classList.remove('alert-danger');
-      }
-      msgEl.textContent = data.message || 'Website đang được bảo trì...';
-    } else {
-      banner.classList.add('d-none');
-    }
-  });
-
-  // Products slider (show first 6 or all if less)
-  onValue(productsRef, (snapshot) => {
+  onValue(ref(db, 'products'), (snapshot) => {
     const data = snapshot.val() || {};
     const products = Object.values(data);
     const sliderInner = document.getElementById('productSliderInner');
 
     if (products.length === 0) {
-      sliderInner.innerHTML = '<div class="carousel-item active text-center py-5"><h5>Chưa có sản phẩm nào</h5></div>';
+      sliderInner.innerHTML = '<div class="carousel-item active text-center py-5"><h5>Chưa có sản phẩm</h5></div>';
       return;
     }
 
-    sliderInner.innerHTML = products.slice(0, 6).map((p, index) => `
-      <div class="carousel-item ${index === 0 ? 'active' : ''}">
-        <div class="text-center">
-          <img src="${p.image || 'https://via.placeholder.com/800x400?text=InkSpire'}" class="d-block w-100 rounded" alt="${p.name}" style="max-height: 500px; object-fit: cover;">
-          <div class="carousel-caption d-none d-md-block">
-            <h5>${p.name}</h5>
-            <p>${p.price} • ${p.category}</p>
-            ${p.outOfStock ? '<span class="badge bg-danger">Hết hàng</span>' : ''}
-          </div>
+    sliderInner.innerHTML = products.slice(0, 6).map((p, i) => `
+      <div class="carousel-item ${i === 0 ? 'active' : ''}">
+        <img src="${p.image}" class="d-block w-100" alt="${p.name}" style="height: 400px; object-fit: cover;">
+        <div class="carousel-caption d-none d-md-block">
+          <h5>${p.name}</h5>
+          <p>${p.price} - ${p.category}</p>
+          ${p.outOfStock ? '<span class="badge bg-danger">Hết hàng</span>' : ''}
         </div>
       </div>
     `).join('');
   });
 
-  // Upcoming & current events
-  onValue(eventsRef, (snapshot) => {
+  onValue(ref(db, 'events'), (snapshot) => {
     const data = snapshot.val() || {};
     const events = Object.values(data);
     const eventList = document.getElementById('eventList');
@@ -247,10 +249,9 @@
     eventList.innerHTML = '';
 
     const activeEvents = events.filter(e => {
-      if (e.aborted) return false;
+      if (e.aborted || e.delayed) return false;
       const start = new Date(e.start);
-      const end = new Date(e.end);
-      return now <= end; // show upcoming & ongoing
+      return now < start;
     });
 
     if (activeEvents.length === 0) {
@@ -259,25 +260,34 @@
     }
 
     activeEvents.forEach(e => {
-      const start = new Date(e.start);
-      const end = new Date(e.end);
-      let status = now < start ? 'Sắp diễn ra' : 'Đang diễn ra';
-
       const card = `
-        <div class="col-12 col-md-6 col-lg-4">
-          <div class="card h-100 event-card">
-            ${e.image ? `<img src="${e.image}" class="card-img-top" alt="${e.title}">` : ''}
+        <div class="col-md-4">
+          <div class="card event-card">
+            <img src="${e.image}" class="card-img-top" alt="${e.title}">
             <div class="card-body">
               <h5 class="card-title">${e.title}</h5>
-              <p class="event-time"><i class="fas fa-clock me-2"></i>${e.start} → ${e.end}</p>
-              <p class="card-text">${e.desc.substring(0, 150)}${e.desc.length > 150 ? '...' : ''}</p>
-              <span class="badge bg-success">${status}</span>
+              <p>${e.start} - ${e.end}</p>
+              <p>${e.desc.substring(0, 100)}...</p>
             </div>
           </div>
         </div>
       `;
       eventList.innerHTML += card;
     });
+  });
+
+  // Website Status banner
+  onValue(ref(db, 'siteStatus'), (snapshot) => {
+    const data = snapshot.val() || { status: 'live', message: '' };
+    const banner = document.getElementById('statusBanner');
+    const msg = document.getElementById('statusMessage');
+    if (data.status !== 'live') {
+      banner.classList.remove('d-none');
+      msg.textContent = data.message || 'Website đang được bảo trì...';
+      banner.classList.add(data.status === 'maintenance' || data.status === 'fixing' ? 'alert-danger' : 'alert-warning');
+    } else {
+      banner.classList.add('d-none');
+    }
   });
 </script>
 </body>
