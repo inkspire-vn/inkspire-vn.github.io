@@ -287,30 +287,6 @@
 
 <!-- Site Status Banner -->
 <div id="site-status-banner" class="d-none" style="position:sticky;top:56px;z-index:1020;"></div>
-<script type="module">
-  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
-  const _fbc={apiKey:"AIzaSyA9XvWCZOyaSuT42HBMUgQQ7KTuQYPWLbE",authDomain:"inkspire-vn-security.firebaseapp.com",databaseURL:"https://inkspire-vn-security-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"inkspire-vn-security",storageBucket:"inkspire-vn-security.firebasestorage.app",messagingSenderId:"774834040534",appId:"1:774834040534:web:c7b5e64826176a44b4e377"};
-  const _app=getApps().length?getApps()[0]:initializeApp(_fbc);
-  const _db=getDatabase(_app);
-  const _SM={
-    construction:{color:"#fff3cd",border:"#ffc107",icon:"🚧",label:"This page is under construction"},
-    update:{color:"#cff4fc",border:"#0dcaf0",icon:"🔄",label:"This page is currently being updated"},
-    bugfix:{color:"#f8d7da",border:"#dc3545",icon:"🐛",label:"A bug fix is in progress on this page"},
-    maintenance:{color:"#fff3cd",border:"#fd7e14",icon:"🔧",label:"This page is under maintenance"},
-    coming_soon:{color:"#e2e3e5",border:"#6c757d",icon:"⏳",label:"Coming soon — stay tuned!"},
-    limited:{color:"#fff3cd",border:"#ffc107",icon:"⚠️",label:"Limited availability on this page"},
-  };
-  onValue(ref(_db,"siteStatus/index"),(snap)=>{
-    const banner=document.getElementById("site-status-banner");
-    const data=snap.val();
-    if(!data||!data.type||data.type==="none"){banner.classList.add("d-none");banner.innerHTML="";return;}
-    const m=_SM[data.type]||{color:"#e2e3e5",border:"#6c757d",icon:"ℹ️",label:data.type};
-    const msg=data.message||m.label;
-    banner.innerHTML=`<div class="site-banner-inner" style="border-bottom:3px solid ${m.border};padding:10px 24px;text-align:center;font-weight:600;font-size:0.95rem;" data-color="${m.color}" data-border="${m.border}">${m.icon}&nbsp;${msg}</div>`;
-    banner.classList.remove("d-none");
-  });
-</script>
 
 <section class="hero">
   <div class="hero-content">
@@ -364,7 +340,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
   import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
 
   const firebaseConfig = {
@@ -378,10 +354,31 @@
     measurementId: "G-MJSRBE9TY6"
   };
 
-  initializeApp(firebaseConfig);
-  const db = getDatabase();
+  const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+  const db = getDatabase(app);
 
-  // Theme toggle
+  // ── Site Status Banner ──────────────────────────────────────────
+  const _SM = {
+    construction: { border:"#ffc107", icon:"🚧", label:"This page is under construction" },
+    update:       { border:"#0dcaf0", icon:"🔄", label:"This page is currently being updated" },
+    bugfix:       { border:"#dc3545", icon:"🐛", label:"A bug fix is in progress on this page" },
+    maintenance:  { border:"#fd7e14", icon:"🔧", label:"This page is under maintenance" },
+    coming_soon:  { border:"#6c757d", icon:"⏳", label:"Coming soon — stay tuned!" },
+    limited:      { border:"#ffc107", icon:"⚠️", label:"Limited availability on this page" },
+  };
+  onValue(ref(db, "siteStatus/index"), (snap) => {
+    const banner = document.getElementById("site-status-banner");
+    const data = snap.val();
+    if (!data || !data.type || data.type === "none") {
+      banner.classList.add("d-none"); banner.innerHTML = ""; return;
+    }
+    const m = _SM[data.type] || { border:"#6c757d", icon:"ℹ️", label: data.type };
+    const msg = data.message || m.label;
+    banner.innerHTML = `<div class="site-banner-inner" style="border-bottom:3px solid ${m.border};padding:10px 24px;text-align:center;font-weight:600;font-size:0.95rem;">${m.icon}&nbsp;${msg}</div>`;
+    banner.classList.remove("d-none");
+  });
+
+  // ── Theme ───────────────────────────────────────────────────────
   const html = document.documentElement;
   const themeBtn = document.getElementById('themeBtn');
 
@@ -394,32 +391,22 @@
   setTheme(localStorage.getItem('theme') || 'light');
   themeBtn.onclick = () => setTheme(html.getAttribute('data-bs-theme') === 'light' ? 'dark' : 'light');
 
-  // Language toggle
+  // ── Language ────────────────────────────────────────────────────
   const langGroup = document.getElementById('langGroup');
   const langSwitch = document.getElementById('langSwitch');
 
   const dict = {
     vi: {
-      home: "Trang chủ",
-      products: "Sản phẩm",
-      events: "Sự kiện",
-      contact: "Liên hệ",
-      toys: "Đồ chơi – Toys",
-      stationery: "Văn phòng phẩm – Stationery",
-      books: "Sách – Books",
-      footer: "Tri thức bắt đầu từ một giọt mực",
-      ongoing: "Sự kiện đang diễn ra"
+      home: "Trang chủ", products: "Sản phẩm", events: "Sự kiện", contact: "Liên hệ",
+      toys: "Đồ chơi – Toys", stationery: "Văn phòng phẩm – Stationery", books: "Sách – Books",
+      footer: "Tri thức bắt đầu từ một giọt mực", ongoing: "Sự kiện đang diễn ra",
+      title: "InkSpire Bookstore", slogan: "Nơi ý tưởng bắt đầu • Where ideas begin"
     },
     en: {
-      home: "Home",
-      products: "Products",
-      events: "Events",
-      contact: "Contact",
-      toys: "Toys",
-      stationery: "Stationery",
-      books: "Books",
-      footer: "Knowledge begins with a drop of ink",
-      ongoing: "Ongoing Events"
+      home: "Home", products: "Products", events: "Events", contact: "Contact",
+      toys: "Toys", stationery: "Stationery", books: "Books",
+      footer: "Knowledge begins with a drop of ink", ongoing: "Ongoing Events",
+      title: "InkSpire Bookstore", slogan: "Where ideas begin • Nơi ý tưởng bắt đầu"
     }
   };
 
@@ -427,10 +414,8 @@
     html.lang = lang;
     localStorage.setItem('lang', lang);
     langSwitch.checked = (lang === 'en');
-
     document.querySelector('.vi-flag').classList.toggle('inactive', lang !== 'vi');
     document.querySelector('.en-flag').classList.toggle('inactive', lang !== 'en');
-
     document.querySelectorAll('[data-lang-key]').forEach(el => {
       const k = el.getAttribute('data-lang-key');
       if (dict[lang][k]) el.textContent = dict[lang][k];
@@ -438,78 +423,54 @@
   }
 
   setLang(localStorage.getItem('lang') || 'vi');
+  langGroup.addEventListener('click', () => setLang((localStorage.getItem('lang') || 'vi') === 'vi' ? 'en' : 'vi'));
+  langSwitch.addEventListener('change', () => setLang(langSwitch.checked ? 'en' : 'vi'));
+  langGroup.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); langGroup.click(); } });
 
-  langGroup.addEventListener('click', () => {
-    const cur = localStorage.getItem('lang') || 'vi';
-    setLang(cur === 'vi' ? 'en' : 'vi');
-  });
-
-  langSwitch.addEventListener('change', () => {
-    setLang(langSwitch.checked ? 'en' : 'vi');
-  });
-
-  // Firebase real-time sliders + events
-  const productsRef = ref(db, 'products');
-  const eventsRef = ref(db, 'events');
-
-  // Products sliders
-  onValue(productsRef, (snapshot) => {
+  // ── Firebase: Products sliders ──────────────────────────────────
+  onValue(ref(db, 'products'), (snapshot) => {
     const products = Object.values(snapshot.val() || {});
-
-    // Toys
-    renderSlider('toys-track', products.filter(p => (p.category || '').toLowerCase().includes('toy') || (p.category || '').includes('đồ chơi')));
-
-    // Stationery
-    renderSlider('stationery-track', products.filter(p => (p.category || '').toLowerCase().includes('station') || (p.category || '').includes('văn phòng')));
-
-    // Books
-    renderSlider('books-track', products.filter(p => (p.category || '').toLowerCase().includes('book') || (p.category || '').includes('sách')));
+    renderSlider('toys-track',       products.filter(p => (p.category||'').toLowerCase().includes('toy')     || (p.category||'').includes('đồ chơi')));
+    renderSlider('stationery-track', products.filter(p => (p.category||'').toLowerCase().includes('station') || (p.category||'').includes('văn phòng')));
+    renderSlider('books-track',      products.filter(p => (p.category||'').toLowerCase().includes('book')    || (p.category||'').includes('sách')));
   });
 
-  // Events box (max 3 recent)
-  onValue(eventsRef, (snapshot) => {
-    const events = Object.values(snapshot.val() || {}).slice(0, 3); // latest 3
+  // ── Firebase: Events box (max 3) ────────────────────────────────
+  onValue(ref(db, 'events'), (snapshot) => {
+    const events = Object.values(snapshot.val() || {}).slice(0, 3);
     const list = document.getElementById('events-list');
     list.innerHTML = '';
-
     if (events.length === 0) {
       list.innerHTML = '<p class="text-muted text-center">Chưa có sự kiện nào</p>';
       return;
     }
-
     events.forEach(e => {
       list.innerHTML += `
         <div class="event-card">
           <h5>${e.title}</h5>
-          <p>${e.date}</p>
-          <small>${e.desc.substring(0, 100)}${e.desc.length > 100 ? '...' : ''}</small>
-        </div>
-      `;
+          <p>${e.start || e.date || ''}</p>
+          <small>${(e.desc||'').substring(0, 100)}${(e.desc||'').length > 100 ? '...' : ''}</small>
+        </div>`;
     });
   });
 
+  // ── Slider renderer ─────────────────────────────────────────────
   function renderSlider(trackId, items) {
     const track = document.getElementById(trackId);
     if (!track) return;
-
-    track.innerHTML = '';
-
     if (items.length === 0) {
       track.innerHTML = '<p class="text-center text-muted py-4">Chưa có sản phẩm trong danh mục này</p>';
       return;
     }
-
+    let html2 = '';
     items.forEach(item => {
-      track.innerHTML += `
+      html2 += `
         <div class="item">
-          <img src="${item.image || 'https://via.placeholder.com/240/320?text=No+Image'}" alt="${item.name}">
+          <img src="${item.image || 'https://via.placeholder.com/240x320?text=No+Image'}" alt="${item.name}">
           <div class="price">${item.price}</div>
-        </div>
-      `;
+        </div>`;
     });
-
-    // Duplicate for infinite loop
-    track.innerHTML += track.innerHTML;
+    track.innerHTML = html2 + html2; // duplicate for infinite loop
   }
 </script>
 </body>
