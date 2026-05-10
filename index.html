@@ -445,14 +445,36 @@
     if (!text || !text.trim() || targetLang === 'vi') return text;
     const cacheKey = `${targetLang}::${text}`;
     if (transCache[cacheKey]) return transCache[cacheKey];
-    try {
-      const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=vi|en`);
-      const json = await res.json();
-      const translated = json?.responseData?.translatedText || text;
-      transCache[cacheKey] = translated;
-      localStorage.setItem(CACHE_KEY, JSON.stringify(transCache));
-      return translated;
-    } catch { return text; }
+    const LIMIT = 480;
+    async function fetchChunk(chunk) {
+      try {
+        const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(chunk)}&langpair=vi|en`);
+        const json = await res.json();
+        return json?.responseData?.translatedText || chunk;
+      } catch { return chunk; }
+    }
+    let result = '';
+    if (text.length <= LIMIT) {
+      result = await fetchChunk(text);
+    } else {
+      const sentences = text.split(/(?<=[.!?])\s+/);
+      let chunk = '';
+      const parts = [];
+      for (const s of sentences) {
+        if ((chunk + ' ' + s).trim().length > LIMIT) {
+          if (chunk) parts.push(chunk.trim());
+          chunk = s;
+        } else {
+          chunk = (chunk + ' ' + s).trim();
+        }
+      }
+      if (chunk) parts.push(chunk.trim());
+      const translated = await Promise.all(parts.map(fetchChunk));
+      result = translated.join(' ');
+    }
+    transCache[cacheKey] = result;
+    localStorage.setItem(CACHE_KEY, JSON.stringify(transCache));
+    return result;
   }
 
   // ── Date parser: handles DD/MM/YYYY HH:MM ──────────────────────
