@@ -1,4 +1,16 @@
-/* styles.css - shared across all pages */
+/* Site Status Banner */
+.site-banner-inner {
+  background: var(--banner-bg, #fff3cd);
+  color: #1a1f25;
+  transition: background 0.35s, color 0.35s;
+}
+
+[data-bs-theme="dark"] .site-banner-inner {
+  background: #1e293b !important;
+  color: #e0e6ed !important;
+}
+
+
 .nav-tabs .nav-link {
   color: var(--bs-body-color) !important;
 }
