@@ -210,6 +210,7 @@
           <li class="nav-item"><button class="nav-link" data-page="products">📦 Sản phẩm</button></li>
           <li class="nav-item"><button class="nav-link" data-page="events">📅 Sự kiện</button></li>
           <li class="nav-item"><button class="nav-link" data-page="contact">📞 Liên hệ</button></li>
+          <li class="nav-item"><button class="nav-link text-danger fw-bold" data-page="all">🌐 Tất cả trang</button></li>
         </ul>
 
         <div class="card p-4 mb-4">
@@ -368,11 +369,23 @@
         document.querySelectorAll('#pageTabs .nav-link').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentStatusPage = btn.dataset.page;
-        document.getElementById('currentPageLabel').textContent = PAGE_LABELS[currentStatusPage];
-        const cached = pageStatusCache[currentStatusPage] || { type: 'none', message: '' };
-        document.getElementById('pageStatusType').value = cached.type || 'none';
-        document.getElementById('pageStatusMessage').value = cached.message || '';
-        renderStatusPreview(cached.type || 'none', cached.message || '');
+        document.getElementById('currentPageLabel').textContent = currentStatusPage === 'all' ? 'Tất cả trang' : PAGE_LABELS[currentStatusPage];
+
+        // For "all", clear the form rather than loading one page's state
+        if (currentStatusPage === 'all') {
+          document.getElementById('pageStatusType').value = 'none';
+          document.getElementById('pageStatusMessage').value = '';
+          renderStatusPreview('none', '');
+          document.getElementById('statusSaveBtn').textContent = '💾 Áp dụng cho tất cả trang';
+          document.getElementById('statusClearBtn').textContent = '🗑️ Xoá tất cả banner';
+        } else {
+          const cached = pageStatusCache[currentStatusPage] || { type: 'none', message: '' };
+          document.getElementById('pageStatusType').value = cached.type || 'none';
+          document.getElementById('pageStatusMessage').value = cached.message || '';
+          renderStatusPreview(cached.type || 'none', cached.message || '');
+          document.getElementById('statusSaveBtn').textContent = '💾 Lưu cho trang này';
+          document.getElementById('statusClearBtn').textContent = 'Xoá banner';
+        }
       });
     });
 
@@ -405,16 +418,29 @@
     document.getElementById('statusSaveBtn').addEventListener('click', async () => {
       const type = document.getElementById('pageStatusType').value;
       const message = document.getElementById('pageStatusMessage').value.trim();
-      await set(ref(db, `siteStatus/${currentStatusPage}`), { type, message });
       const btn = document.getElementById('statusSaveBtn');
-      btn.textContent = '✅ Đã lưu!';
-      setTimeout(() => btn.textContent = '💾 Lưu cho trang này', 1800);
+
+      if (currentStatusPage === 'all') {
+        if (!confirm(`Áp dụng trạng thái này cho TẤT CẢ 4 trang?`)) return;
+        await Promise.all(PAGES.map(p => set(ref(db, `siteStatus/${p}`), { type, message })));
+        btn.textContent = '✅ Đã áp dụng tất cả!';
+        setTimeout(() => btn.textContent = '💾 Áp dụng cho tất cả trang', 1800);
+      } else {
+        await set(ref(db, `siteStatus/${currentStatusPage}`), { type, message });
+        btn.textContent = '✅ Đã lưu!';
+        setTimeout(() => btn.textContent = '💾 Lưu cho trang này', 1800);
+      }
     });
 
     // Clear button
     document.getElementById('statusClearBtn').addEventListener('click', async () => {
-      if (!confirm(`Xoá banner cho trang "${PAGE_LABELS[currentStatusPage]}"?`)) return;
-      await set(ref(db, `siteStatus/${currentStatusPage}`), { type: 'none', message: '' });
+      if (currentStatusPage === 'all') {
+        if (!confirm('Xoá banner của TẤT CẢ 4 trang?')) return;
+        await Promise.all(PAGES.map(p => set(ref(db, `siteStatus/${p}`), { type: 'none', message: '' })));
+      } else {
+        if (!confirm(`Xoá banner cho trang "${PAGE_LABELS[currentStatusPage]}"?`)) return;
+        await set(ref(db, `siteStatus/${currentStatusPage}`), { type: 'none', message: '' });
+      }
     });
   }
 
