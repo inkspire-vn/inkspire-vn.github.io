@@ -140,6 +140,33 @@
   </div>
 </nav>
 
+<!-- Site Status Banner -->
+<div id="site-status-banner" class="d-none" style="position:sticky;top:56px;z-index:1020;"></div>
+<script type="module">
+  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+  const _fbc={apiKey:"AIzaSyA9XvWCZOyaSuT42HBMUgQQ7KTuQYPWLbE",authDomain:"inkspire-vn-security.firebaseapp.com",databaseURL:"https://inkspire-vn-security-default-rtdb.asia-southeast1.firebasedatabase.app",projectId:"inkspire-vn-security",storageBucket:"inkspire-vn-security.firebasestorage.app",messagingSenderId:"774834040534",appId:"1:774834040534:web:c7b5e64826176a44b4e377"};
+  const _app=getApps().length?getApps()[0]:initializeApp(_fbc);
+  const _db=getDatabase(_app);
+  const _SM={
+    construction:{color:"#fff3cd",border:"#ffc107",icon:"🚧",label:"This page is under construction"},
+    update:{color:"#cff4fc",border:"#0dcaf0",icon:"🔄",label:"This page is currently being updated"},
+    bugfix:{color:"#f8d7da",border:"#dc3545",icon:"🐛",label:"A bug fix is in progress on this page"},
+    maintenance:{color:"#fff3cd",border:"#fd7e14",icon:"🔧",label:"This page is under maintenance"},
+    coming_soon:{color:"#e2e3e5",border:"#6c757d",icon:"⏳",label:"Coming soon — stay tuned!"},
+    limited:{color:"#fff3cd",border:"#ffc107",icon:"⚠️",label:"Limited availability on this page"},
+  };
+  onValue(ref(_db,"siteStatus/products"),(snap)=>{
+    const banner=document.getElementById("site-status-banner");
+    const data=snap.val();
+    if(!data||!data.type||data.type==="none"){banner.classList.add("d-none");banner.innerHTML="";return;}
+    const m=_SM[data.type]||{color:"#e2e3e5",border:"#6c757d",icon:"ℹ️",label:data.type};
+    const msg=data.message||m.label;
+    banner.innerHTML=`<div style="background:${m.color};border-bottom:3px solid ${m.border};padding:10px 24px;text-align:center;font-weight:600;font-size:0.95rem;">${m.icon}&nbsp;${msg}<button onclick="document.getElementById('site-status-banner').classList.add('d-none')" style="background:none;border:none;float:right;font-size:1.2rem;cursor:pointer;opacity:0.5;line-height:1;">✕</button></div>`;
+    banner.classList.remove("d-none");
+  });
+</script>
+
 <!-- Hero -->
 <section class="page-hero text-center">
   <div class="container h-100 d-flex align-items-center justify-content-center">
