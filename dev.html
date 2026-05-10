@@ -220,6 +220,7 @@
               <label class="form-label fw-semibold">Loại trạng thái</label>
               <select class="form-select" id="pageStatusType">
                 <option value="none">✅ None – Bình thường</option>
+                <option value="message">📢 Message – Thông báo</option>
                 <option value="construction">🚧 Under Construction</option>
                 <option value="update">🔄 Đang cập nhật</option>
                 <option value="bugfix">🐛 Đang sửa lỗi</option>
@@ -321,6 +322,7 @@
     // ── Site Status per-page system ──────────────────────────────
     const STATUS_META = {
       none:         { color: null,      border: null,      icon: '',   label: 'None' },
+      message:      { color: '#e8f5e9', border: '#00c4b4', icon: '📢', label: 'Message' },
       construction: { color: '#fff3cd', border: '#ffc107', icon: '🚧', label: 'Under Construction' },
       update:       { color: '#cff4fc', border: '#0dcaf0', icon: '🔄', label: 'Đang cập nhật' },
       bugfix:       { color: '#f8d7da', border: '#dc3545', icon: '🐛', label: 'Đang sửa lỗi' },
@@ -330,7 +332,8 @@
     };
 
     const BADGE_COLORS = {
-      none: 'bg-success', construction: 'bg-warning text-dark',
+      none: 'bg-success', message: 'bg-success',
+      construction: 'bg-warning text-dark',
       update: 'bg-info text-dark', bugfix: 'bg-danger',
       maintenance: 'bg-warning text-dark', coming_soon: 'bg-secondary', limited: 'bg-warning text-dark'
     };
