@@ -199,31 +199,59 @@
         <div id="eventList" class="list-group"></div>
       </div>
 
-      <!-- Website Status tab (improved UI) -->
+      <!-- Website Status tab (per-page controls) -->
       <div class="tab-pane fade" id="status" role="tabpanel">
-        <h3 class="mb-4">Trạng thái Website (hiển thị cho tất cả người dùng)</h3>
-        <form id="statusForm" class="row g-3 mb-5">
-          <div class="col-md-6">
-            <label class="form-label">Trạng thái hiện tại</label>
-            <select class="form-select" id="siteStatus" required>
-              <option value="live">Live / Bình thường</option>
-              <option value="test">Test / Phát triển</option>
-              <option value="maintenance">Bảo trì / Under Construction</option>
-              <option value="updating">Đang cập nhật</option>
-              <option value="fixing">Đang sửa lỗi (khẩn cấp)</option>
-            </select>
-          </div>
-          <div class="col-12">
-            <label class="form-label">Thông báo chi tiết (hiển thị trên trang chủ, v.v.)</label>
-            <textarea class="form-control" id="statusMessage" rows="4" placeholder="Ví dụ: Website đang bảo trì, sẽ trở lại sau 2 giờ..."></textarea>
-          </div>
-          <div class="col-12 text-end">
-            <button type="submit" class="btn btn-primary">Lưu trạng thái</button>
-          </div>
-        </form>
+        <h3 class="mb-2">Trạng thái Website</h3>
+        <p class="text-muted mb-4">Kiểm soát banner thông báo hiển thị trên từng trang riêng biệt.</p>
 
-        <h4 class="mt-5 mb-3">Xem trước (những gì người dùng sẽ thấy)</h4>
-        <div id="statusPreview" class="alert alert-info">Đang tải...</div>
+        <!-- Page selector tabs -->
+        <ul class="nav nav-pills mb-4" id="pageTabs">
+          <li class="nav-item"><button class="nav-link active" data-page="index">🏠 Trang chủ</button></li>
+          <li class="nav-item"><button class="nav-link" data-page="products">📦 Sản phẩm</button></li>
+          <li class="nav-item"><button class="nav-link" data-page="events">📅 Sự kiện</button></li>
+          <li class="nav-item"><button class="nav-link" data-page="contact">📞 Liên hệ</button></li>
+        </ul>
+
+        <div class="card p-4 mb-4">
+          <h5 class="mb-3">Đang chỉnh: <strong id="currentPageLabel">Trang chủ</strong></h5>
+          <div class="row g-3">
+            <div class="col-md-5">
+              <label class="form-label fw-semibold">Loại trạng thái</label>
+              <select class="form-select" id="pageStatusType">
+                <option value="none">✅ None – Bình thường</option>
+                <option value="construction">🚧 Under Construction</option>
+                <option value="update">🔄 Đang cập nhật</option>
+                <option value="bugfix">🐛 Đang sửa lỗi</option>
+                <option value="maintenance">🔧 Bảo trì</option>
+                <option value="coming_soon">⏳ Coming Soon</option>
+                <option value="limited">⚠️ Limited Availability</option>
+              </select>
+            </div>
+            <div class="col-md-7">
+              <label class="form-label fw-semibold">Thông báo tuỳ chỉnh <span class="text-muted fw-normal">(để trống = dùng mặc định)</span></label>
+              <input type="text" class="form-control" id="pageStatusMessage" placeholder="Ví dụ: Trang đang được cập nhật, vui lòng quay lại sau!">
+            </div>
+            <div class="col-12 text-end">
+              <button class="btn btn-outline-secondary me-2" id="statusClearBtn">Xoá banner</button>
+              <button class="btn btn-primary" id="statusSaveBtn">💾 Lưu cho trang này</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- All pages overview -->
+        <h5 class="mb-3">Tổng quan tất cả trang</h5>
+        <div class="row g-3 mb-5" id="statusOverview">
+          <div class="col-md-3"><div class="card p-3 text-center" id="ov-index"><div class="fw-bold mb-1">🏠 Trang chủ</div><span class="badge bg-secondary" id="ov-index-badge">Đang tải...</span></div></div>
+          <div class="col-md-3"><div class="card p-3 text-center" id="ov-products"><div class="fw-bold mb-1">📦 Sản phẩm</div><span class="badge bg-secondary" id="ov-products-badge">Đang tải...</span></div></div>
+          <div class="col-md-3"><div class="card p-3 text-center" id="ov-events"><div class="fw-bold mb-1">📅 Sự kiện</div><span class="badge bg-secondary" id="ov-events-badge">Đang tải...</span></div></div>
+          <div class="col-md-3"><div class="card p-3 text-center" id="ov-contact"><div class="fw-bold mb-1">📞 Liên hệ</div><span class="badge bg-secondary" id="ov-contact-badge">Đang tải...</span></div></div>
+        </div>
+
+        <!-- Live preview -->
+        <h5 class="mb-3">Xem trước banner (theo trang đang chọn)</h5>
+        <div id="statusPreview" class="rounded overflow-hidden border" style="min-height:52px;">
+          <div class="text-muted p-3 text-center small">Chọn loại trạng thái để xem trước</div>
+        </div>
       </div>
     </div>
   </main>
@@ -289,43 +317,106 @@
       renderEvents(currentEvents);
     });
 
-    // Website status
-    onValue(ref(db, 'siteStatus'), (snapshot) => {
-      const data = snapshot.val() || { status: 'live', message: '' };
-      document.getElementById('siteStatus').value = data.status;
-      document.getElementById('statusMessage').value = data.message;
+    // ── Site Status per-page system ──────────────────────────────
+    const STATUS_META = {
+      none:         { color: null,      border: null,      icon: '',   label: 'None' },
+      construction: { color: '#fff3cd', border: '#ffc107', icon: '🚧', label: 'Under Construction' },
+      update:       { color: '#cff4fc', border: '#0dcaf0', icon: '🔄', label: 'Đang cập nhật' },
+      bugfix:       { color: '#f8d7da', border: '#dc3545', icon: '🐛', label: 'Đang sửa lỗi' },
+      maintenance:  { color: '#fff3cd', border: '#fd7e14', icon: '🔧', label: 'Bảo trì' },
+      coming_soon:  { color: '#e2e3e5', border: '#6c757d', icon: '⏳', label: 'Coming Soon' },
+      limited:      { color: '#fff3cd', border: '#ffc107', icon: '⚠️', label: 'Limited Availability' },
+    };
 
+    const BADGE_COLORS = {
+      none: 'bg-success', construction: 'bg-warning text-dark',
+      update: 'bg-info text-dark', bugfix: 'bg-danger',
+      maintenance: 'bg-warning text-dark', coming_soon: 'bg-secondary', limited: 'bg-warning text-dark'
+    };
+
+    const PAGES = ['index', 'products', 'events', 'contact'];
+    const PAGE_LABELS = { index: 'Trang chủ', products: 'Sản phẩm', events: 'Sự kiện', contact: 'Liên hệ' };
+    let currentStatusPage = 'index';
+    let pageStatusCache = {};
+
+    // Listen to all page statuses
+    PAGES.forEach(page => {
+      onValue(ref(db, `siteStatus/${page}`), (snap) => {
+        const data = snap.val() || { type: 'none', message: '' };
+        pageStatusCache[page] = data;
+
+        // Update overview badge
+        const badge = document.getElementById(`ov-${page}-badge`);
+        if (badge) {
+          const m = STATUS_META[data.type] || STATUS_META.none;
+          badge.className = `badge ${BADGE_COLORS[data.type] || 'bg-secondary'}`;
+          badge.textContent = (m.icon ? m.icon + ' ' : '') + (data.type === 'none' ? '✅ Normal' : m.label);
+        }
+
+        // If this is the currently selected page, update the form + preview
+        if (page === currentStatusPage) {
+          document.getElementById('pageStatusType').value = data.type || 'none';
+          document.getElementById('pageStatusMessage').value = data.message || '';
+          renderStatusPreview(data.type || 'none', data.message || '');
+        }
+      });
+    });
+
+    // Page pill tab switching
+    document.querySelectorAll('#pageTabs .nav-link').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('#pageTabs .nav-link').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentStatusPage = btn.dataset.page;
+        document.getElementById('currentPageLabel').textContent = PAGE_LABELS[currentStatusPage];
+        const cached = pageStatusCache[currentStatusPage] || { type: 'none', message: '' };
+        document.getElementById('pageStatusType').value = cached.type || 'none';
+        document.getElementById('pageStatusMessage').value = cached.message || '';
+        renderStatusPreview(cached.type || 'none', cached.message || '');
+      });
+    });
+
+    // Live preview on type/message change
+    document.getElementById('pageStatusType').addEventListener('change', () => {
+      renderStatusPreview(
+        document.getElementById('pageStatusType').value,
+        document.getElementById('pageStatusMessage').value
+      );
+    });
+    document.getElementById('pageStatusMessage').addEventListener('input', () => {
+      renderStatusPreview(
+        document.getElementById('pageStatusType').value,
+        document.getElementById('pageStatusMessage').value
+      );
+    });
+
+    function renderStatusPreview(type, message) {
       const preview = document.getElementById('statusPreview');
-      preview.className = 'alert';
-      preview.innerHTML = '';
-      if (data.status === 'live') {
-        preview.classList.add('alert-success');
-        preview.innerHTML = 'Website đang hoạt động bình thường.';
-      } else if (data.status === 'test') {
-        preview.classList.add('alert-warning');
-        preview.innerHTML = 'Website đang ở chế độ test/phát triển.';
-      } else if (data.status === 'maintenance') {
-        preview.classList.add('alert-danger');
-        preview.innerHTML = 'Website đang bảo trì / under construction.<br><strong>Thông báo:</strong> ' + (data.message || 'N/A');
-      } else if (data.status === 'updating') {
-        preview.classList.add('alert-info');
-        preview.innerHTML = 'Website đang được cập nhật.<br><strong>Thông báo:</strong> ' + (data.message || 'N/A');
-      } else if (data.status === 'fixing') {
-        preview.classList.add('alert-danger');
-        preview.innerHTML = 'Website đang sửa lỗi khẩn cấp.<br><strong>Thông báo:</strong> ' + (data.message || 'N/A');
+      if (!type || type === 'none') {
+        preview.innerHTML = '<div class="text-muted p-3 text-center small">✅ Không có banner — trang hiển thị bình thường</div>';
+        return;
       }
+      const m = STATUS_META[type] || { color: '#e2e3e5', border: '#6c757d', icon: 'ℹ️', label: type };
+      const msg = message.trim() || m.label;
+      preview.innerHTML = `<div style="background:${m.color};border-bottom:3px solid ${m.border};padding:10px 24px;text-align:center;font-weight:600;font-size:0.95rem;">${m.icon}&nbsp;${msg}<button disabled style="background:none;border:none;float:right;font-size:1.2rem;cursor:not-allowed;opacity:0.5;line-height:1;">✕</button></div>`;
+    }
+
+    // Save button
+    document.getElementById('statusSaveBtn').addEventListener('click', async () => {
+      const type = document.getElementById('pageStatusType').value;
+      const message = document.getElementById('pageStatusMessage').value.trim();
+      await set(ref(db, `siteStatus/${currentStatusPage}`), { type, message });
+      const btn = document.getElementById('statusSaveBtn');
+      btn.textContent = '✅ Đã lưu!';
+      setTimeout(() => btn.textContent = '💾 Lưu cho trang này', 1800);
+    });
+
+    // Clear button
+    document.getElementById('statusClearBtn').addEventListener('click', async () => {
+      if (!confirm(`Xoá banner cho trang "${PAGE_LABELS[currentStatusPage]}"?`)) return;
+      await set(ref(db, `siteStatus/${currentStatusPage}`), { type: 'none', message: '' });
     });
   }
-
-  // Status form submit
-  document.getElementById('statusForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const status = document.getElementById('siteStatus').value;
-    const message = document.getElementById('statusMessage').value.trim();
-
-    await set(ref(db, 'siteStatus'), { status, message });
-    alert('Đã cập nhật trạng thái website!');
-  });
 
   // Products render
   function renderProducts(products) {
