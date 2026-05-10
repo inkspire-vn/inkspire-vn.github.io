@@ -411,7 +411,8 @@
       }
       const m = STATUS_META[type] || { color: '#e2e3e5', border: '#6c757d', icon: 'ℹ️', label: type };
       const msg = message.trim() || m.label;
-      preview.innerHTML = `<div class="site-banner-inner" style="border-bottom:3px solid ${m.border};padding:10px 24px;text-align:center;font-weight:600;font-size:0.95rem;">${m.icon}&nbsp;${msg}</div>`;
+      // Always use the light-mode color in preview so it's visible in both themes
+      preview.innerHTML = `<div style="background:${m.color};color:#1a1f25;border-bottom:3px solid ${m.border};padding:10px 24px;text-align:center;font-weight:600;font-size:0.95rem;">${m.icon}&nbsp;${msg}</div>`;
     }
 
     // Save button
