@@ -424,9 +424,52 @@
   }
 
   setLang(localStorage.getItem('lang') || 'vi');
-  langGroup.addEventListener('click', () => setLang((localStorage.getItem('lang') || 'vi') === 'vi' ? 'en' : 'vi'));
-  langSwitch.addEventListener('change', () => setLang(langSwitch.checked ? 'en' : 'vi'));
+  langGroup.addEventListener('click', async () => {
+    const next = (localStorage.getItem('lang') || 'vi') === 'vi' ? 'en' : 'vi';
+    setLang(next);
+    await renderEventsBox(next);
+  });
+  langSwitch.addEventListener('change', async () => {
+    const next = langSwitch.checked ? 'en' : 'vi';
+    setLang(next);
+    await renderEventsBox(next);
+  });
   langGroup.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); langGroup.click(); } });
+
+  // ── Translation cache & engine ──────────────────────────────────
+  const CACHE_KEY = 'inkspire_trans_cache_v1';
+  let transCache = {};
+  try { transCache = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}'); } catch {}
+
+  async function translate(text, targetLang) {
+    if (!text || !text.trim() || targetLang === 'vi') return text;
+    const cacheKey = `${targetLang}::${text}`;
+    if (transCache[cacheKey]) return transCache[cacheKey];
+    try {
+      const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=vi|en`);
+      const json = await res.json();
+      const translated = json?.responseData?.translatedText || text;
+      transCache[cacheKey] = translated;
+      localStorage.setItem(CACHE_KEY, JSON.stringify(transCache));
+      return translated;
+    } catch { return text; }
+  }
+
+  // ── Date parser: handles DD/MM/YYYY HH:MM ──────────────────────
+  function parseEventDate(str) {
+    if (!str) return null;
+    const m = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})(?:\s*(AM|PM))?/i);
+    if (m) {
+      let [, day, month, year, hour, min, ampm] = m;
+      hour = parseInt(hour);
+      if (ampm) {
+        if (ampm.toUpperCase() === 'PM' && hour !== 12) hour += 12;
+        if (ampm.toUpperCase() === 'AM' && hour === 12) hour = 0;
+      }
+      return new Date(+year, +month - 1, +day, hour, parseInt(min));
+    }
+    return new Date(str);
+  }
 
   // ── Firebase: Products sliders ──────────────────────────────────
   onValue(ref(db, 'products'), (snapshot) => {
@@ -437,23 +480,31 @@
   });
 
   // ── Firebase: Events box (max 3) ────────────────────────────────
+  let cachedEvents = [];
   onValue(ref(db, 'events'), (snapshot) => {
-    const events = Object.values(snapshot.val() || {}).slice(0, 3);
+    cachedEvents = Object.values(snapshot.val() || {}).slice(0, 3);
+    renderEventsBox(localStorage.getItem('lang') || 'vi');
+  });
+
+  async function renderEventsBox(lang) {
     const list = document.getElementById('events-list');
+    if (!list) return;
     list.innerHTML = '';
-    if (events.length === 0) {
+    if (cachedEvents.length === 0) {
       list.innerHTML = '<p class="text-muted text-center">Chưa có sự kiện nào</p>';
       return;
     }
-    events.forEach(e => {
+    for (const e of cachedEvents) {
+      const title = lang === 'en' ? await translate(e.title || '', 'en') : (e.title || '');
+      const desc  = lang === 'en' ? await translate(e.desc  || '', 'en') : (e.desc  || '');
       list.innerHTML += `
         <div class="event-card">
-          <h5>${e.title}</h5>
+          <h5>${title}</h5>
           <p>${e.start || e.date || ''}</p>
-          <small>${(e.desc||'').substring(0, 100)}${(e.desc||'').length > 100 ? '...' : ''}</small>
+          <small>${desc.substring(0, 100)}${desc.length > 100 ? '...' : ''}</small>
         </div>`;
-    });
-  });
+    }
+  }
 
   // ── Slider renderer ─────────────────────────────────────────────
   function renderSlider(trackId, items) {
