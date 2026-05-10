@@ -200,7 +200,6 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script type="module">
-  // Theme & Language (unchanged)
   const html = document.documentElement;
   const themeBtn = document.getElementById('themeBtn');
 
@@ -209,7 +208,6 @@
     localStorage.setItem('theme', mode);
     themeBtn.textContent = mode === 'dark' ? '☀️' : '🌙';
   }
-
   setTheme(localStorage.getItem('theme') || 'light');
   themeBtn.onclick = () => setTheme(html.getAttribute('data-bs-theme') === 'light' ? 'dark' : 'light');
 
@@ -218,62 +216,149 @@
 
   const dict = {
     vi: {
-      home: "Trang chủ",
-      products: "Sản phẩm",
-      events: "Sự kiện",
-      contact: "Liên hệ",
-      loading: "Đang tải sự kiện...",
-      "no-events": "Chưa có sự kiện nào",
-      footer: "Tri thức bắt đầu từ một giọt mực",
-      "see-more": "Xem thêm",
-      "show-less": "Thu gọn"
+      home: "Trang chủ", products: "Sản phẩm", events: "Sự kiện", contact: "Liên hệ",
+      loading: "Đang tải sự kiện...", "no-events": "Chưa có sự kiện nào",
+      footer: "Tri thức bắt đầu từ một giọt mực", "see-more": "Xem thêm", "show-less": "Thu gọn",
+      translating: "Đang dịch..."
     },
     en: {
-      home: "Home",
-      products: "Products",
-      events: "Events",
-      contact: "Contact",
-      loading: "Loading events...",
-      "no-events": "No events scheduled yet",
-      footer: "Knowledge begins with a drop of ink",
-      "see-more": "See more",
-      "show-less": "Show less"
+      home: "Home", products: "Products", events: "Events", contact: "Contact",
+      loading: "Loading events...", "no-events": "No events scheduled yet",
+      footer: "Knowledge begins with a drop of ink", "see-more": "See more", "show-less": "Show less",
+      translating: "Translating..."
     }
   };
 
-  function setLang(lang) {
+  // ── Translation cache & engine ──────────────────────────────────
+  const CACHE_KEY = 'inkspire_trans_cache_v1';
+  let transCache = {};
+  try { transCache = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}'); } catch {}
+
+  async function translate(text, targetLang) {
+    if (!text || !text.trim()) return text;
+    if (targetLang === 'vi') return text; // source is always VI
+    const cacheKey = `${targetLang}::${text}`;
+    if (transCache[cacheKey]) return transCache[cacheKey];
+    try {
+      const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=vi|en`);
+      const json = await res.json();
+      const translated = json?.responseData?.translatedText || text;
+      transCache[cacheKey] = translated;
+      localStorage.setItem(CACHE_KEY, JSON.stringify(transCache));
+      return translated;
+    } catch { return text; }
+  }
+
+  async function translateBatch(texts, targetLang) {
+    return Promise.all(texts.map(t => translate(t, targetLang)));
+  }
+
+  // ── Date parser: handles "DD/MM/YYYY HH:MM" and ISO ────────────
+  function parseEventDate(str) {
+    if (!str) return null;
+    // Try DD/MM/YYYY HH:MM or DD/MM/YYYY HH:MM AM/PM
+    const m = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})(?:\s*(AM|PM))?/i);
+    if (m) {
+      let [, day, month, year, hour, min, ampm] = m;
+      hour = parseInt(hour); min = parseInt(min);
+      if (ampm) {
+        if (ampm.toUpperCase() === 'PM' && hour !== 12) hour += 12;
+        if (ampm.toUpperCase() === 'AM' && hour === 12) hour = 0;
+      }
+      return new Date(+year, +month - 1, +day, hour, min);
+    }
+    // Fallback to native (ISO etc.)
+    return new Date(str);
+  }
+
+  // ── Render ──────────────────────────────────────────────────────
+  let currentEvents = [];
+  let currentlyExpandedKey = null;
+  let currentLang = localStorage.getItem('lang') || 'vi';
+
+  async function renderEvents(lang) {
+    const grid = document.getElementById('event-grid');
+    if (!grid || currentEvents.length === 0) return;
+
+    // Show translating indicator
+    if (lang === 'en') {
+      grid.querySelectorAll('.card-title, .card-text, .event-time-label').forEach(el => {
+        if (!el.dataset.orig) el.dataset.orig = el.textContent;
+        el.style.opacity = '0.5';
+      });
+    }
+
+    const now = new Date();
+    grid.innerHTML = '';
+
+    for (const event of currentEvents) {
+      const start = parseEventDate(event.start);
+      const end   = parseEventDate(event.end);
+
+      let statusClass, statusTextVI, statusTextEN;
+      if (event.aborted)       { statusClass = 'status-aborted';  statusTextVI = 'Bị hủy';       statusTextEN = 'Aborted'; }
+      else if (event.delayed)  { statusClass = 'status-delayed';  statusTextVI = 'Bị hoãn';       statusTextEN = 'Delayed'; }
+      else if (start && now < start) { statusClass = 'status-upcoming'; statusTextVI = 'Sắp diễn ra';  statusTextEN = 'Upcoming'; }
+      else if (end   && now > end)   { statusClass = 'status-expired';  statusTextVI = 'Đã kết thúc';  statusTextEN = 'Expired'; }
+      else                     { statusClass = 'status-current';  statusTextVI = 'Đang diễn ra'; statusTextEN = 'Ongoing'; }
+
+      const statusText = lang === 'en' ? statusTextEN : statusTextVI;
+
+      // Translate title + desc if needed
+      let title = event.title || '';
+      let fullDesc = event.desc || '';
+      if (lang === 'en') {
+        [title, fullDesc] = await translateBatch([title, fullDesc], 'en');
+      }
+
+      const hasMore = fullDesc.length > 150;
+      const shortDesc = hasMore ? fullDesc.substring(0, 150) + '...' : fullDesc;
+      const seeMoreText = dict[lang]['see-more'];
+
+      grid.innerHTML += `
+        <div class="col-12 col-md-6 col-lg-4">
+          <div class="card h-100 event-card position-relative">
+            ${event.image ? `<img src="${event.image}" class="card-img-top" alt="${title}">` : ''}
+            <div class="card-body">
+              <h5 class="card-title fw-bold">${title || (lang === 'en' ? 'No title' : 'Không có tiêu đề')}</h5>
+              <p class="event-time mb-2">
+                <i class="fas fa-clock me-2"></i>
+                ${event.start || 'N/A'} → ${event.end || 'N/A'}
+              </p>
+              <p class="card-text event-desc mb-1" id="desc-${event.key}">${shortDesc}</p>
+              ${hasMore ? `<button class="toggle-btn" data-key="${event.key}" data-full="${encodeURIComponent(fullDesc)}" data-short="${encodeURIComponent(shortDesc)}">${seeMoreText}</button>` : ''}
+              <br>
+              <span class="status-badge ${statusClass} mt-2 d-inline-block">${statusText}</span>
+            </div>
+          </div>
+        </div>`;
+    }
+  }
+
+  // ── Language ────────────────────────────────────────────────────
+  function applyUILang(lang) {
     html.lang = lang;
     localStorage.setItem('lang', lang);
+    currentLang = lang;
     langSwitch.checked = (lang === 'en');
-
     document.querySelector('.vi-flag').classList.toggle('inactive', lang !== 'vi');
     document.querySelector('.en-flag').classList.toggle('inactive', lang !== 'en');
-
     document.querySelectorAll('[data-lang-key]').forEach(el => {
       const k = el.getAttribute('data-lang-key');
       if (dict[lang][k]) el.textContent = dict[lang][k];
     });
   }
 
-  setLang(localStorage.getItem('lang') || 'vi');
+  async function setLang(lang) {
+    applyUILang(lang);
+    await renderEvents(lang);
+  }
 
-  langGroup.addEventListener('click', () => {
-    const cur = localStorage.getItem('lang') || 'vi';
-    setLang(cur === 'vi' ? 'en' : 'vi');
-  });
+  langGroup.addEventListener('click', () => setLang(currentLang === 'vi' ? 'en' : 'vi'));
+  langSwitch.addEventListener('change', () => setLang(langSwitch.checked ? 'en' : 'vi'));
 
-  langSwitch.addEventListener('change', () => {
-    setLang(langSwitch.checked ? 'en' : 'vi');
-  });
-
-  // Global events array
-  let currentEvents = [];
-  let currentlyExpandedKey = null;
-
-  // Firebase listener
-  const eventsRef = ref(db, 'events');
-
-  onValue(eventsRef, (snapshot) => {
+  // ── Firebase ────────────────────────────────────────────────────
+  onValue(ref(db, 'events'), async (snapshot) => {
     const loading = document.getElementById('loading');
     const grid = document.getElementById('event-grid');
     const noEvents = document.getElementById('no-events');
@@ -285,81 +370,26 @@
 
     if (currentEvents.length === 0) {
       if (noEvents) noEvents.classList.remove('d-none');
-      if (grid) grid.classList.add('d-none');
-      if (grid) grid.innerHTML = '';
+      if (grid) { grid.classList.add('d-none'); grid.innerHTML = ''; }
       return;
     }
 
     if (noEvents) noEvents.classList.add('d-none');
-    if (grid) {
-      grid.classList.remove('d-none');
-      grid.innerHTML = '';
+    if (grid) grid.classList.remove('d-none');
 
-      const now = new Date();
-
-      currentEvents.forEach(event => {
-        const start = new Date(event.start);
-        const end = new Date(event.end);
-
-        let statusClass = '';
-        let statusText = '';
-
-        if (event.aborted) {
-          statusClass = 'status-aborted';
-          statusText = langSwitch.checked ? 'Aborted' : 'Bị hủy';
-        } else if (event.delayed) {
-          statusClass = 'status-delayed';
-          statusText = langSwitch.checked ? 'Delayed' : 'Bị hoãn';
-        } else if (now < start) {
-          statusClass = 'status-upcoming';
-          statusText = langSwitch.checked ? 'Upcoming' : 'Sắp diễn ra';
-        } else if (now > end) {
-          statusClass = 'status-expired';
-          statusText = langSwitch.checked ? 'Expired' : 'Đã kết thúc';
-        } else {
-          statusClass = 'status-current';
-          statusText = langSwitch.checked ? 'Ongoing' : 'Đang diễn ra';
-        }
-
-        const fullDesc = event.desc || '';
-        const hasMore = fullDesc.length > 150;
-        const shortDesc = hasMore ? fullDesc.substring(0, 150) + '...' : fullDesc;
-        const seeMoreText = langSwitch.checked ? dict.en['see-more'] : dict.vi['see-more'];
-
-        const card = `
-          <div class="col-12 col-md-6 col-lg-4">
-            <div class="card h-100 event-card position-relative">
-              ${event.image ? `<img src="${event.image}" class="card-img-top" alt="${event.title}">` : ''}
-              <div class="card-body">
-                <h5 class="card-title fw-bold">${event.title || 'Không có tiêu đề'}</h5>
-                <p class="event-time mb-2">
-                  <i class="fas fa-clock me-2"></i>
-                  ${event.start || 'N/A'} → ${event.end || 'N/A'}
-                </p>
-                <p class="card-text event-desc mb-1" id="desc-${event.key}">${shortDesc}</p>
-                ${hasMore ? `<button class="toggle-btn" data-key="${event.key}" data-full="${encodeURIComponent(fullDesc)}" data-short="${encodeURIComponent(shortDesc)}">${seeMoreText}</button>` : ''}
-                <br>
-                <span class="status-badge ${statusClass} mt-2 d-inline-block">${statusText}</span>
-              </div>
-            </div>
-          </div>
-        `;
-        grid.innerHTML += card;
-      });
-    }
-
-    setLang(localStorage.getItem('lang') || 'vi');
+    await renderEvents(currentLang);
+    applyUILang(currentLang);
   });
 
-  // Event delegation for toggle buttons
+  // ── Toggle (see more/less) ──────────────────────────────────────
   document.getElementById('event-grid').addEventListener('click', (e) => {
     const btn = e.target.closest('.toggle-btn');
     if (!btn) return;
     const key = btn.dataset.key;
     const descEl = document.getElementById(`desc-${key}`);
     if (!descEl) return;
-    const seeMoreText = langSwitch.checked ? dict.en['see-more'] : dict.vi['see-more'];
-    const showLessText = langSwitch.checked ? dict.en['show-less'] : dict.vi['show-less'];
+    const seeMoreText = dict[currentLang]['see-more'];
+    const showLessText = dict[currentLang]['show-less'];
     const isExpanded = btn.dataset.expanded === 'true';
     if (currentlyExpandedKey && currentlyExpandedKey !== key) {
       const prevBtn = document.querySelector(`.toggle-btn[data-key="${currentlyExpandedKey}"]`);
@@ -385,6 +415,9 @@
       currentlyExpandedKey = null;
     }
   });
+
+  // Initial lang apply (UI only, Firebase will trigger render)
+  applyUILang(currentLang);
 </script>
 </body>
 </html>
