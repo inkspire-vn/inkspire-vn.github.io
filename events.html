@@ -157,7 +157,7 @@
     if(!data||!data.type||data.type==="none"){banner.classList.add("d-none");banner.innerHTML="";return;}
     const m=_SM[data.type]||{color:"#e2e3e5",border:"#6c757d",icon:"ℹ️",label:data.type};
     const msg=data.message||m.label;
-    banner.innerHTML=`<div style="background:${m.color};border-bottom:3px solid ${m.border};padding:10px 24px;text-align:center;font-weight:600;font-size:0.95rem;">${m.icon}&nbsp;${msg}<button onclick="document.getElementById('site-status-banner').classList.add('d-none')" style="background:none;border:none;float:right;font-size:1.2rem;cursor:pointer;opacity:0.5;line-height:1;">✕</button></div>`;
+    banner.innerHTML=`<div class="site-banner-inner" style="border-bottom:3px solid ${m.border};padding:10px 24px;text-align:center;font-weight:600;font-size:0.95rem;" data-color="${m.color}" data-border="${m.border}">${m.icon}&nbsp;${msg}</div>`;
     banner.classList.remove("d-none");
   });
 </script>
