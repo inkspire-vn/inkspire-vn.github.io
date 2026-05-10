@@ -205,7 +205,6 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <script type="module">
-  // Theme toggle
   const html = document.documentElement;
   const themeBtn = document.getElementById('themeBtn');
 
@@ -214,68 +213,110 @@
     localStorage.setItem('theme', mode);
     themeBtn.textContent = mode === 'dark' ? '☀️' : '🌙';
   }
-
   setTheme(localStorage.getItem('theme') || 'light');
   themeBtn.onclick = () => setTheme(html.getAttribute('data-bs-theme') === 'light' ? 'dark' : 'light');
 
-  // Language toggle
   const langGroup = document.getElementById('langGroup');
   const langSwitch = document.getElementById('langSwitch');
 
   const dict = {
     vi: {
-      home: "Trang chủ",
-      products: "Sản phẩm",
-      events: "Sự kiện",
-      contact: "Liên hệ",
-      "products": "Sản phẩm",
-      loading: "Đang tải sản phẩm...",
-      "no-products": "Hiện chưa có sản phẩm nào",
-      "contact-now": "Liên hệ ngay",
-      footer: "Tri thức bắt đầu từ một giọt mực"
+      home: "Trang chủ", products: "Sản phẩm", events: "Sự kiện", contact: "Liên hệ",
+      loading: "Đang tải sản phẩm...", "no-products": "Hiện chưa có sản phẩm nào",
+      "contact-now": "Liên hệ ngay", footer: "Tri thức bắt đầu từ một giọt mực",
+      "out-of-stock": "Hết hàng", "unknown-cat": "Không xác định"
     },
     en: {
-      home: "Home",
-      products: "Products",
-      events: "Events",
-      contact: "Contact",
-      "products": "Products",
-      loading: "Loading products...",
-      "no-products": "No products available yet",
-      "contact-now": "Contact Now",
-      footer: "Knowledge begins with a drop of ink"
+      home: "Home", products: "Products", events: "Events", contact: "Contact",
+      loading: "Loading products...", "no-products": "No products available yet",
+      "contact-now": "Contact Now", footer: "Knowledge begins with a drop of ink",
+      "out-of-stock": "Out of Stock", "unknown-cat": "Uncategorized"
     }
   };
 
-  function setLang(lang) {
+  // ── Translation cache & engine ──────────────────────────────────
+  const CACHE_KEY = 'inkspire_trans_cache_v1';
+  let transCache = {};
+  try { transCache = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}'); } catch {}
+
+  async function translate(text, targetLang) {
+    if (!text || !text.trim() || targetLang === 'vi') return text;
+    const cacheKey = `${targetLang}::${text}`;
+    if (transCache[cacheKey]) return transCache[cacheKey];
+    try {
+      const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=vi|en`);
+      const json = await res.json();
+      const translated = json?.responseData?.translatedText || text;
+      transCache[cacheKey] = translated;
+      localStorage.setItem(CACHE_KEY, JSON.stringify(transCache));
+      return translated;
+    } catch { return text; }
+  }
+
+  // ── Products data ───────────────────────────────────────────────
+  let currentProducts = [];
+  let currentLang = localStorage.getItem('lang') || 'vi';
+
+  async function renderProducts(lang) {
+    const grid = document.getElementById('product-grid');
+    if (!grid || currentProducts.length === 0) return;
+
+    grid.innerHTML = '';
+    const outOfStockLabel = dict[lang]['out-of-stock'];
+    const unknownCat = dict[lang]['unknown-cat'];
+
+    for (const product of currentProducts) {
+      const isOutOfStock = !!product.outOfStock;
+
+      let name = product.name || '';
+      let category = product.category || '';
+      if (lang === 'en') {
+        [name, category] = await Promise.all([
+          translate(name, 'en'),
+          translate(category, 'en')
+        ]);
+      }
+
+      grid.innerHTML += `
+        <div class="col-6 col-md-4 col-lg-3">
+          <div class="card h-100 product-card ${isOutOfStock ? 'out-of-stock' : ''} position-relative">
+            ${isOutOfStock ? `<span class="out-of-stock-badge">${outOfStockLabel}</span>` : ''}
+            <img src="${product.image || 'https://via.placeholder.com/400x300?text=No+Image'}"
+                 class="card-img-top" alt="${name}">
+            <div class="product-info">
+              <h5 class="product-title">${name}</h5>
+              <p class="product-category">${category || unknownCat}</p>
+              <p class="product-price ${isOutOfStock ? 'text-danger' : 'text-primary'}">${product.price}</p>
+            </div>
+          </div>
+        </div>`;
+    }
+  }
+
+  // ── Language ────────────────────────────────────────────────────
+  function applyUILang(lang) {
     html.lang = lang;
     localStorage.setItem('lang', lang);
+    currentLang = lang;
     langSwitch.checked = (lang === 'en');
-
     document.querySelector('.vi-flag').classList.toggle('inactive', lang !== 'vi');
     document.querySelector('.en-flag').classList.toggle('inactive', lang !== 'en');
-
     document.querySelectorAll('[data-lang-key]').forEach(el => {
       const k = el.getAttribute('data-lang-key');
       if (dict[lang][k]) el.textContent = dict[lang][k];
     });
   }
 
-  setLang(localStorage.getItem('lang') || 'vi');
+  async function setLang(lang) {
+    applyUILang(lang);
+    await renderProducts(lang);
+  }
 
-  langGroup.addEventListener('click', () => {
-    const cur = localStorage.getItem('lang') || 'vi';
-    setLang(cur === 'vi' ? 'en' : 'vi');
-  });
+  langGroup.addEventListener('click', () => setLang(currentLang === 'vi' ? 'en' : 'vi'));
+  langSwitch.addEventListener('change', () => setLang(langSwitch.checked ? 'en' : 'vi'));
 
-  langSwitch.addEventListener('change', () => {
-    setLang(langSwitch.checked ? 'en' : 'vi');
-  });
-
-  // Firebase real-time products
-  const productsRef = ref(db, 'products');
-
-  onValue(productsRef, (snapshot) => {
+  // ── Firebase ────────────────────────────────────────────────────
+  onValue(ref(db, 'products'), async (snapshot) => {
     const loading = document.getElementById('loading');
     const grid = document.getElementById('product-grid');
     const noProducts = document.getElementById('no-products');
@@ -283,45 +324,22 @@
     if (loading) loading.classList.add('d-none');
 
     const data = snapshot.val() || {};
-    const products = Object.values(data);
+    currentProducts = Object.values(data);
 
-    if (products.length === 0) {
+    if (currentProducts.length === 0) {
       if (noProducts) noProducts.classList.remove('d-none');
-      if (grid) grid.classList.add('d-none');
-      if (grid) grid.innerHTML = '';
+      if (grid) { grid.classList.add('d-none'); grid.innerHTML = ''; }
       return;
     }
 
     if (noProducts) noProducts.classList.add('d-none');
-    if (grid) {
-      grid.classList.remove('d-none');
-      grid.innerHTML = '';
+    if (grid) grid.classList.remove('d-none');
 
-      products.forEach(product => {
-        const isOutOfStock = !!product.outOfStock;
-
-        const card = `
-          <div class="col-6 col-md-4 col-lg-3">
-            <div class="card h-100 product-card ${isOutOfStock ? 'out-of-stock' : ''} position-relative">
-              ${isOutOfStock ? '<span class="out-of-stock-badge">Hết hàng</span>' : ''}
-              <img src="${product.image || 'https://via.placeholder.com/400x300?text=No+Image'}" 
-                   class="card-img-top" alt="${product.name}">
-              <div class="product-info">
-                <h5 class="product-title">${product.name}</h5>
-                <p class="product-category">${product.category || 'Không xác định'}</p>
-                <p class="product-price ${isOutOfStock ? 'text-danger' : 'text-primary'}">
-                  ${product.price}
-                </p>
-              </div>
-            </div>
-          </div>
-        `;
-        grid.innerHTML += card;
-      });
-    }
-
-    setLang(localStorage.getItem('lang') || 'vi');
+    await renderProducts(currentLang);
+    applyUILang(currentLang);
   });
+
+  applyUILang(currentLang);
 </script>
 </body>
 </html>
