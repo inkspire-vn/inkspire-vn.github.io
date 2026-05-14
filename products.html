@@ -73,7 +73,7 @@
     }
     .page-hero {
       background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)),
-                  url('https://images.unsplash.com/photo-1507842217343-583bb7278b66?w=1600') center/cover;
+                  url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80') center/cover;
       color: white;
       height: 35vh;
       min-height: 250px;
@@ -125,15 +125,7 @@
         <li class="nav-item"><a class="nav-link" href="/contact" data-lang-key="contact">Liên hệ</a></li>
       </ul>
 
-      <div class="d-flex align-items-center gap-4">
-        <div class="lang-group" id="langGroup" role="button" tabindex="0">
-          <span class="flag vi-flag" data-lang="vi">🇻🇳</span>
-          <div class="switch">
-            <input type="checkbox" id="langSwitch">
-            <span class="slider"></span>
-          </div>
-          <span class="flag en-flag" data-lang="en">🇺🇸</span>
-        </div>
+      <div class="d-flex align-items-center gap-4"> </div>
         <button class="theme-btn" id="themeBtn">🌙</button>
       </div>
     </div>
@@ -216,76 +208,15 @@
   setTheme(localStorage.getItem('theme') || 'light');
   themeBtn.onclick = () => setTheme(html.getAttribute('data-bs-theme') === 'light' ? 'dark' : 'light');
 
-  const langGroup = document.getElementById('langGroup');
-  const langSwitch = document.getElementById('langSwitch');
-
-  const dict = {
-    vi: {
-      home: "Trang chủ", products: "Sản phẩm", events: "Sự kiện", contact: "Liên hệ",
-      loading: "Đang tải sản phẩm...", "no-products": "Hiện chưa có sản phẩm nào",
-      "contact-now": "Liên hệ ngay", footer: "Tri thức bắt đầu từ một giọt mực",
-      "out-of-stock": "Hết hàng", "unknown-cat": "Không xác định"
-    },
-    en: {
-      home: "Home", products: "Products", events: "Events", contact: "Contact",
-      loading: "Loading products...", "no-products": "No products available yet",
-      "contact-now": "Contact Now", footer: "Knowledge begins with a drop of ink",
-      "out-of-stock": "Out of Stock", "unknown-cat": "Uncategorized"
-    }
-  };
-
   // ── Translation cache & engine ──────────────────────────────────
-  const CACHE_KEY = 'inkspire_trans_cache_v1';
-  let transCache = {};
-  try { transCache = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}'); } catch {}
-
-  async function translate(text, targetLang) {
-    if (!text || !text.trim() || targetLang === 'vi') return text;
-    const cacheKey = `${targetLang}::${text}`;
-    if (transCache[cacheKey]) return transCache[cacheKey];
-    const LIMIT = 480;
-    async function fetchChunk(chunk) {
-      try {
-        const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(chunk)}&langpair=vi|en`);
-        const json = await res.json();
-        return json?.responseData?.translatedText || chunk;
-      } catch { return chunk; }
-    }
-    let result = '';
-    if (text.length <= LIMIT) {
-      result = await fetchChunk(text);
-    } else {
-      const sentences = text.split(/(?<=[.!?])\s+/);
-      let chunk = '';
-      const parts = [];
-      for (const s of sentences) {
-        if ((chunk + ' ' + s).trim().length > LIMIT) {
-          if (chunk) parts.push(chunk.trim());
-          chunk = s;
-        } else {
-          chunk = (chunk + ' ' + s).trim();
-        }
-      }
-      if (chunk) parts.push(chunk.trim());
-      const translated = await Promise.all(parts.map(fetchChunk));
-      result = translated.join(' ');
-    }
-    transCache[cacheKey] = result;
-    localStorage.setItem(CACHE_KEY, JSON.stringify(transCache));
-    return result;
-  }
-
   // ── Products data ───────────────────────────────────────────────
   let currentProducts = [];
-  let currentLang = localStorage.getItem('lang') || 'vi';
 
   async function renderProducts(lang) {
     const grid = document.getElementById('product-grid');
     if (!grid || currentProducts.length === 0) return;
 
     grid.innerHTML = '';
-    const outOfStockLabel = dict[lang]['out-of-stock'];
-    const unknownCat = dict[lang]['unknown-cat'];
 
     for (const product of currentProducts) {
       const isOutOfStock = !!product.outOfStock;
@@ -294,8 +225,6 @@
       let category = product.category || '';
       if (lang === 'en') {
         [name, category] = await Promise.all([
-          translate(name, 'en'),
-          translate(category, 'en')
         ]);
       }
 
@@ -316,52 +245,7 @@
   }
 
   // ── Language ────────────────────────────────────────────────────
-  function applyUILang(lang) {
-    html.lang = lang;
-    localStorage.setItem('lang', lang);
-    currentLang = lang;
-    langSwitch.checked = (lang === 'en');
-    document.querySelector('.vi-flag').classList.toggle('inactive', lang !== 'vi');
-    document.querySelector('.en-flag').classList.toggle('inactive', lang !== 'en');
-    document.querySelectorAll('[data-lang-key]').forEach(el => {
-      const k = el.getAttribute('data-lang-key');
-      if (dict[lang][k]) el.textContent = dict[lang][k];
-    });
-  }
-
-  async function setLang(lang) {
-    applyUILang(lang);
-    await renderProducts(lang);
-  }
-
-  langGroup.addEventListener('click', () => setLang(currentLang === 'vi' ? 'en' : 'vi'));
-  langSwitch.addEventListener('change', () => setLang(langSwitch.checked ? 'en' : 'vi'));
-
-  // ── Firebase ────────────────────────────────────────────────────
-  onValue(ref(db, 'products'), async (snapshot) => {
-    const loading = document.getElementById('loading');
-    const grid = document.getElementById('product-grid');
-    const noProducts = document.getElementById('no-products');
-
-    if (loading) loading.classList.add('d-none');
-
-    const data = snapshot.val() || {};
-    currentProducts = Object.values(data);
-
-    if (currentProducts.length === 0) {
-      if (noProducts) noProducts.classList.remove('d-none');
-      if (grid) { grid.classList.add('d-none'); grid.innerHTML = ''; }
-      return;
-    }
-
-    if (noProducts) noProducts.classList.add('d-none');
-    if (grid) grid.classList.remove('d-none');
-
-    await renderProducts(currentLang);
-    applyUILang(currentLang);
-  });
-
-  applyUILang(currentLang);
+  async
 </script>
 </body>
 </html>
