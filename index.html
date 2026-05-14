@@ -40,7 +40,7 @@
       position: relative;
       height: 65vh;
       min-height: 420px;
-      background: url('https://images.unsplash.com/photo-1507842217343-583bb7278b66?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
+      background: url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80') center/cover no-repeat;
       color: white;
       text-shadow: 0 2px 8px rgba(0,0,0,0.75);
       display: flex;
@@ -65,61 +65,6 @@
       border: 5px solid rgba(255,255,255,0.92);
       box-shadow: 0 5px 22px rgba(0,0,0,0.45);
       margin-bottom: 1.25rem;
-    }
-
-    /* Language Toggle */
-    .lang-group {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-      user-select: none;
-      padding: 6px 14px;
-      border-radius: 999px;
-      transition: background 0.25s;
-    }
-
-    .lang-group:hover { background: rgba(255,255,255,0.15); }
-
-    .flag { font-size: 1.55rem; transition: opacity 0.3s; }
-    .flag.inactive { opacity: 0.48; }
-
-    .switch {
-      position: relative;
-      width: 56px;
-      height: 28px;
-      flex-shrink: 0;
-    }
-
-    .switch input { opacity: 0; width: 0; height: 0; position: absolute; }
-
-    .switch .slider {
-      position: absolute;
-      inset: 0;
-      background: rgba(255,255,255,0.38);
-      border-radius: 34px;
-      border: 2px solid white;
-      transition: background 0.38s;
-      cursor: pointer;
-    }
-
-    .switch .slider:before {
-      content: "";
-      position: absolute;
-      height: 20px;
-      width: 20px;
-      left: 4px;
-      bottom: 4px;
-      background: white;
-      border-radius: 50%;
-      transition: transform 0.38s;
-      box-shadow: 0 1px 5px rgba(0,0,0,0.25);
-    }
-
-    .switch input:checked + .slider { background: white; }
-    .switch input:checked + .slider:before {
-      transform: translateX(28px);
-      background: var(--bs-primary);
     }
 
     /* Events Box */
@@ -269,15 +214,7 @@
         <li class="nav-item"><a class="nav-link" href="/contact" data-lang-key="contact">Liên hệ</a></li>
       </ul>
 
-      <div class="d-flex align-items-center gap-4">
-        <div class="lang-group" id="langGroup" role="button" tabindex="0">
-          <span class="flag vi-flag" data-lang="vi">🇻🇳</span>
-          <div class="switch">
-            <input type="checkbox" id="langSwitch">
-            <span class="slider"></span>
-          </div>
-          <span class="flag en-flag" data-lang="en">🇺🇸</span>
-        </div>
+      <div class="d-flex align-items-center gap-4"> </div>
 
         <button class="theme-btn" id="themeBtn">🌙</button>
       </div>
@@ -392,103 +329,8 @@
   setTheme(localStorage.getItem('theme') || 'light');
   themeBtn.onclick = () => setTheme(html.getAttribute('data-bs-theme') === 'light' ? 'dark' : 'light');
 
-  // ── Language ────────────────────────────────────────────────────
-  const langGroup = document.getElementById('langGroup');
-  const langSwitch = document.getElementById('langSwitch');
-
-  const dict = {
-    vi: {
-      home: "Trang chủ", products: "Sản phẩm", events: "Sự kiện", contact: "Liên hệ",
-      toys: "Đồ chơi – Toys", stationery: "Văn phòng phẩm – Stationery", books: "Sách – Books",
-      footer: "Tri thức bắt đầu từ một giọt mực", ongoing: "Sự kiện đang diễn ra",
-      title: "InkSpire Bookstore", slogan: "Nơi ý tưởng bắt đầu • Where ideas begin"
-    },
-    en: {
-      home: "Home", products: "Products", events: "Events", contact: "Contact",
-      toys: "Toys", stationery: "Stationery", books: "Books",
-      footer: "Knowledge begins with a drop of ink", ongoing: "Ongoing Events",
-      title: "InkSpire Bookstore", slogan: "Where ideas begin • Nơi ý tưởng bắt đầu"
-    }
-  };
-
-  function setLang(lang) {
-    html.lang = lang;
-    localStorage.setItem('lang', lang);
-    langSwitch.checked = (lang === 'en');
-    document.querySelector('.vi-flag').classList.toggle('inactive', lang !== 'vi');
-    document.querySelector('.en-flag').classList.toggle('inactive', lang !== 'en');
-    document.querySelectorAll('[data-lang-key]').forEach(el => {
-      const k = el.getAttribute('data-lang-key');
-      if (dict[lang][k]) el.textContent = dict[lang][k];
-    });
-  }
-
-  setLang(localStorage.getItem('lang') || 'vi');
-  langGroup.addEventListener('click', async () => {
-    const next = (localStorage.getItem('lang') || 'vi') === 'vi' ? 'en' : 'vi';
-    setLang(next);
-    await renderEventsBox(next);
-  });
-  langSwitch.addEventListener('change', async () => {
-    const next = langSwitch.checked ? 'en' : 'vi';
-    setLang(next);
-    await renderEventsBox(next);
-  });
-  langGroup.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); langGroup.click(); } });
-
-  // ── Translation cache & engine ──────────────────────────────────
-  const CACHE_KEY = 'inkspire_trans_cache_v1';
-  let transCache = {};
-  try { transCache = JSON.parse(localStorage.getItem(CACHE_KEY) || '{}'); } catch {}
-
-  async function translate(text, targetLang) {
-    if (!text || !text.trim() || targetLang === 'vi') return text;
-    const cacheKey = `${targetLang}::${text}`;
-    if (transCache[cacheKey]) return transCache[cacheKey];
-    const LIMIT = 480;
-    async function fetchChunk(chunk) {
-      try {
-        const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(chunk)}&langpair=vi|en`);
-        const json = await res.json();
-        return json?.responseData?.translatedText || chunk;
-      } catch { return chunk; }
-    }
-    let result = '';
-    if (text.length <= LIMIT) {
-      result = await fetchChunk(text);
-    } else {
-      const sentences = text.split(/(?<=[.!?])\s+/);
-      let chunk = '';
-      const parts = [];
-      for (const s of sentences) {
-        if ((chunk + ' ' + s).trim().length > LIMIT) {
-          if (chunk) parts.push(chunk.trim());
-          chunk = s;
-        } else {
-          chunk = (chunk + ' ' + s).trim();
-        }
-      }
-      if (chunk) parts.push(chunk.trim());
-      const translated = await Promise.all(parts.map(fetchChunk));
-      result = translated.join(' ');
-    }
-    transCache[cacheKey] = result;
-    localStorage.setItem(CACHE_KEY, JSON.stringify(transCache));
-    return result;
-  }
-
-  // ── Date parser: handles DD/MM/YYYY HH:MM ──────────────────────
-  function parseEventDate(str) {
-    if (!str) return null;
-    const m = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})(?:\s*(AM|PM))?/i);
-    if (m) {
-      let [, day, month, year, hour, min, ampm] = m;
-      hour = parseInt(hour);
-      if (ampm) {
-        if (ampm.toUpperCase() === 'PM' && hour !== 12) hour += 12;
-        if (ampm.toUpperCase() === 'AM' && hour === 12) hour = 0;
-      }
-      return new Date(+year, +month - 1, +day, hour, parseInt(min));
+  
+        return new Date(+year, +month - 1, +day, hour, parseInt(min));
     }
     return new Date(str);
   }
@@ -505,10 +347,10 @@
   let cachedEvents = [];
   onValue(ref(db, 'events'), (snapshot) => {
     cachedEvents = Object.values(snapshot.val() || {}).slice(0, 3);
-    renderEventsBox(localStorage.getItem('lang') || 'vi');
+    renderEventsBox();
   });
 
-  async function renderEventsBox(lang) {
+    async function renderEventsBox() {
     const list = document.getElementById('events-list');
     if (!list) return;
     list.innerHTML = '';
@@ -517,13 +359,11 @@
       return;
     }
     for (const e of cachedEvents) {
-      const title = lang === 'en' ? await translate(e.title || '', 'en') : (e.title || '');
-      const desc  = lang === 'en' ? await translate(e.desc  || '', 'en') : (e.desc  || '');
       list.innerHTML += `
         <div class="event-card">
-          <h5>${title}</h5>
+          <h5>${e.title || ''}</h5>
           <p>${e.start || e.date || ''}</p>
-          <small>${desc.substring(0, 100)}${desc.length > 100 ? '...' : ''}</small>
+          <small>${(e.desc||'').substring(0, 100)}${(e.desc||'').length > 100 ? '...' : ''}</small>
         </div>`;
     }
   }
