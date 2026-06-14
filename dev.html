@@ -80,12 +80,6 @@
         </ul>
 
         <div class="d-flex align-items-center gap-4">
-          <div class="lang-group" id="langGroup" role="button" tabindex="0">
-            <span class="flag vi-flag" data-lang="vi">🇻🇳</span>
-            <div class="switch">
-              <input type="checkbox" id="langSwitch">
-              <span class="slider"></span>
-            </div>
             <span class="flag en-flag" data-lang="en">🇺🇸</span>
           </div>
           <button class="theme-btn btn btn-sm btn-outline-light" id="themeBtn">🌙</button>
@@ -166,11 +160,11 @@
           </div>
           <div class="col-md-6">
             <label class="form-label">Bắt đầu</label>
-            <input type="text" class="form-control" id="eventStart" placeholder="Ví dụ: 20/01/2026 10:00 AM" required>
+            <input type="datetime-local" class="form-control" id="eventStart" required>
           </div>
           <div class="col-md-6">
             <label class="form-label">Kết thúc</label>
-            <input type="text" class="form-control" id="eventEnd" placeholder="Ví dụ: 20/01/2026 12:00 PM" required>
+            <input type="datetime-local" class="form-control" id="eventEnd" required>
           </div>
           <div class="col-12">
             <label class="form-label">Mô tả</label>
@@ -537,13 +531,21 @@
   window.editEvent = (key) => {
     const e = currentEvents.find(x => x.key === key);
     if (!e) return;
-
+    function toInputDT(str) {
+      if (!str) return '';
+      const m = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})/);
+      if (m) {
+        const [,d,mo,y,h,mi] = m;
+        return `${y}-${mo.padStart(2,'0')}-${d.padStart(2,'0')}T${h.padStart(2,'0')}:${mi}`;
+      }
+      return str;
+    }
     editingEventKey = key;
     document.getElementById('eventTitle').value = e.title;
-    document.getElementById('eventStart').value = e.start;
-    document.getElementById('eventEnd').value = e.end;
-    document.getElementById('eventDesc').value = e.desc;
-    document.getElementById('eventImage').value = e.image;
+    document.getElementById('eventStart').value = toInputDT(e.start);
+    document.getElementById('eventEnd').value   = toInputDT(e.end);
+    document.getElementById('eventDesc').value  = e.desc;
+    document.getElementById('eventImage').value = e.image || '';
     document.getElementById('eventAborted').checked = e.aborted;
     document.getElementById('eventDelayed').checked = e.delayed;
     document.getElementById('eventSubmitBtn').textContent = 'Cập nhật sự kiện';
@@ -576,11 +578,21 @@
 
   document.getElementById('eventForm').addEventListener('submit', async (e) => {
     e.preventDefault();
+    function fmtDT(val) {
+      if (!val) return '';
+      const d = new Date(val);
+      const dd = String(d.getDate()).padStart(2,'0');
+      const mm = String(d.getMonth()+1).padStart(2,'0');
+      const yyyy = d.getFullYear();
+      const hh = String(d.getHours()).padStart(2,'0');
+      const mi = String(d.getMinutes()).padStart(2,'0');
+      return `${dd}/${mm}/${yyyy} ${hh}:${mi}`;
+    }
     const data = {
       title: document.getElementById('eventTitle').value,
-      start: document.getElementById('eventStart').value,
-      end: document.getElementById('eventEnd').value,
-      desc: document.getElementById('eventDesc').value,
+      start: fmtDT(document.getElementById('eventStart').value),
+      end:   fmtDT(document.getElementById('eventEnd').value),
+      desc:  document.getElementById('eventDesc').value,
       image: document.getElementById('eventImage').value,
       aborted: document.getElementById('eventAborted').checked,
       delayed: document.getElementById('eventDelayed').checked
@@ -600,44 +612,6 @@
     const term = e.target.value.toLowerCase().trim();
     renderProducts(currentProducts.filter(p => p.name.toLowerCase().includes(term) || p.category.toLowerCase().includes(term)));
     renderEvents(currentEvents.filter(e => e.title.toLowerCase().includes(term) || e.desc.toLowerCase().includes(term)));
-  });
-
-  // Theme & Language
-  const themeBtn = document.getElementById('themeBtn');
-  function setTheme(mode) {
-    html.setAttribute('data-bs-theme', mode);
-    localStorage.setItem('theme', mode);
-    themeBtn.textContent = mode === 'dark' ? '☀️' : '🌙';
-  }
-  setTheme(localStorage.getItem('theme') || 'light');
-  themeBtn.onclick = () => setTheme(html.getAttribute('data-bs-theme') === 'light' ? 'dark' : 'light');
-
-  const langGroup = document.getElementById('langGroup');
-  const langSwitch = document.getElementById('langSwitch');
-
-  function setLang(lang) {
-    html.lang = lang;
-    localStorage.setItem('lang', lang);
-    langSwitch.checked = (lang === 'en');
-
-    document.querySelector('.vi-flag').classList.toggle('inactive', lang !== 'vi');
-    document.querySelector('.en-flag').classList.toggle('inactive', lang !== 'en');
-
-    document.querySelectorAll('[data-lang-key]').forEach(el => {
-      const k = el.getAttribute('data-lang-key');
-      if (dict[lang][k]) el.textContent = dict[lang][k];
-    });
-  }
-
-  setLang(localStorage.getItem('lang') || 'vi');
-
-  langGroup.addEventListener('click', () => {
-    const cur = localStorage.getItem('lang') || 'vi';
-    setLang(cur === 'vi' ? 'en' : 'vi');
-  });
-
-  langSwitch.addEventListener('change', () => {
-    setLang(langSwitch.checked ? 'en' : 'vi');
   });
 </script>
 </body>
