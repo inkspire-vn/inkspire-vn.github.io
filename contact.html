@@ -74,7 +74,9 @@
         <li class="nav-item"><a class="nav-link active" href="/contact" data-lang-key="contact">Liên hệ</a></li>
       </ul>
 
-      <div class="d-flex align-items-center gap-4"> </div>
+      <div class="d-flex align-items-center gap-4">
+          <span class="flag en-flag" data-lang="en">🇺🇸</span>
+        </div>
 
         <button class="theme-btn" id="themeBtn">🌙</button>
       </div>
@@ -187,7 +189,6 @@ function setTheme(mode) {
 
 setTheme(localStorage.getItem('theme') || 'light');
 themeBtn.onclick = () => setTheme(html.getAttribute('data-bs-theme') === 'light' ? 'dark' : 'light');
-});
 </script>
 </body>
 </html>
