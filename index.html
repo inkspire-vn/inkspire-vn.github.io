@@ -40,7 +40,7 @@
       position: relative;
       height: 65vh;
       min-height: 420px;
-      background: url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80') center/cover no-repeat;
+      background: url('https://images.unsplash.com/photo-1507842217343-583bb7278b66?auto=format&fit=crop&w=1600&q=80') center/cover no-repeat;
       color: white;
       text-shadow: 0 2px 8px rgba(0,0,0,0.75);
       display: flex;
@@ -214,7 +214,9 @@
         <li class="nav-item"><a class="nav-link" href="/contact" data-lang-key="contact">Liên hệ</a></li>
       </ul>
 
-      <div class="d-flex align-items-center gap-4"> </div>
+      <div class="d-flex align-items-center gap-4">
+          <span class="flag en-flag" data-lang="en">🇺🇸</span>
+        </div>
 
         <button class="theme-btn" id="themeBtn">🌙</button>
       </div>
@@ -329,12 +331,6 @@
   setTheme(localStorage.getItem('theme') || 'light');
   themeBtn.onclick = () => setTheme(html.getAttribute('data-bs-theme') === 'light' ? 'dark' : 'light');
 
-  
-        return new Date(+year, +month - 1, +day, hour, parseInt(min));
-    }
-    return new Date(str);
-  }
-
   // ── Firebase: Products sliders ──────────────────────────────────
   onValue(ref(db, 'products'), (snapshot) => {
     const products = Object.values(snapshot.val() || {});
@@ -344,29 +340,23 @@
   });
 
   // ── Firebase: Events box (max 3) ────────────────────────────────
-  let cachedEvents = [];
   onValue(ref(db, 'events'), (snapshot) => {
-    cachedEvents = Object.values(snapshot.val() || {}).slice(0, 3);
-    renderEventsBox();
-  });
-
-    async function renderEventsBox() {
+    const events = Object.values(snapshot.val() || {}).slice(0, 3);
     const list = document.getElementById('events-list');
-    if (!list) return;
     list.innerHTML = '';
-    if (cachedEvents.length === 0) {
+    if (events.length === 0) {
       list.innerHTML = '<p class="text-muted text-center">Chưa có sự kiện nào</p>';
       return;
     }
-    for (const e of cachedEvents) {
+    events.forEach(e => {
       list.innerHTML += `
         <div class="event-card">
-          <h5>${e.title || ''}</h5>
+          <h5>${e.title}</h5>
           <p>${e.start || e.date || ''}</p>
           <small>${(e.desc||'').substring(0, 100)}${(e.desc||'').length > 100 ? '...' : ''}</small>
         </div>`;
-    }
-  }
+    });
+  });
 
   // ── Slider renderer ─────────────────────────────────────────────
   function renderSlider(trackId, items) {
