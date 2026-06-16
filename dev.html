@@ -80,7 +80,6 @@
         </ul>
 
         <div class="d-flex align-items-center gap-4">
-            <span class="flag en-flag" data-lang="en">🇺🇸</span>
           </div>
           <button class="theme-btn btn btn-sm btn-outline-light" id="themeBtn">🌙</button>
           <button id="signOutBtn" class="btn btn-sm btn-outline-light">Đăng xuất</button>
@@ -130,8 +129,15 @@
             </select>
           </div>
           <div class="col-12">
-            <label class="form-label">Link ảnh (URL)</label>
-            <input type="url" class="form-control" id="productImage" placeholder="https://example.com/hinh-anh.jpg" required>
+            <label class="form-label">Ảnh sản phẩm</label>
+            <div class="input-group mb-2">
+              <input type="url" class="form-control" id="productImage" placeholder="https://example.com/hinh-anh.jpg">
+              <span class="input-group-text">hoặc</span>
+              <input type="file" class="form-control" id="productImageFile" accept="image/*">
+            </div>
+            <div id="productImagePreview" class="mt-2" style="display:none;">
+              <img id="productImageThumb" src="" style="max-height:120px;border-radius:8px;border:1px solid #dee2e6;">
+            </div>
           </div>
           <div class="col-12">
             <div class="form-check">
@@ -171,8 +177,15 @@
             <textarea class="form-control" id="eventDesc" rows="3" placeholder="Ví dụ: Buổi kể chuyện vui nhộn cho trẻ em..." required></textarea>
           </div>
           <div class="col-12">
-            <label class="form-label">Link ảnh (URL) – optional</label>
-            <input type="url" class="form-control" id="eventImage" placeholder="https://example.com/su-kien.jpg">
+            <label class="form-label">Ảnh sự kiện <span class="text-muted fw-normal">(không bắt buộc)</span></label>
+            <div class="input-group mb-2">
+              <input type="url" class="form-control" id="eventImage" placeholder="https://example.com/su-kien.jpg">
+              <span class="input-group-text">hoặc</span>
+              <input type="file" class="form-control" id="eventImageFile" accept="image/*">
+            </div>
+            <div id="eventImagePreview" class="mt-2" style="display:none;">
+              <img id="eventImageThumb" src="" style="max-height:120px;border-radius:8px;border:1px solid #dee2e6;">
+            </div>
           </div>
           <div class="col-12">
             <div class="form-check">
@@ -461,13 +474,24 @@
   }
 
   // Events render
+  function parseDate(str) {
+    if (!str) return null;
+    const m = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})(?:\s*(AM|PM))?/i);
+    if (m) {
+      let [,d,mo,y,h,mi,ap]=m; h=parseInt(h);
+      if(ap){if(ap.toUpperCase()==='PM'&&h!==12)h+=12;if(ap.toUpperCase()==='AM'&&h===12)h=0;}
+      return new Date(+y,+mo-1,+d,h,parseInt(mi));
+    }
+    return new Date(str);
+  }
+
   function renderEvents(events) {
     const list = document.getElementById('eventList');
     const now = new Date();
 
     list.innerHTML = events.map(e => {
-      const start = new Date(e.start);
-      const end = new Date(e.end);
+      const start = parseDate(e.start);
+      const end = parseDate(e.end);
       let status = '';
 
       if (e.aborted) status = '<span class="badge bg-secondary">Bị hủy</span>';
@@ -498,6 +522,7 @@
     document.getElementById('productForm').reset();
     document.getElementById('productSubmitBtn').textContent = 'Thêm sản phẩm';
     document.getElementById('productOutOfStock').checked = false;
+    document.getElementById('productImagePreview').style.display = 'none';
     editingProductKey = null;
   }
 
@@ -506,6 +531,7 @@
     document.getElementById('eventSubmitBtn').textContent = 'Thêm sự kiện';
     document.getElementById('eventAborted').checked = false;
     document.getElementById('eventDelayed').checked = false;
+    document.getElementById('eventImagePreview').style.display = 'none';
     editingEventKey = null;
   }
 
@@ -513,14 +539,18 @@
   window.editProduct = (key) => {
     const p = currentProducts.find(x => x.key === key);
     if (!p) return;
-
     editingProductKey = key;
     document.getElementById('productName').value = p.name;
     document.getElementById('productPrice').value = p.price;
     document.getElementById('productCategory').value = p.category;
-    document.getElementById('productImage').value = p.image;
+    document.getElementById('productImage').value = p.image || '';
     document.getElementById('productOutOfStock').checked = p.outOfStock;
+    if (p.image) {
+      document.getElementById('productImageThumb').src = p.image;
+      document.getElementById('productImagePreview').style.display = 'block';
+    }
     document.getElementById('productSubmitBtn').textContent = 'Cập nhật sản phẩm';
+    document.getElementById('products-tab').click();
   };
 
   window.deleteProduct = async (key) => {
@@ -535,20 +565,25 @@
       if (!str) return '';
       const m = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})/);
       if (m) {
-        const [,d,mo,y,h,mi] = m;
+        const [,d,mo,y,h,mi]=m;
         return `${y}-${mo.padStart(2,'0')}-${d.padStart(2,'0')}T${h.padStart(2,'0')}:${mi}`;
       }
       return str;
     }
     editingEventKey = key;
-    document.getElementById('eventTitle').value = e.title;
-    document.getElementById('eventStart').value = toInputDT(e.start);
-    document.getElementById('eventEnd').value   = toInputDT(e.end);
-    document.getElementById('eventDesc').value  = e.desc;
-    document.getElementById('eventImage').value = e.image || '';
+    document.getElementById('eventTitle').value   = e.title;
+    document.getElementById('eventStart').value   = toInputDT(e.start);
+    document.getElementById('eventEnd').value     = toInputDT(e.end);
+    document.getElementById('eventDesc').value    = e.desc;
+    document.getElementById('eventImage').value   = e.image || '';
     document.getElementById('eventAborted').checked = e.aborted;
     document.getElementById('eventDelayed').checked = e.delayed;
+    if (e.image && !e.image.startsWith('data:')) {
+      document.getElementById('eventImageThumb').src = e.image;
+      document.getElementById('eventImagePreview').style.display = 'block';
+    }
     document.getElementById('eventSubmitBtn').textContent = 'Cập nhật sự kiện';
+    document.getElementById('events-tab').click();
   };
 
   window.deleteEvent = async (key) => {
@@ -557,13 +592,40 @@
   };
 
   // Form submits (placeholder - adjust as needed)
+  document.getElementById('productImageFile').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      document.getElementById('productImage').value = '';
+      document.getElementById('productImageThumb').src = ev.target.result;
+      document.getElementById('productImagePreview').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  });
+
+  document.getElementById('productImage').addEventListener('input', () => {
+    document.getElementById('productImageFile').value = '';
+    document.getElementById('productImagePreview').style.display = 'none';
+  });
+
   document.getElementById('productForm').addEventListener('submit', async (e) => {
     e.preventDefault();
+    const fileInput = document.getElementById('productImageFile');
+    const urlInput  = document.getElementById('productImage').value.trim();
+    let imageData = urlInput;
+    if (fileInput.files[0] && !urlInput) {
+      imageData = await new Promise(res => {
+        const r = new FileReader();
+        r.onload = ev => res(ev.target.result);
+        r.readAsDataURL(fileInput.files[0]);
+      });
+    }
     const data = {
       name: document.getElementById('productName').value,
       price: document.getElementById('productPrice').value,
       category: document.getElementById('productCategory').value,
-      image: document.getElementById('productImage').value,
+      image: imageData,
       outOfStock: document.getElementById('productOutOfStock').checked
     };
     if (editingProductKey) {
@@ -573,7 +635,25 @@
       await push(ref(db, 'products'), data);
     }
     e.target.reset();
+    document.getElementById('productImagePreview').style.display = 'none';
     resetProductForm();
+  });
+
+  document.getElementById('eventImageFile').addEventListener('change', (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      document.getElementById('eventImage').value = '';
+      document.getElementById('eventImageThumb').src = ev.target.result;
+      document.getElementById('eventImagePreview').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  });
+
+  document.getElementById('eventImage').addEventListener('input', () => {
+    document.getElementById('eventImageFile').value = '';
+    document.getElementById('eventImagePreview').style.display = 'none';
   });
 
   document.getElementById('eventForm').addEventListener('submit', async (e) => {
@@ -583,17 +663,26 @@
       const d = new Date(val);
       const dd = String(d.getDate()).padStart(2,'0');
       const mm = String(d.getMonth()+1).padStart(2,'0');
-      const yyyy = d.getFullYear();
       const hh = String(d.getHours()).padStart(2,'0');
       const mi = String(d.getMinutes()).padStart(2,'0');
-      return `${dd}/${mm}/${yyyy} ${hh}:${mi}`;
+      return `${dd}/${mm}/${d.getFullYear()} ${hh}:${mi}`;
+    }
+    const fileInput = document.getElementById('eventImageFile');
+    const urlInput  = document.getElementById('eventImage').value.trim();
+    let imageData = urlInput;
+    if (fileInput.files[0] && !urlInput) {
+      imageData = await new Promise(res => {
+        const r = new FileReader();
+        r.onload = ev => res(ev.target.result);
+        r.readAsDataURL(fileInput.files[0]);
+      });
     }
     const data = {
-      title: document.getElementById('eventTitle').value,
-      start: fmtDT(document.getElementById('eventStart').value),
-      end:   fmtDT(document.getElementById('eventEnd').value),
-      desc:  document.getElementById('eventDesc').value,
-      image: document.getElementById('eventImage').value,
+      title:   document.getElementById('eventTitle').value,
+      start:   fmtDT(document.getElementById('eventStart').value),
+      end:     fmtDT(document.getElementById('eventEnd').value),
+      desc:    document.getElementById('eventDesc').value,
+      image:   imageData,
       aborted: document.getElementById('eventAborted').checked,
       delayed: document.getElementById('eventDelayed').checked
     };
@@ -604,6 +693,7 @@
       await push(ref(db, 'events'), data);
     }
     e.target.reset();
+    document.getElementById('eventImagePreview').style.display = 'none';
     resetEventForm();
   });
 
@@ -613,6 +703,16 @@
     renderProducts(currentProducts.filter(p => p.name.toLowerCase().includes(term) || p.category.toLowerCase().includes(term)));
     renderEvents(currentEvents.filter(e => e.title.toLowerCase().includes(term) || e.desc.toLowerCase().includes(term)));
   });
+
+  // Theme & Language
+  const themeBtn = document.getElementById('themeBtn');
+  function setTheme(mode) {
+    html.setAttribute('data-bs-theme', mode);
+    localStorage.setItem('theme', mode);
+    themeBtn.textContent = mode === 'dark' ? '☀️' : '🌙';
+  }
+  setTheme(localStorage.getItem('theme') || 'light');
+  themeBtn.onclick = () => setTheme(html.getAttribute('data-bs-theme') === 'light' ? 'dark' : 'light');
 </script>
 </body>
 </html>
