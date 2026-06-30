@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="/styles.css">
   <style>
-    .product-card { transition:transform 0.25s,box-shadow 0.25s; border:none; border-radius:12px; overflow:hidden; box-shadow:0 6px 20px rgba(0,0,0,0.1); }
+    .product-card { transition:transform 0.25s,box-shadow 0.25s; border:none; border-radius:12px; overflow:hidden; box-shadow:0 6px 20px rgba(0,0,0,0.1); cursor:pointer; }
     .product-card:hover { transform:translateY(-8px); box-shadow:0 16px 40px rgba(0,0,0,0.15); }
     .product-card .card-img-top { height:260px; object-fit:cover; transition:filter 0.4s; }
     .product-card.out-of-stock .card-img-top { filter:grayscale(80%) brightness(90%); }
@@ -72,14 +72,12 @@
   const app = getApps().length ? getApps()[0] : initializeApp(_fc);
   const db = getDatabase(app);
 
-  // Theme
   const html = document.documentElement;
   const themeBtn = document.getElementById('themeBtn');
   function setTheme(mode) { html.setAttribute('data-bs-theme',mode); localStorage.setItem('theme',mode); themeBtn.textContent = mode==='dark'?'☀️':'🌙'; }
   setTheme(localStorage.getItem('theme')||'light');
   themeBtn.onclick = () => setTheme(html.getAttribute('data-bs-theme')==='light'?'dark':'light');
 
-  // Banner
   const _SM={message:{border:"#00c4b4",icon:"📢",label:"Thông báo"},construction:{border:"#ffc107",icon:"🚧",label:"Trang đang được xây dựng"},update:{border:"#0dcaf0",icon:"🔄",label:"Trang đang được cập nhật"},bugfix:{border:"#dc3545",icon:"🐛",label:"Đang sửa lỗi"},maintenance:{border:"#fd7e14",icon:"🔧",label:"Đang bảo trì"},coming_soon:{border:"#6c757d",icon:"⏳",label:"Sắp ra mắt"},limited:{border:"#ffc107",icon:"⚠️",label:"Tính năng có hạn"}};
   onValue(ref(db,"siteStatus/products"),(snap)=>{
     const banner=document.getElementById("site-status-banner");
@@ -90,20 +88,32 @@
     banner.classList.remove("d-none");
   });
 
-  // Products
   onValue(ref(db,'products'),(snapshot)=>{
     const loading=document.getElementById('loading');
     const grid=document.getElementById('product-grid');
     const noProducts=document.getElementById('no-products');
     if(loading)loading.classList.add('d-none');
-    const products=Object.values(snapshot.val()||{});
+    const products=Object.entries(snapshot.val()||{}).map(([key,val])=>({key,...val}));
     if(products.length===0){noProducts.classList.remove('d-none');grid.classList.add('d-none');grid.innerHTML='';return;}
     noProducts.classList.add('d-none');
     grid.classList.remove('d-none');
     grid.innerHTML='';
     products.forEach(p=>{
       const oos=!!p.outOfStock;
-      grid.innerHTML+=`<div class="col-6 col-md-4 col-lg-3"><div class="card h-100 product-card ${oos?'out-of-stock':''} position-relative">${oos?'<span class="out-of-stock-badge">Hết hàng</span>':''}<img src="${p.image||'https://via.placeholder.com/400x300?text=No+Image'}" class="card-img-top" alt="${p.name}"><div class="product-info"><h5 class="product-title">${p.name}</h5><p class="product-category">${p.category||'Không xác định'}</p><p class="product-price ${oos?'text-danger':'text-primary'}">${p.price}</p></div></div></div>`;
+      grid.innerHTML+=`
+        <div class="col-6 col-md-4 col-lg-3">
+          <a href="/product-detail?key=${p.key}" class="text-decoration-none" style="color:inherit;">
+            <div class="card h-100 product-card ${oos?'out-of-stock':''} position-relative">
+              ${oos?'<span class="out-of-stock-badge">Hết hàng</span>':''}
+              <img src="${p.image||'https://via.placeholder.com/400x300?text=No+Image'}" class="card-img-top" alt="${p.name}">
+              <div class="product-info">
+                <h5 class="product-title">${p.name}</h5>
+                <p class="product-category">${p.category||'Không xác định'}</p>
+                <p class="product-price ${oos?'text-danger':'text-primary'}">${p.price}</p>
+              </div>
+            </div>
+          </a>
+        </div>`;
     });
   });
 </script>
