@@ -9,16 +9,44 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="/styles.css">
   <style>
-    .page-hero { background:linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80') center/cover; color:white; height:30vh; min-height:200px; display:flex; align-items:center; justify-content:center; text-shadow:1px 1px 4px rgba(0,0,0,0.7); }
-    .detail-card { background:rgba(255,255,255,0.95); border-radius:16px; padding:2.5rem; box-shadow:0 10px 35px rgba(0,0,0,0.18); border:2px solid var(--green); }
-    [data-bs-theme="dark"] .detail-card { background:#1e293b; border-color:var(--green); }
-    .detail-img { width:100%; max-height:480px; object-fit:cover; border-radius:12px; box-shadow:0 6px 20px rgba(0,0,0,0.18); }
-    .detail-price { font-size:2rem; font-weight:700; color:var(--bs-primary); }
-    .detail-desc { white-space:pre-wrap; line-height:1.7; font-size:1.05rem; }
-    .out-of-stock-badge { background:#dc3545; color:white; padding:6px 16px; border-radius:999px; font-weight:600; display:inline-block; }
+    .product-detail-wrap {
+      min-height: calc(100vh - 130px);
+      padding: 3rem 0 4rem;
+    }
+    .product-img {
+      width: 100%;
+      max-height: 520px;
+      object-fit: cover;
+      border-radius: 16px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    }
+    .product-info-card {
+      background: var(--bs-body-bg);
+      border-radius: 16px;
+      padding: 2.5rem;
+      border: 2px solid var(--bs-primary);
+      box-shadow: 0 6px 24px rgba(0,0,0,0.1);
+      height: 100%;
+    }
+    .product-category-badge {
+      display: inline-block;
+      background: rgba(0,196,180,0.12);
+      color: var(--bs-primary);
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 4px 14px;
+      border-radius: 999px;
+      margin-bottom: 1rem;
+    }
+    .product-name { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .product-price { font-size: 2.2rem; font-weight: 800; color: var(--bs-primary); margin: 1.2rem 0; }
+    .product-desc { white-space: pre-wrap; line-height: 1.75; font-size: 1.05rem; color: var(--bs-body-color); opacity: 0.85; }
+    .oos-badge { display:inline-block; background:#dc3545; color:white; padding:6px 18px; border-radius:999px; font-weight:600; margin-bottom:1rem; }
+    .divider { border-top: 1px solid var(--bs-border-color); margin: 1.5rem 0; }
   </style>
 </head>
 <body>
+
 <nav class="navbar navbar-expand-lg sticky-top shadow">
   <div class="container">
     <a class="navbar-brand fw-bold fs-4" href="https://inkspire-vn.github.io">InkSpire</a>
@@ -37,50 +65,55 @@
   </div>
 </nav>
 
-<section class="page-hero text-center">
-  <div class="container h-100 d-flex align-items-center justify-content-center">
-    <h1 class="display-5 fw-bold text-white">Chi tiết sản phẩm</h1>
-  </div>
-</section>
+<div class="product-detail-wrap">
+  <div class="container">
 
-<main class="container py-5">
-  <div id="loading" class="text-center py-5">
-    <div class="spinner-border text-primary" role="status" style="width:3rem;height:3rem;"></div>
-    <p class="mt-4 fs-5">Đang tải...</p>
-  </div>
+    <!-- Loading -->
+    <div id="loading" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status" style="width:3rem;height:3rem;"></div>
+      <p class="mt-4 fs-5">Đang tải sản phẩm...</p>
+    </div>
 
-  <div id="notfound" class="text-center py-5 d-none">
-    <i class="fas fa-exclamation-circle fa-5x text-muted mb-4"></i>
-    <h4 class="mb-3">Không tìm thấy sản phẩm</h4>
-    <a href="/products" class="btn btn-outline-primary btn-lg px-5">Quay về Sản phẩm</a>
-  </div>
+    <!-- Not found -->
+    <div id="notfound" class="text-center py-5 d-none">
+      <i class="fas fa-exclamation-circle fa-5x text-muted mb-4"></i>
+      <h4 class="mb-3">Không tìm thấy sản phẩm</h4>
+      <a href="/products" class="btn btn-outline-primary btn-lg px-5">← Quay về Sản phẩm</a>
+    </div>
 
-  <div id="detail-content" class="d-none">
-    <div class="row justify-content-center">
-      <div class="col-lg-10">
-        <div class="detail-card">
-          <div class="row g-4 align-items-start">
-            <div class="col-md-6">
-              <img id="d-image" class="detail-img" src="" alt="">
-            </div>
-            <div class="col-md-6">
-              <h2 id="d-name" class="fw-bold mb-2"></h2>
-              <p id="d-category" class="text-muted mb-3"></p>
-              <p id="d-oos" class="d-none"><span class="out-of-stock-badge">Hết hàng</span></p>
-              <p id="d-price" class="detail-price mb-4"></p>
-              <h5 class="mb-2">Mô tả</h5>
-              <p id="d-desc" class="detail-desc text-muted"></p>
-              <a href="/contact" class="btn btn-primary btn-lg mt-3">Liên hệ đặt mua</a>
-            </div>
-          </div>
+    <!-- Detail -->
+    <div id="detail-content" class="d-none">
+      <div class="mb-4">
+        <a href="/products" class="text-decoration-none text-muted small">
+          <i class="fas fa-arrow-left me-1"></i> Tất cả sản phẩm
+        </a>
+      </div>
+      <div class="row g-4 align-items-start">
+        <!-- Image -->
+        <div class="col-md-6" id="d-image-col">
+          <img id="d-image" class="product-img" src="" alt="">
         </div>
-        <div class="text-center mt-4">
-          <a href="/products" class="btn btn-outline-secondary">← Quay về Sản phẩm</a>
+        <!-- Info -->
+        <div class="col-md-6">
+          <div class="product-info-card">
+            <div id="d-oos" class="d-none"><span class="oos-badge">Hết hàng</span></div>
+            <span id="d-category" class="product-category-badge"></span>
+            <h1 id="d-name" class="product-name"></h1>
+            <p id="d-price" class="product-price"></p>
+            <div class="divider"></div>
+            <p class="fw-semibold mb-1">Mô tả</p>
+            <p id="d-desc" class="product-desc"></p>
+            <div class="divider"></div>
+            <a href="/contact" class="btn btn-primary btn-lg w-100 mt-2">
+              <i class="fas fa-phone-alt me-2"></i>Liên hệ đặt mua
+            </a>
+          </div>
         </div>
       </div>
     </div>
+
   </div>
-</main>
+</div>
 
 <footer class="text-center py-4" style="background:var(--bs-primary);color:white;">
   <div class="container">
@@ -105,10 +138,9 @@
 
   const params = new URLSearchParams(window.location.search);
   const key = params.get('key');
-
-  const loading = document.getElementById('loading');
+  const loading  = document.getElementById('loading');
   const notfound = document.getElementById('notfound');
-  const content = document.getElementById('detail-content');
+  const content  = document.getElementById('detail-content');
 
   if (!key) {
     loading.classList.add('d-none');
@@ -117,17 +149,22 @@
     onValue(ref(db, `products/${key}`), (snapshot) => {
       const p = snapshot.val();
       loading.classList.add('d-none');
-      if (!p) { notfound.classList.remove('d-none'); content.classList.add('d-none'); return; }
-      notfound.classList.add('d-none');
+      if (!p) { notfound.classList.remove('d-none'); return; }
       content.classList.remove('d-none');
 
       document.title = `${p.name} - InkSpire Bookstore`;
-      document.getElementById('d-image').src = p.image || 'https://via.placeholder.com/600x600?text=No+Image';
-      document.getElementById('d-image').alt = p.name;
+      const img = document.getElementById('d-image');
+      if (p.image) {
+        img.src = p.image;
+        img.alt = p.name;
+      } else {
+        document.getElementById('d-image-col').classList.add('d-none');
+        document.querySelector('.col-md-6:last-child').classList.replace('col-md-6','col-12');
+      }
       document.getElementById('d-name').textContent = p.name;
-      document.getElementById('d-category').textContent = p.category || 'Không xác định';
+      document.getElementById('d-category').textContent = p.category || 'Sản phẩm';
       document.getElementById('d-price').textContent = p.price;
-      document.getElementById('d-desc').textContent = p.desc && p.desc.trim() ? p.desc : 'Chưa có mô tả cho sản phẩm này.';
+      document.getElementById('d-desc').textContent = p.desc?.trim() ? p.desc : 'Chưa có mô tả cho sản phẩm này.';
       document.getElementById('d-oos').classList.toggle('d-none', !p.outOfStock);
     });
   }
