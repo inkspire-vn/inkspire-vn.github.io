@@ -246,7 +246,7 @@
   onAuthStateChanged(auth, (user) => {
     if (user) {
       if (user.email !== 'inkspire.bookstore.vn@gmail.com') {
-        alert('Chỉ tài khoản inkspire.bookstore.vn@gmail.com được phép truy cập.');
+        alert('Chỉ tài khoản của nhân viên được phép truy cập.');
         signOut(auth);
         return;
       }
