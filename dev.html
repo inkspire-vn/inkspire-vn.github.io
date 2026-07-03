@@ -4,14 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dev - InkSpire</title>
+
   <link rel="icon" type="image/png" href="https://avatars.githubusercontent.com/u/254457838?s=64">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="/styles.css">
+
+  <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
     import { getDatabase, ref, onValue, push, remove, update, set } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+
     const firebaseConfig = {
       apiKey: "AIzaSyA9XvWCZOyaSuT42HBMUgQQ7KTuQYPWLbE",
       authDomain: "inkspire-vn-security.firebaseapp.com",
@@ -22,32 +26,51 @@
       appId: "1:774834040534:web:c7b5e64826176a44b4e377",
       measurementId: "G-MJSRBE9TY6"
     };
+
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
-    window.db = db; window.auth = auth; window.provider = provider;
-    window.signInWithPopup = signInWithPopup; window.onAuthStateChanged = onAuthStateChanged; window.signOut = signOut;
-    window.ref = ref; window.onValue = onValue; window.push = push; window.remove = remove; window.update = update; window.set = set;
+
+    window.db = db;
+    window.auth = auth;
+    window.provider = provider;
+    window.signInWithPopup = signInWithPopup;
+    window.onAuthStateChanged = onAuthStateChanged;
+    window.signOut = signOut;
+    window.ref = ref;
+    window.onValue = onValue;
+    window.push = push;
+    window.remove = remove;
+    window.update = update;
+    window.set = set;
+
     signOut(auth).catch(() => {});
   </script>
 </head>
 <body>
 
+<!-- Login screen -->
 <div id="login-screen" class="d-flex align-items-center justify-content-center vh-100 bg-light">
-  <div class="card p-5 shadow-lg text-center" style="max-width:420px;">
+  <div class="card p-5 shadow-lg text-center" style="max-width: 420px;">
     <h3>Dev Access - Staff Only</h3>
     <p class="text-muted mb-4">Đăng nhập bằng Google để quản lý</p>
-    <button id="googleSignIn" class="btn btn-outline-danger btn-lg w-100 mb-3"><i class="fab fa-google me-2"></i> Đăng nhập bằng Google</button>
+    <button id="googleSignIn" class="btn btn-outline-danger btn-lg w-100 mb-3">
+      <i class="fab fa-google me-2"></i> Đăng nhập bằng Google
+    </button>
     <p id="loginError" class="text-danger d-none">Đăng nhập thất bại hoặc không được phép.</p>
   </div>
 </div>
 
+<!-- Main content -->
 <div id="dev-content" class="d-none">
   <nav class="navbar navbar-expand-lg sticky-top shadow bg-primary navbar-dark">
     <div class="container">
       <a class="navbar-brand fw-bold fs-4" href="https://inkspire-vn.github.io">InkSpire</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain"><span class="navbar-toggler-icon"></span></button>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
       <div class="collapse navbar-collapse" id="navMain">
         <ul class="navbar-nav me-auto">
           <li class="nav-item"><a class="nav-link" href="https://inkspire-vn.github.io">Trang chủ</a></li>
@@ -55,7 +78,10 @@
           <li class="nav-item"><a class="nav-link" href="/events">Sự kiện</a></li>
           <li class="nav-item"><a class="nav-link" href="/contact">Liên hệ</a></li>
         </ul>
-        <div class="d-flex align-items-center gap-3">
+
+        <div class="d-flex align-items-center gap-4">
+            <span class="flag en-flag" data-lang="en">🇺🇸</span>
+          </div>
           <button class="theme-btn btn btn-sm btn-outline-light" id="themeBtn">🌙</button>
           <button id="signOutBtn" class="btn btn-sm btn-outline-light">Đăng xuất</button>
         </div>
@@ -71,9 +97,15 @@
     </div>
 
     <ul class="nav nav-tabs mb-4" id="devTabs" role="tablist">
-      <li class="nav-item" role="presentation"><button class="nav-link active" id="products-tab" data-bs-toggle="tab" data-bs-target="#products" type="button" role="tab">Sản phẩm</button></li>
-      <li class="nav-item" role="presentation"><button class="nav-link" id="events-tab" data-bs-toggle="tab" data-bs-target="#events" type="button" role="tab">Sự kiện</button></li>
-      <li class="nav-item" role="presentation"><button class="nav-link" id="status-tab" data-bs-toggle="tab" data-bs-target="#status" type="button" role="tab">Trạng thái Website</button></li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="products-tab" data-bs-toggle="tab" data-bs-target="#products" type="button" role="tab">Sản phẩm</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="events-tab" data-bs-toggle="tab" data-bs-target="#events" type="button" role="tab">Sự kiện</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="status-tab" data-bs-toggle="tab" data-bs-target="#status" type="button" role="tab">Trạng thái Website</button>
+      </li>
     </ul>
 
     <div class="tab-content" id="devTabContent">
@@ -86,10 +118,6 @@
             <input type="text" class="form-control" id="productName" placeholder="Ví dụ: Sách Harry Potter" required>
           </div>
           <div class="col-md-3">
-            <label class="form-label">Giá</label>
-            <input type="text" class="form-control" id="productPrice" placeholder="Ví dụ: 220k" required>
-          </div>
-          <div class="col-md-3">
             <label class="form-label">Danh mục</label>
             <select class="form-select" id="productCategory" required>
               <option value="Books">Sách – Books</option>
@@ -98,30 +126,22 @@
             </select>
           </div>
           <div class="col-12">
-            <label class="form-label">Mô tả sản phẩm <span class="text-muted fw-normal">(không bắt buộc)</span></label>
-            <textarea class="form-control" id="productDesc" rows="3" placeholder="Mô tả chi tiết về sản phẩm..."></textarea>
-          </div>
-          <div class="col-12">
-            <label class="form-label">Ảnh sản phẩm</label>
-            <div class="input-group mb-2">
-              <input type="url" class="form-control" id="productImage" placeholder="https://example.com/hinh-anh.jpg">
-              <span class="input-group-text">hoặc</span>
-              <input type="file" class="form-control" id="productImageFile" accept="image/*">
-            </div>
-            <div id="productImagePreview" class="mt-2" style="display:none;">
-              <img id="productImageThumb" src="" style="max-height:120px;border-radius:8px;border:1px solid #dee2e6;">
-            </div>
+            <label class="form-label">Link ảnh (URL)</label>
+            <input type="url" class="form-control" id="productImage" placeholder="https://example.com/hinh-anh.jpg" required>
           </div>
           <div class="col-12">
             <div class="form-check">
               <input class="form-check-input" type="checkbox" id="productOutOfStock">
-              <label class="form-check-label" for="productOutOfStock">Hết hàng (Out of Stock)</label>
+              <label class="form-check-label" for="productOutOfStock">
+                Hết hàng (Out of Stock)
+              </label>
             </div>
           </div>
           <div class="col-12 text-end">
             <button type="submit" class="btn btn-primary" id="productSubmitBtn">Thêm sản phẩm</button>
           </div>
         </form>
+
         <h4 class="mt-5 mb-3">Sản phẩm hiện tại</h4>
         <div id="productList" class="list-group"></div>
       </div>
@@ -147,15 +167,8 @@
             <textarea class="form-control" id="eventDesc" rows="3" placeholder="Ví dụ: Buổi kể chuyện vui nhộn cho trẻ em..." required></textarea>
           </div>
           <div class="col-12">
-            <label class="form-label">Ảnh sự kiện <span class="text-muted fw-normal">(không bắt buộc)</span></label>
-            <div class="input-group mb-2">
-              <input type="url" class="form-control" id="eventImage" placeholder="https://example.com/su-kien.jpg">
-              <span class="input-group-text">hoặc</span>
-              <input type="file" class="form-control" id="eventImageFile" accept="image/*">
-            </div>
-            <div id="eventImagePreview" class="mt-2" style="display:none;">
-              <img id="eventImageThumb" src="" style="max-height:120px;border-radius:8px;border:1px solid #dee2e6;">
-            </div>
+            <label class="form-label">Link ảnh (URL) – optional</label>
+            <input type="url" class="form-control" id="eventImage" placeholder="https://example.com/su-kien.jpg">
           </div>
           <div class="col-12">
             <div class="form-check">
@@ -171,14 +184,17 @@
             <button type="submit" class="btn btn-primary" id="eventSubmitBtn">Thêm sự kiện</button>
           </div>
         </form>
+
         <h4 class="mt-5 mb-3">Sự kiện hiện tại</h4>
         <div id="eventList" class="list-group"></div>
       </div>
 
-      <!-- Website Status tab -->
+      <!-- Website Status tab (per-page controls) -->
       <div class="tab-pane fade" id="status" role="tabpanel">
         <h3 class="mb-2">Trạng thái Website</h3>
         <p class="text-muted mb-4">Kiểm soát banner thông báo hiển thị trên từng trang riêng biệt.</p>
+
+        <!-- Page selector tabs -->
         <ul class="nav nav-pills mb-4" id="pageTabs">
           <li class="nav-item"><button class="nav-link active" data-page="index">🏠 Trang chủ</button></li>
           <li class="nav-item"><button class="nav-link" data-page="products">📦 Sản phẩm</button></li>
@@ -186,6 +202,7 @@
           <li class="nav-item"><button class="nav-link" data-page="contact">📞 Liên hệ</button></li>
           <li class="nav-item"><button class="nav-link text-danger fw-bold" data-page="all">🌐 Tất cả trang</button></li>
         </ul>
+
         <div class="card p-4 mb-4">
           <h5 class="mb-3">Đang chỉnh: <strong id="currentPageLabel">Trang chủ</strong></h5>
           <div class="row g-3">
@@ -212,6 +229,8 @@
             </div>
           </div>
         </div>
+
+        <!-- All pages overview -->
         <h5 class="mb-3">Tổng quan tất cả trang</h5>
         <div class="row g-3 mb-5" id="statusOverview">
           <div class="col-md-3"><div class="card p-3 text-center" id="ov-index"><div class="fw-bold mb-1">🏠 Trang chủ</div><span class="badge bg-secondary" id="ov-index-badge">Đang tải...</span></div></div>
@@ -219,6 +238,8 @@
           <div class="col-md-3"><div class="card p-3 text-center" id="ov-events"><div class="fw-bold mb-1">📅 Sự kiện</div><span class="badge bg-secondary" id="ov-events-badge">Đang tải...</span></div></div>
           <div class="col-md-3"><div class="card p-3 text-center" id="ov-contact"><div class="fw-bold mb-1">📞 Liên hệ</div><span class="badge bg-secondary" id="ov-contact-badge">Đang tải...</span></div></div>
         </div>
+
+        <!-- Live preview -->
         <h5 class="mb-3">Xem trước banner (theo trang đang chọn)</h5>
         <div id="statusPreview" class="rounded overflow-hidden border" style="min-height:52px;">
           <div class="text-muted p-3 text-center small">Chọn loại trạng thái để xem trước</div>
@@ -229,8 +250,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 <script type="module">
   const html = document.documentElement;
+
   let currentProducts = [];
   let currentEvents = [];
   let editingProductKey = null;
@@ -243,10 +266,11 @@
   const loginError = document.getElementById('loginError');
   const searchInput = document.getElementById('searchInput');
 
+  // Auth
   onAuthStateChanged(auth, (user) => {
     if (user) {
       if (user.email !== 'inkspire.bookstore.vn@gmail.com') {
-        alert('Chỉ tài khoản của nhân viên được phép truy cập.');
+        alert('Chỉ tài khoản inkspire.bookstore.vn@gmail.com được phép truy cập.');
         signOut(auth);
         return;
       }
@@ -262,22 +286,17 @@
   });
 
   googleSignIn.addEventListener('click', async () => {
-    try { await signInWithPopup(auth, provider); }
-    catch (error) { loginError.classList.remove('d-none'); console.error('Login error:', error); }
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (error) {
+      loginError.classList.remove('d-none');
+      console.error('Login error:', error);
+    }
   });
 
-  signOutBtn.addEventListener('click', async () => { await signOut(auth); });
-
-  function parseDate(str) {
-    if (!str) return null;
-    const m = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})(?:\s*(AM|PM))?/i);
-    if (m) {
-      let [,d,mo,y,h,mi,ap]=m; h=parseInt(h);
-      if(ap){if(ap.toUpperCase()==='PM'&&h!==12)h+=12;if(ap.toUpperCase()==='AM'&&h===12)h=0;}
-      return new Date(+y,+mo-1,+d,h,parseInt(mi));
-    }
-    return new Date(str);
-  }
+  signOutBtn.addEventListener('click', async () => {
+    await signOut(auth);
+  });
 
   function loadAllData() {
     onValue(ref(db, 'products'), (snapshot) => {
@@ -290,6 +309,7 @@
       renderEvents(currentEvents);
     });
 
+    // ── Site Status per-page system ──────────────────────────────
     const STATUS_META = {
       none:         { color: null,      border: null,      icon: '',   label: 'None' },
       message:      { color: '#e8f5e9', border: '#00c4b4', icon: '📢', label: 'Message' },
@@ -300,26 +320,34 @@
       coming_soon:  { color: '#e2e3e5', border: '#6c757d', icon: '⏳', label: 'Coming Soon' },
       limited:      { color: '#fff3cd', border: '#ffc107', icon: '⚠️', label: 'Limited Availability' },
     };
+
     const BADGE_COLORS = {
-      none: 'bg-success', message: 'bg-success', construction: 'bg-warning text-dark',
+      none: 'bg-success', message: 'bg-success',
+      construction: 'bg-warning text-dark',
       update: 'bg-info text-dark', bugfix: 'bg-danger',
       maintenance: 'bg-warning text-dark', coming_soon: 'bg-secondary', limited: 'bg-warning text-dark'
     };
+
     const PAGES = ['index', 'products', 'events', 'contact'];
     const PAGE_LABELS = { index: 'Trang chủ', products: 'Sản phẩm', events: 'Sự kiện', contact: 'Liên hệ' };
     let currentStatusPage = 'index';
     let pageStatusCache = {};
 
+    // Listen to all page statuses
     PAGES.forEach(page => {
       onValue(ref(db, `siteStatus/${page}`), (snap) => {
         const data = snap.val() || { type: 'none', message: '' };
         pageStatusCache[page] = data;
+
+        // Update overview badge
         const badge = document.getElementById(`ov-${page}-badge`);
         if (badge) {
           const m = STATUS_META[data.type] || STATUS_META.none;
           badge.className = `badge ${BADGE_COLORS[data.type] || 'bg-secondary'}`;
           badge.textContent = (m.icon ? m.icon + ' ' : '') + (data.type === 'none' ? '✅ Normal' : m.label);
         }
+
+        // If this is the currently selected page, update the form + preview
         if (page === currentStatusPage) {
           document.getElementById('pageStatusType').value = data.type || 'none';
           document.getElementById('pageStatusMessage').value = data.message || '';
@@ -328,12 +356,15 @@
       });
     });
 
+    // Page pill tab switching
     document.querySelectorAll('#pageTabs .nav-link').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('#pageTabs .nav-link').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentStatusPage = btn.dataset.page;
         document.getElementById('currentPageLabel').textContent = currentStatusPage === 'all' ? 'Tất cả trang' : PAGE_LABELS[currentStatusPage];
+
+        // For "all", clear the form rather than loading one page's state
         if (currentStatusPage === 'all') {
           document.getElementById('pageStatusType').value = 'none';
           document.getElementById('pageStatusMessage').value = '';
@@ -351,11 +382,18 @@
       });
     });
 
+    // Live preview on type/message change
     document.getElementById('pageStatusType').addEventListener('change', () => {
-      renderStatusPreview(document.getElementById('pageStatusType').value, document.getElementById('pageStatusMessage').value);
+      renderStatusPreview(
+        document.getElementById('pageStatusType').value,
+        document.getElementById('pageStatusMessage').value
+      );
     });
     document.getElementById('pageStatusMessage').addEventListener('input', () => {
-      renderStatusPreview(document.getElementById('pageStatusType').value, document.getElementById('pageStatusMessage').value);
+      renderStatusPreview(
+        document.getElementById('pageStatusType').value,
+        document.getElementById('pageStatusMessage').value
+      );
     });
 
     function renderStatusPreview(type, message) {
@@ -366,13 +404,16 @@
       }
       const m = STATUS_META[type] || { color: '#e2e3e5', border: '#6c757d', icon: 'ℹ️', label: type };
       const msg = message.trim() || m.label;
+      // Always use the light-mode color in preview so it's visible in both themes
       preview.innerHTML = `<div style="background:${m.color};color:#1a1f25;border-bottom:3px solid ${m.border};padding:10px 24px;text-align:center;font-weight:600;font-size:0.95rem;">${m.icon}&nbsp;${msg}</div>`;
     }
 
+    // Save button
     document.getElementById('statusSaveBtn').addEventListener('click', async () => {
       const type = document.getElementById('pageStatusType').value;
       const message = document.getElementById('pageStatusMessage').value.trim();
       const btn = document.getElementById('statusSaveBtn');
+
       if (currentStatusPage === 'all') {
         if (!confirm(`Áp dụng trạng thái này cho TẤT CẢ 4 trang?`)) return;
         await Promise.all(PAGES.map(p => set(ref(db, `siteStatus/${p}`), { type, message })));
@@ -385,6 +426,7 @@
       }
     });
 
+    // Clear button
     document.getElementById('statusClearBtn').addEventListener('click', async () => {
       if (currentStatusPage === 'all') {
         if (!confirm('Xoá banner của TẤT CẢ 4 trang?')) return;
@@ -396,13 +438,14 @@
     });
   }
 
+  // Products render
   function renderProducts(products) {
     const list = document.getElementById('productList');
     list.innerHTML = products.map(p => `
       <div class="list-group-item d-flex justify-content-between align-items-center">
         <div>
-          <strong>${p.name}</strong> — ${p.price} (${p.category})<br>
-          <small class="text-muted">${(p.desc||'').substring(0,80)}${(p.desc||'').length>80?'...':''}</small>
+          <strong>${p.name}</strong> (${p.category})<br>
+          <small class="text-muted">${p.image.substring(0, 60)}${p.image.length > 60 ? '...' : ''}</small>
           ${p.outOfStock ? '<span class="badge bg-danger ms-2">Hết hàng</span>' : ''}
         </div>
         <div>
@@ -413,24 +456,28 @@
     `).join('');
   }
 
+  // Events render
   function renderEvents(events) {
     const list = document.getElementById('eventList');
     const now = new Date();
+
     list.innerHTML = events.map(e => {
-      const start = parseDate(e.start);
-      const end = parseDate(e.end);
+      const start = new Date(e.start);
+      const end = new Date(e.end);
       let status = '';
+
       if (e.aborted) status = '<span class="badge bg-secondary">Bị hủy</span>';
       else if (e.delayed) status = '<span class="badge bg-warning">Bị hoãn</span>';
-      else if (start && now < start) status = '<span class="badge bg-info">Sắp diễn ra</span>';
-      else if (end && now > end) status = '<span class="badge bg-danger">Đã kết thúc</span>';
+      else if (now < start) status = '<span class="badge bg-info">Sắp diễn ra</span>';
+      else if (now > end) status = '<span class="badge bg-danger">Đã kết thúc</span>';
       else status = '<span class="badge bg-success">Đang diễn ra</span>';
+
       return `
         <div class="list-group-item d-flex justify-content-between align-items-center">
           <div>
             <strong>${e.title}</strong><br>
             <small>${e.start} → ${e.end}</small><br>
-            <small>${(e.desc||'').substring(0,80)}${(e.desc||'').length>80?'...':''}</small><br>
+            <small>${e.desc.substring(0, 80)}${e.desc.length > 80 ? '...' : ''}</small><br>
             ${status}
           </div>
           <div>
@@ -442,11 +489,11 @@
     }).join('');
   }
 
+  // Reset functions
   function resetProductForm() {
     document.getElementById('productForm').reset();
     document.getElementById('productSubmitBtn').textContent = 'Thêm sản phẩm';
     document.getElementById('productOutOfStock').checked = false;
-    document.getElementById('productImagePreview').style.display = 'none';
     editingProductKey = null;
   }
 
@@ -455,26 +502,21 @@
     document.getElementById('eventSubmitBtn').textContent = 'Thêm sự kiện';
     document.getElementById('eventAborted').checked = false;
     document.getElementById('eventDelayed').checked = false;
-    document.getElementById('eventImagePreview').style.display = 'none';
     editingEventKey = null;
   }
 
+  // Edit & delete functions (placeholder - adjust as needed)
   window.editProduct = (key) => {
     const p = currentProducts.find(x => x.key === key);
     if (!p) return;
+
     editingProductKey = key;
     document.getElementById('productName').value = p.name;
     document.getElementById('productPrice').value = p.price;
     document.getElementById('productCategory').value = p.category;
-    document.getElementById('productDesc').value = p.desc || '';
-    document.getElementById('productImage').value = p.image || '';
+    document.getElementById('productImage').value = p.image;
     document.getElementById('productOutOfStock').checked = p.outOfStock;
-    if (p.image) {
-      document.getElementById('productImageThumb').src = p.image;
-      document.getElementById('productImagePreview').style.display = 'block';
-    }
     document.getElementById('productSubmitBtn').textContent = 'Cập nhật sản phẩm';
-    document.getElementById('products-tab').click();
   };
 
   window.deleteProduct = async (key) => {
@@ -497,17 +539,12 @@
     editingEventKey = key;
     document.getElementById('eventTitle').value = e.title;
     document.getElementById('eventStart').value = toInputDT(e.start);
-    document.getElementById('eventEnd').value = toInputDT(e.end);
-    document.getElementById('eventDesc').value = e.desc;
+    document.getElementById('eventEnd').value   = toInputDT(e.end);
+    document.getElementById('eventDesc').value  = e.desc;
     document.getElementById('eventImage').value = e.image || '';
     document.getElementById('eventAborted').checked = e.aborted;
     document.getElementById('eventDelayed').checked = e.delayed;
-    if (e.image) {
-      document.getElementById('eventImageThumb').src = e.image;
-      document.getElementById('eventImagePreview').style.display = 'block';
-    }
     document.getElementById('eventSubmitBtn').textContent = 'Cập nhật sự kiện';
-    document.getElementById('events-tab').click();
   };
 
   window.deleteEvent = async (key) => {
@@ -515,63 +552,23 @@
     await remove(ref(db, `events/${key}`));
   };
 
-  document.getElementById('productImageFile').addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      document.getElementById('productImage').value = '';
-      document.getElementById('productImageThumb').src = ev.target.result;
-      document.getElementById('productImagePreview').style.display = 'block';
-    };
-    reader.readAsDataURL(file);
-  });
-  document.getElementById('productImage').addEventListener('input', () => {
-    document.getElementById('productImageFile').value = '';
-    document.getElementById('productImagePreview').style.display = 'none';
-  });
-
+  // Form submits (placeholder - adjust as needed)
   document.getElementById('productForm').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const fileInput = document.getElementById('productImageFile');
-    const urlInput  = document.getElementById('productImage').value.trim();
-    let imageData = urlInput;
-    if (fileInput.files[0] && !urlInput) {
-      imageData = await new Promise(res => {
-        const r = new FileReader();
-        r.onload = ev => res(ev.target.result);
-        r.readAsDataURL(fileInput.files[0]);
-      });
-    }
     const data = {
       name: document.getElementById('productName').value,
-      price: document.getElementById('productPrice').value,
       category: document.getElementById('productCategory').value,
-      desc: document.getElementById('productDesc').value,
-      image: imageData,
+      image: document.getElementById('productImage').value,
       outOfStock: document.getElementById('productOutOfStock').checked
     };
-    if (editingProductKey) { await update(ref(db, `products/${editingProductKey}`), data); editingProductKey = null; }
-    else { await push(ref(db, 'products'), data); }
+    if (editingProductKey) {
+      await update(ref(db, `products/${editingProductKey}`), data);
+      editingProductKey = null;
+    } else {
+      await push(ref(db, 'products'), data);
+    }
     e.target.reset();
-    document.getElementById('productImagePreview').style.display = 'none';
     resetProductForm();
-  });
-
-  document.getElementById('eventImageFile').addEventListener('change', (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      document.getElementById('eventImage').value = '';
-      document.getElementById('eventImageThumb').src = ev.target.result;
-      document.getElementById('eventImagePreview').style.display = 'block';
-    };
-    reader.readAsDataURL(file);
-  });
-  document.getElementById('eventImage').addEventListener('input', () => {
-    document.getElementById('eventImageFile').value = '';
-    document.getElementById('eventImagePreview').style.display = 'none';
   });
 
   document.getElementById('eventForm').addEventListener('submit', async (e) => {
@@ -581,50 +578,36 @@
       const d = new Date(val);
       const dd = String(d.getDate()).padStart(2,'0');
       const mm = String(d.getMonth()+1).padStart(2,'0');
+      const yyyy = d.getFullYear();
       const hh = String(d.getHours()).padStart(2,'0');
       const mi = String(d.getMinutes()).padStart(2,'0');
-      return `${dd}/${mm}/${d.getFullYear()} ${hh}:${mi}`;
-    }
-    const fileInput = document.getElementById('eventImageFile');
-    const urlInput  = document.getElementById('eventImage').value.trim();
-    let imageData = urlInput;
-    if (fileInput.files[0] && !urlInput) {
-      imageData = await new Promise(res => {
-        const r = new FileReader();
-        r.onload = ev => res(ev.target.result);
-        r.readAsDataURL(fileInput.files[0]);
-      });
+      return `${dd}/${mm}/${yyyy} ${hh}:${mi}`;
     }
     const data = {
       title: document.getElementById('eventTitle').value,
       start: fmtDT(document.getElementById('eventStart').value),
-      end: fmtDT(document.getElementById('eventEnd').value),
-      desc: document.getElementById('eventDesc').value,
-      image: imageData,
+      end:   fmtDT(document.getElementById('eventEnd').value),
+      desc:  document.getElementById('eventDesc').value,
+      image: document.getElementById('eventImage').value,
       aborted: document.getElementById('eventAborted').checked,
       delayed: document.getElementById('eventDelayed').checked
     };
-    if (editingEventKey) { await update(ref(db, `events/${editingEventKey}`), data); editingEventKey = null; }
-    else { await push(ref(db, 'events'), data); }
+    if (editingEventKey) {
+      await update(ref(db, `events/${editingEventKey}`), data);
+      editingEventKey = null;
+    } else {
+      await push(ref(db, 'events'), data);
+    }
     e.target.reset();
-    document.getElementById('eventImagePreview').style.display = 'none';
     resetEventForm();
   });
 
+  // Search filter
   searchInput.addEventListener('input', (e) => {
     const term = e.target.value.toLowerCase().trim();
     renderProducts(currentProducts.filter(p => p.name.toLowerCase().includes(term) || p.category.toLowerCase().includes(term)));
-    renderEvents(currentEvents.filter(e => e.title.toLowerCase().includes(term) || (e.desc||'').toLowerCase().includes(term)));
+    renderEvents(currentEvents.filter(e => e.title.toLowerCase().includes(term) || e.desc.toLowerCase().includes(term)));
   });
-
-  const themeBtn = document.getElementById('themeBtn');
-  function setTheme(mode) {
-    html.setAttribute('data-bs-theme', mode);
-    localStorage.setItem('theme', mode);
-    themeBtn.textContent = mode === 'dark' ? '☀️' : '🌙';
-  }
-  setTheme(localStorage.getItem('theme') || 'light');
-  themeBtn.onclick = () => setTheme(html.getAttribute('data-bs-theme') === 'light' ? 'dark' : 'light');
 </script>
 </body>
 </html>
