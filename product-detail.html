@@ -164,7 +164,7 @@
       document.getElementById('d-name').textContent = p.name;
       document.getElementById('d-category').textContent = p.category || 'Sản phẩm';
       document.getElementById('d-price').textContent = p.price;
-      document.getElementById('d-desc').textContent = p.desc?.trim() ? p.desc : 'Chưa có mô tả cho sản phẩm này.';
+      document.getElementById('d-desc').innerHTML = p.desc?.trim() ? p.desc : 'Chưa có mô tả cho sản phẩm này.';
       document.getElementById('d-oos').classList.toggle('d-none', !p.outOfStock);
     });
   }
