@@ -9,12 +9,13 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="/styles.css">
   <style>
-    .page-hero { background:linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.5)), url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80') center/cover; color:white; height:30vh; min-height:200px; display:flex; align-items:center; justify-content:center; text-shadow:1px 1px 4px rgba(0,0,0,0.7); }
-    .detail-card { background:rgba(255,255,255,0.95); border-radius:16px; padding:2.5rem; box-shadow:0 10px 35px rgba(0,0,0,0.18); border:2px solid var(--green); }
-    [data-bs-theme="dark"] .detail-card { background:#1e293b; border-color:var(--green); }
-    .detail-img { width:100%; max-height:480px; object-fit:cover; border-radius:12px; box-shadow:0 6px 20px rgba(0,0,0,0.18); }
-    .detail-desc { white-space:pre-wrap; line-height:1.7; font-size:1.05rem; }
-    .detail-time { font-weight:600; color:var(--bs-primary); font-size:1.1rem; }
+    .event-detail-wrap { min-height: calc(100vh - 130px); padding: 3rem 0 4rem; }
+    .event-img { width:100%; max-height:520px; object-fit:cover; border-radius:16px; box-shadow:0 8px 32px rgba(0,0,0,0.18); }
+    .event-info-card { background:var(--bs-body-bg); border-radius:16px; padding:2.5rem; border:2px solid var(--bs-primary); box-shadow:0 6px 24px rgba(0,0,0,0.1); height:100%; }
+    .event-name { font-size:2rem; font-weight:700; margin-bottom:0.5rem; }
+    .event-time { font-size:1.05rem; font-weight:600; color:var(--bs-primary); }
+    .event-desc { line-height:1.75; font-size:1.05rem; color:var(--bs-body-color); opacity:0.85; }
+    .divider { border-top:1px solid var(--bs-border-color); margin:1.5rem 0; }
     .status-badge { font-size:1rem; padding:8px 18px; border-radius:999px; font-weight:600; display:inline-block; }
     .status-upcoming { background:#0dcaf0; color:white; }
     .status-current  { background:#198754; color:white; }
@@ -24,6 +25,7 @@
   </style>
 </head>
 <body>
+
 <nav class="navbar navbar-expand-lg sticky-top shadow">
   <div class="container">
     <a class="navbar-brand fw-bold fs-4" href="https://inkspire-vn.github.io">InkSpire</a>
@@ -42,49 +44,60 @@
   </div>
 </nav>
 
-<section class="page-hero text-center">
-  <div class="container h-100 d-flex align-items-center justify-content-center">
-    <h1 class="display-5 fw-bold text-white">Chi tiết sự kiện</h1>
-  </div>
-</section>
+<div class="event-detail-wrap">
+  <div class="container">
 
-<main class="container py-5">
-  <div id="loading" class="text-center py-5">
-    <div class="spinner-border text-primary" role="status" style="width:3rem;height:3rem;"></div>
-    <p class="mt-4 fs-5">Đang tải...</p>
-  </div>
+    <!-- Loading -->
+    <div id="loading" class="text-center py-5">
+      <div class="spinner-border text-primary" role="status" style="width:3rem;height:3rem;"></div>
+      <p class="mt-4 fs-5">Đang tải sự kiện...</p>
+    </div>
 
-  <div id="notfound" class="text-center py-5 d-none">
-    <i class="fas fa-exclamation-circle fa-5x text-muted mb-4"></i>
-    <h4 class="mb-3">Không tìm thấy sự kiện</h4>
-    <a href="/events" class="btn btn-outline-primary btn-lg px-5">Quay về Sự kiện</a>
-  </div>
+    <!-- Not found -->
+    <div id="notfound" class="text-center py-5 d-none">
+      <i class="fas fa-exclamation-circle fa-5x text-muted mb-4"></i>
+      <h4 class="mb-3">Không tìm thấy sự kiện</h4>
+      <a href="/events" class="btn btn-outline-primary btn-lg px-5">← Quay về Sự kiện</a>
+    </div>
 
-  <div id="detail-content" class="d-none">
-    <div class="row justify-content-center">
-      <div class="col-lg-10">
-        <div class="detail-card">
-          <div class="row g-4 align-items-start">
-            <div class="col-md-6" id="d-image-col">
-              <img id="d-image" class="detail-img" src="" alt="">
-            </div>
-            <div class="col-md-6" id="d-text-col">
-              <h2 id="d-title" class="fw-bold mb-3"></h2>
-              <p class="detail-time mb-1"><i class="fas fa-clock me-2"></i><span id="d-start"></span> → <span id="d-end"></span></p>
-              <div class="mb-4 mt-3" id="d-status"></div>
-              <h5 class="mb-2">Mô tả</h5>
-              <p id="d-desc" class="detail-desc text-muted"></p>
-              <a href="/contact" class="btn btn-primary btn-lg mt-3">Liên hệ để biết thêm</a>
-            </div>
-          </div>
+    <!-- Detail -->
+    <div id="detail-content" class="d-none">
+      <div class="mb-4">
+        <a href="/events" class="text-decoration-none text-muted small">
+          <i class="fas fa-arrow-left me-1"></i> Tất cả sự kiện
+        </a>
+      </div>
+      <div class="row g-4 align-items-start">
+        <!-- Image -->
+        <div class="col-md-6" id="d-image-col">
+          <img id="d-image" class="event-img" src="" alt="">
         </div>
-        <div class="text-center mt-4">
-          <a href="/events" class="btn btn-outline-secondary">← Quay về Sự kiện</a>
+        <!-- Info -->
+        <div class="col-md-6" id="d-info-col">
+          <div class="event-info-card">
+            <div id="d-status" class="mb-3"></div>
+            <h1 id="d-title" class="event-name"></h1>
+            <div class="divider"></div>
+            <p class="event-time mb-1">
+              <i class="fas fa-calendar-alt me-2"></i>Bắt đầu: <span id="d-start"></span>
+            </p>
+            <p class="event-time mt-2">
+              <i class="fas fa-calendar-check me-2"></i>Kết thúc: <span id="d-end"></span>
+            </p>
+            <div class="divider"></div>
+            <p class="fw-semibold mb-1">Mô tả</p>
+            <div id="d-desc" class="event-desc"></div>
+            <div class="divider"></div>
+            <a href="/contact" class="btn btn-primary btn-lg w-100 mt-2">
+              <i class="fas fa-phone-alt me-2"></i>Liên hệ để biết thêm
+            </a>
+          </div>
         </div>
       </div>
     </div>
+
   </div>
-</main>
+</div>
 
 <footer class="text-center py-4" style="background:var(--bs-primary);color:white;">
   <div class="container">
@@ -120,10 +133,9 @@
 
   const params = new URLSearchParams(window.location.search);
   const key = params.get('key');
-
-  const loading = document.getElementById('loading');
+  const loading  = document.getElementById('loading');
   const notfound = document.getElementById('notfound');
-  const content = document.getElementById('detail-content');
+  const content  = document.getElementById('detail-content');
 
   if (!key) {
     loading.classList.add('d-none');
@@ -132,34 +144,37 @@
     onValue(ref(db, `events/${key}`), (snapshot) => {
       const e = snapshot.val();
       loading.classList.add('d-none');
-      if (!e) { notfound.classList.remove('d-none'); content.classList.add('d-none'); return; }
-      notfound.classList.add('d-none');
+      if (!e) { notfound.classList.remove('d-none'); return; }
       content.classList.remove('d-none');
 
       document.title = `${e.title} - InkSpire Bookstore`;
-      document.getElementById('d-title').textContent = e.title || 'Không có tiêu đề';
-      document.getElementById('d-start').textContent = e.start || 'N/A';
-      document.getElementById('d-end').textContent = e.end || 'N/A';
-      document.getElementById('d-desc').textContent = e.desc && e.desc.trim() ? e.desc : 'Chưa có mô tả cho sự kiện này.';
 
+      // Image — hide col if no image, expand info to full width
       if (e.image) {
         document.getElementById('d-image').src = e.image;
         document.getElementById('d-image').alt = e.title;
       } else {
         document.getElementById('d-image-col').classList.add('d-none');
-        document.getElementById('d-text-col').classList.remove('col-md-6');
-        document.getElementById('d-text-col').classList.add('col-12');
+        document.getElementById('d-info-col').classList.replace('col-md-6','col-12');
       }
 
+      document.getElementById('d-title').textContent = e.title || 'Không có tiêu đề';
+      document.getElementById('d-start').textContent = e.start || 'N/A';
+      document.getElementById('d-end').textContent   = e.end   || 'N/A';
+
+      // Description — innerHTML allows HTML easter eggs
+      document.getElementById('d-desc').innerHTML = e.desc?.trim() ? e.desc : 'Chưa có mô tả cho sự kiện này.';
+
+      // Status badge
       const start = parseDate(e.start);
-      const end = parseDate(e.end);
-      const now = new Date();
+      const end   = parseDate(e.end);
+      const now   = new Date();
       let sc, st;
-      if (e.aborted)             { sc='status-aborted';  st='Bị hủy'; }
-      else if (e.delayed)        { sc='status-delayed';  st='Bị hoãn'; }
-      else if (start && now < start) { sc='status-upcoming'; st='Sắp diễn ra'; }
-      else if (end && now > end)     { sc='status-expired';  st='Đã kết thúc'; }
-      else                        { sc='status-current';  st='Đang diễn ra'; }
+      if      (e.aborted)              { sc='status-aborted';  st='Bị hủy'; }
+      else if (e.delayed)              { sc='status-delayed';  st='Bị hoãn'; }
+      else if (start && now < start)   { sc='status-upcoming'; st='Sắp diễn ra'; }
+      else if (end   && now > end)     { sc='status-expired';  st='Đã kết thúc'; }
+      else                             { sc='status-current';  st='Đang diễn ra'; }
       document.getElementById('d-status').innerHTML = `<span class="status-badge ${sc}">${st}</span>`;
     });
   }
