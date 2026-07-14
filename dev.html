@@ -259,7 +259,15 @@
 <script type="module">
   const html = document.documentElement;
 
-  let currentProducts = [];
+  // ── Theme ──────────────────────────────────────────────────────
+  const themeBtn = document.getElementById('themeBtn');
+  function setTheme(mode) {
+    html.setAttribute('data-bs-theme', mode);
+    localStorage.setItem('theme', mode);
+    themeBtn.textContent = mode === 'dark' ? '☀️' : '🌙';
+  }
+  setTheme(localStorage.getItem('theme') || 'light');
+  themeBtn.onclick = () => setTheme(html.getAttribute('data-bs-theme') === 'light' ? 'dark' : 'light');
   let currentEvents = [];
   let editingProductKey = null;
   let editingEventKey = null;
