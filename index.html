@@ -169,6 +169,20 @@
 
     .item:hover img { transform: scale(1.065); }
 
+    .price {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--bs-primary);
+      color: white;
+      font-weight: 600;
+      padding: 6px 16px;
+      border-radius: 999px;
+      box-shadow: 0 3px 10px rgba(0,0,0,0.35);
+      white-space: nowrap;
+    }
+
     @keyframes slide-left  { 0% { transform: translateX(0);    } 100% { transform: translateX(-50%); } }
     @keyframes slide-right { 0% { transform: translateX(-50%); } 100% { transform: translateX(0);    } }
 
@@ -252,6 +266,12 @@
     <div class="track" id="books-track"></div>
   </div>
 
+  <!-- Decoration Slider -->
+  <h2 class="mb-5 mt-5">Đồ trang trí – Decoration</h2>
+  <div class="slider-wrap reverse">
+    <div class="track" id="decoration-track"></div>
+  </div>
+
 </main>
 
 <footer class="text-center py-4" style="background:var(--bs-primary); color:white;">
@@ -319,9 +339,10 @@
   // ── Firebase: Products sliders ──────────────────────────────────
   onValue(ref(db, 'products'), (snapshot) => {
     const products = Object.values(snapshot.val() || {});
-    renderSlider('toys-track',       products.filter(p => (p.category||'').toLowerCase().includes('toy')     || (p.category||'').includes('đồ chơi')));
-    renderSlider('stationery-track', products.filter(p => (p.category||'').toLowerCase().includes('station') || (p.category||'').includes('văn phòng')));
-    renderSlider('books-track',      products.filter(p => (p.category||'').toLowerCase().includes('book')    || (p.category||'').includes('sách')));
+    renderSlider('toys-track',       products.filter(p => (p.category||'').toLowerCase().includes('toy')        || (p.category||'').includes('đồ chơi')));
+    renderSlider('stationery-track', products.filter(p => (p.category||'').toLowerCase().includes('station')    || (p.category||'').includes('văn phòng')));
+    renderSlider('books-track',      products.filter(p => (p.category||'').toLowerCase().includes('book')       || (p.category||'').includes('sách')));
+    renderSlider('decoration-track', products.filter(p => (p.category||'').toLowerCase().includes('decoration') || (p.category||'').includes('trang trí')));
   });
 
   // ── Firebase: Events box (max 3) ────────────────────────────────
@@ -356,6 +377,7 @@
       html2 += `
         <div class="item">
           <img src="${item.image || 'https://via.placeholder.com/240x320?text=No+Image'}" alt="${item.name}">
+          <div class="price">${item.price}</div>
         </div>`;
     });
     track.innerHTML = html2 + html2; // duplicate for infinite loop
