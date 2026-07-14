@@ -4,14 +4,18 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dev - InkSpire</title>
+
   <link rel="icon" type="image/png" href="https://avatars.githubusercontent.com/u/254457838?s=64">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link rel="stylesheet" href="/styles.css">
+
+  <!-- Firebase SDK -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
     import { getDatabase, ref, onValue, push, remove, update, set } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
     import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+
     const firebaseConfig = {
       apiKey: "AIzaSyA9XvWCZOyaSuT42HBMUgQQ7KTuQYPWLbE",
       authDomain: "inkspire-vn-security.firebaseapp.com",
@@ -22,21 +26,33 @@
       appId: "1:774834040534:web:c7b5e64826176a44b4e377",
       measurementId: "G-MJSRBE9TY6"
     };
+
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
-    window.db = db; window.auth = auth; window.provider = provider;
-    window.signInWithPopup = signInWithPopup; window.onAuthStateChanged = onAuthStateChanged; window.signOut = signOut;
-    window.ref = ref; window.onValue = onValue; window.push = push; window.remove = remove; window.update = update; window.set = set;
+
+    window.db = db;
+    window.auth = auth;
+    window.provider = provider;
+    window.signInWithPopup = signInWithPopup;
+    window.onAuthStateChanged = onAuthStateChanged;
+    window.signOut = signOut;
+    window.ref = ref;
+    window.onValue = onValue;
+    window.push = push;
+    window.remove = remove;
+    window.update = update;
+    window.set = set;
+
     signOut(auth).catch(() => {});
   </script>
 </head>
 <body>
 
 <!-- Login screen -->
-<div id="login-screen" class="d-flex align-items-center justify-content-center vh-100">
-  <div class="card p-5 shadow-lg text-center" style="max-width:420px;">
+<div id="login-screen" class="d-flex align-items-center justify-content-center vh-100 bg-light">
+  <div class="card p-5 shadow-lg text-center" style="max-width: 420px;">
     <h3>Dev Access - Staff Only</h3>
     <p class="text-muted mb-4">Đăng nhập bằng Google để quản lý</p>
     <button id="googleSignIn" class="btn btn-outline-danger btn-lg w-100 mb-3">
@@ -48,21 +64,25 @@
 
 <!-- Main content -->
 <div id="dev-content" class="d-none">
-  <nav class="navbar navbar-expand-lg sticky-top shadow" style="background-color:var(--bs-primary)!important;">
+  <nav class="navbar navbar-expand-lg sticky-top shadow bg-primary navbar-dark">
     <div class="container">
-      <a class="navbar-brand fw-bold fs-4 text-white" href="https://inkspire-vn.github.io">InkSpire</a>
+      <a class="navbar-brand fw-bold fs-4" href="https://inkspire-vn.github.io">InkSpire</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain">
         <span class="navbar-toggler-icon"></span>
       </button>
+
       <div class="collapse navbar-collapse" id="navMain">
         <ul class="navbar-nav me-auto">
-          <li class="nav-item"><a class="nav-link text-white" href="https://inkspire-vn.github.io">Trang chủ</a></li>
-          <li class="nav-item"><a class="nav-link text-white" href="/products">Sản phẩm</a></li>
-          <li class="nav-item"><a class="nav-link text-white" href="/events">Sự kiện</a></li>
-          <li class="nav-item"><a class="nav-link text-white" href="/contact">Liên hệ</a></li>
+          <li class="nav-item"><a class="nav-link" href="https://inkspire-vn.github.io">Trang chủ</a></li>
+          <li class="nav-item"><a class="nav-link" href="/products">Sản phẩm</a></li>
+          <li class="nav-item"><a class="nav-link" href="/events">Sự kiện</a></li>
+          <li class="nav-item"><a class="nav-link" href="/contact">Liên hệ</a></li>
         </ul>
-        <div class="d-flex align-items-center gap-2">
-          <button class="theme-btn" id="themeBtn">🌙</button>
+
+        <div class="d-flex align-items-center gap-4">
+            <span class="flag en-flag" data-lang="en">🇺🇸</span>
+          </div>
+          <button class="theme-btn btn btn-sm btn-outline-light" id="themeBtn">🌙</button>
           <button id="signOutBtn" class="btn btn-sm btn-outline-light">Đăng xuất</button>
         </div>
       </div>
@@ -70,7 +90,7 @@
   </nav>
 
   <main class="container py-5">
-    <h1 class="text-center mb-5">Dev – Quản lý Sản phẩm, Sự kiện & Trạng thái Website</h1>
+    <h1 class="text-center mb-5">Dev - Quản lý Sản phẩm, Sự kiện & Trạng thái Website</h1>
 
     <div class="mb-4">
       <input type="text" id="searchInput" class="form-control" placeholder="Tìm theo tên, danh mục, tiêu đề...">
@@ -89,14 +109,17 @@
     </ul>
 
     <div class="tab-content" id="devTabContent">
-
-      <!-- ── Products tab ── -->
+      <!-- Products tab -->
       <div class="tab-pane fade show active" id="products" role="tabpanel">
         <h3 class="mb-4">Thêm / Sửa sản phẩm</h3>
         <form id="productForm" class="row g-3 mb-5">
-          <div class="col-md-9">
+          <div class="col-md-6">
             <label class="form-label">Tên sản phẩm</label>
             <input type="text" class="form-control" id="productName" placeholder="Ví dụ: Sách Harry Potter" required>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label">Giá</label>
+            <input type="text" class="form-control" id="productPrice" placeholder="Ví dụ: 220k" required>
           </div>
           <div class="col-md-3">
             <label class="form-label">Danh mục</label>
@@ -104,45 +127,31 @@
               <option value="Books">Sách – Books</option>
               <option value="Stationery">Văn phòng phẩm – Stationery</option>
               <option value="Toys">Đồ chơi – Toys</option>
+              <option value="Decoration">Đồ trang trí – Decoration</option>
             </select>
           </div>
           <div class="col-12">
-            <label class="form-label d-flex justify-content-between align-items-center">
-              <span>Mô tả sản phẩm <span class="text-muted fw-normal">(không bắt buộc)</span></span>
-              <button type="button" class="btn btn-sm btn-outline-primary" id="genProductDesc">
-                ✨ Tự tạo mô tả
-              </button>
-            </label>
-            <textarea class="form-control" id="productDesc" rows="3" placeholder="Mô tả chi tiết về sản phẩm..."></textarea>
-            <div id="genProductStatus" class="form-text d-none"></div>
-          </div>
-          <div class="col-12">
-            <label class="form-label">Ảnh sản phẩm</label>
-            <div class="input-group mb-2">
-              <input type="url" class="form-control" id="productImage" placeholder="https://example.com/hinh-anh.jpg">
-              <span class="input-group-text">hoặc</span>
-              <input type="file" class="form-control" id="productImageFile" accept="image/*">
-            </div>
-            <div id="productImagePreview" class="mt-2" style="display:none;">
-              <img id="productImageThumb" src="" style="max-height:120px;border-radius:8px;border:1px solid #dee2e6;">
-            </div>
+            <label class="form-label">Link ảnh (URL)</label>
+            <input type="url" class="form-control" id="productImage" placeholder="https://example.com/hinh-anh.jpg" required>
           </div>
           <div class="col-12">
             <div class="form-check">
               <input class="form-check-input" type="checkbox" id="productOutOfStock">
-              <label class="form-check-label" for="productOutOfStock">Hết hàng (Out of Stock)</label>
+              <label class="form-check-label" for="productOutOfStock">
+                Hết hàng (Out of Stock)
+              </label>
             </div>
           </div>
           <div class="col-12 text-end">
-            <button type="button" class="btn btn-outline-secondary me-2" id="productCancelBtn" style="display:none;">Hủy</button>
             <button type="submit" class="btn btn-primary" id="productSubmitBtn">Thêm sản phẩm</button>
           </div>
         </form>
+
         <h4 class="mt-5 mb-3">Sản phẩm hiện tại</h4>
         <div id="productList" class="list-group"></div>
       </div>
 
-      <!-- ── Events tab ── -->
+      <!-- Events tab -->
       <div class="tab-pane fade" id="events" role="tabpanel">
         <h3 class="mb-4">Thêm / Sửa sự kiện</h3>
         <form id="eventForm" class="row g-3 mb-5">
@@ -159,25 +168,12 @@
             <input type="datetime-local" class="form-control" id="eventEnd" required>
           </div>
           <div class="col-12">
-            <label class="form-label d-flex justify-content-between align-items-center">
-              <span>Mô tả</span>
-              <button type="button" class="btn btn-sm btn-outline-primary" id="genEventDesc">
-                ✨ Tự tạo mô tả
-              </button>
-            </label>
+            <label class="form-label">Mô tả</label>
             <textarea class="form-control" id="eventDesc" rows="3" placeholder="Ví dụ: Buổi kể chuyện vui nhộn cho trẻ em..." required></textarea>
-            <div id="genEventStatus" class="form-text d-none"></div>
           </div>
           <div class="col-12">
-            <label class="form-label">Ảnh sự kiện <span class="text-muted fw-normal">(không bắt buộc)</span></label>
-            <div class="input-group mb-2">
-              <input type="url" class="form-control" id="eventImage" placeholder="https://example.com/su-kien.jpg">
-              <span class="input-group-text">hoặc</span>
-              <input type="file" class="form-control" id="eventImageFile" accept="image/*">
-            </div>
-            <div id="eventImagePreview" class="mt-2" style="display:none;">
-              <img id="eventImageThumb" src="" style="max-height:120px;border-radius:8px;border:1px solid #dee2e6;">
-            </div>
+            <label class="form-label">Link ảnh (URL) – optional</label>
+            <input type="url" class="form-control" id="eventImage" placeholder="https://example.com/su-kien.jpg">
           </div>
           <div class="col-12">
             <div class="form-check">
@@ -190,18 +186,20 @@
             </div>
           </div>
           <div class="col-12 text-end">
-            <button type="button" class="btn btn-outline-secondary me-2" id="eventCancelBtn" style="display:none;">Hủy</button>
             <button type="submit" class="btn btn-primary" id="eventSubmitBtn">Thêm sự kiện</button>
           </div>
         </form>
+
         <h4 class="mt-5 mb-3">Sự kiện hiện tại</h4>
         <div id="eventList" class="list-group"></div>
       </div>
 
-      <!-- ── Website Status tab ── -->
+      <!-- Website Status tab (per-page controls) -->
       <div class="tab-pane fade" id="status" role="tabpanel">
         <h3 class="mb-2">Trạng thái Website</h3>
         <p class="text-muted mb-4">Kiểm soát banner thông báo hiển thị trên từng trang riêng biệt.</p>
+
+        <!-- Page selector tabs -->
         <ul class="nav nav-pills mb-4" id="pageTabs">
           <li class="nav-item"><button class="nav-link active" data-page="index">🏠 Trang chủ</button></li>
           <li class="nav-item"><button class="nav-link" data-page="products">📦 Sản phẩm</button></li>
@@ -209,6 +207,7 @@
           <li class="nav-item"><button class="nav-link" data-page="contact">📞 Liên hệ</button></li>
           <li class="nav-item"><button class="nav-link text-danger fw-bold" data-page="all">🌐 Tất cả trang</button></li>
         </ul>
+
         <div class="card p-4 mb-4">
           <h5 class="mb-3">Đang chỉnh: <strong id="currentPageLabel">Trang chủ</strong></h5>
           <div class="row g-3">
@@ -235,14 +234,18 @@
             </div>
           </div>
         </div>
+
+        <!-- All pages overview -->
         <h5 class="mb-3">Tổng quan tất cả trang</h5>
-        <div class="row g-3 mb-5">
-          <div class="col-md-3"><div class="card p-3 text-center"><div class="fw-bold mb-1">🏠 Trang chủ</div><span class="badge bg-secondary" id="ov-index-badge">Đang tải...</span></div></div>
-          <div class="col-md-3"><div class="card p-3 text-center"><div class="fw-bold mb-1">📦 Sản phẩm</div><span class="badge bg-secondary" id="ov-products-badge">Đang tải...</span></div></div>
-          <div class="col-md-3"><div class="card p-3 text-center"><div class="fw-bold mb-1">📅 Sự kiện</div><span class="badge bg-secondary" id="ov-events-badge">Đang tải...</span></div></div>
-          <div class="col-md-3"><div class="card p-3 text-center"><div class="fw-bold mb-1">📞 Liên hệ</div><span class="badge bg-secondary" id="ov-contact-badge">Đang tải...</span></div></div>
+        <div class="row g-3 mb-5" id="statusOverview">
+          <div class="col-md-3"><div class="card p-3 text-center" id="ov-index"><div class="fw-bold mb-1">🏠 Trang chủ</div><span class="badge bg-secondary" id="ov-index-badge">Đang tải...</span></div></div>
+          <div class="col-md-3"><div class="card p-3 text-center" id="ov-products"><div class="fw-bold mb-1">📦 Sản phẩm</div><span class="badge bg-secondary" id="ov-products-badge">Đang tải...</span></div></div>
+          <div class="col-md-3"><div class="card p-3 text-center" id="ov-events"><div class="fw-bold mb-1">📅 Sự kiện</div><span class="badge bg-secondary" id="ov-events-badge">Đang tải...</span></div></div>
+          <div class="col-md-3"><div class="card p-3 text-center" id="ov-contact"><div class="fw-bold mb-1">📞 Liên hệ</div><span class="badge bg-secondary" id="ov-contact-badge">Đang tải...</span></div></div>
         </div>
-        <h5 class="mb-3">Xem trước banner</h5>
+
+        <!-- Live preview -->
+        <h5 class="mb-3">Xem trước banner (theo trang đang chọn)</h5>
         <div id="statusPreview" class="rounded overflow-hidden border" style="min-height:52px;">
           <div class="text-muted p-3 text-center small">Chọn loại trạng thái để xem trước</div>
         </div>
@@ -252,328 +255,66 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 <script type="module">
   const html = document.documentElement;
+
   let currentProducts = [];
-  let currentEvents   = [];
+  let currentEvents = [];
   let editingProductKey = null;
-  let editingEventKey   = null;
+  let editingEventKey = null;
 
-  // ── Theme (fixed — was missing from this module) ────────────────
-  const themeBtn = document.getElementById('themeBtn');
-  function setTheme(mode) {
-    html.setAttribute('data-bs-theme', mode);
-    localStorage.setItem('theme', mode);
-    themeBtn.textContent = mode === 'dark' ? '☀️' : '🌙';
-  }
-  setTheme(localStorage.getItem('theme') || 'light');
-  themeBtn.onclick = () => setTheme(html.getAttribute('data-bs-theme') === 'light' ? 'dark' : 'light');
+  const loginScreen = document.getElementById('login-screen');
+  const devContent = document.getElementById('dev-content');
+  const googleSignIn = document.getElementById('googleSignIn');
+  const signOutBtn = document.getElementById('signOutBtn');
+  const loginError = document.getElementById('loginError');
+  const searchInput = document.getElementById('searchInput');
 
-  // ── Auth ────────────────────────────────────────────────────────
+  // Auth
   onAuthStateChanged(auth, (user) => {
     if (user) {
       if (user.email !== 'inkspire.bookstore.vn@gmail.com') {
         alert('Chỉ tài khoản inkspire.bookstore.vn@gmail.com được phép truy cập.');
-        signOut(auth); return;
+        signOut(auth);
+        return;
       }
-      document.getElementById('login-screen').classList.add('d-none');
-      document.getElementById('dev-content').classList.remove('d-none');
+      loginScreen.classList.add('d-none');
+      devContent.classList.remove('d-none');
       loadAllData();
     } else {
-      document.getElementById('login-screen').classList.remove('d-none');
-      document.getElementById('dev-content').classList.add('d-none');
-      resetProductForm(); resetEventForm();
+      loginScreen.classList.remove('d-none');
+      devContent.classList.add('d-none');
+      resetProductForm();
+      resetEventForm();
     }
   });
-  document.getElementById('googleSignIn').addEventListener('click', async () => {
-    try { await signInWithPopup(auth, provider); }
-    catch { document.getElementById('loginError').classList.remove('d-none'); }
-  });
-  document.getElementById('signOutBtn').addEventListener('click', () => signOut(auth));
 
-  // ── Date helpers ────────────────────────────────────────────────
-  function parseDate(str) {
-    if (!str) return null;
-    const m = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})(?:\s*(AM|PM))?/i);
-    if (m) {
-      let [,d,mo,y,h,mi,ap]=m; h=parseInt(h);
-      if(ap){if(ap.toUpperCase()==='PM'&&h!==12)h+=12;if(ap.toUpperCase()==='AM'&&h===12)h=0;}
-      return new Date(+y,+mo-1,+d,h,parseInt(mi));
-    }
-    return new Date(str);
-  }
-  function fmtDT(val) {
-    if (!val) return '';
-    const d = new Date(val);
-    return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-  }
-  function toInputDT(str) {
-    if (!str) return '';
-    const m = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})/);
-    if (m) {
-      const [,d,mo,y,h,mi] = m;
-      return `${y}-${mo.padStart(2,'0')}-${d.padStart(2,'0')}T${h.padStart(2,'0')}:${mi}`;
-    }
-    return str;
-  }
-
-  // ── AI Description Generator (Cloudflare AI — free, no key needed client-side) ─
-  async function generateDesc(name, type) {
-    const prompt = type === 'product'
-      ? `Viết mô tả ngắn hấp dẫn bằng tiếng Việt cho sản phẩm nhà sách tên: "${name}". Tối đa 3 câu, không dùng emoji.`
-      : `Viết mô tả ngắn hấp dẫn bằng tiếng Việt cho sự kiện nhà sách tên: "${name}". Tối đa 3 câu, không dùng emoji.`;
+  googleSignIn.addEventListener('click', async () => {
     try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'x-api-key': 'PLACEHOLDER', 'anthropic-version': '2023-06-01' },
-        body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 200, messages: [{ role: 'user', content: prompt }] })
-      });
-      // Fallback to free Pollinations text API if Anthropic fails
-      throw new Error('use fallback');
-    } catch {
-      try {
-        const res = await fetch(`https://text.pollinations.ai/${encodeURIComponent(prompt)}`);
-        const text = await res.text();
-        return text.trim();
-      } catch {
-        return null;
-      }
+      await signInWithPopup(auth, provider);
+    } catch (error) {
+      loginError.classList.remove('d-none');
+      console.error('Login error:', error);
     }
-  }
-
-  // ── AI button handlers ──────────────────────────────────────────
-  document.getElementById('genProductDesc').addEventListener('click', async () => {
-    const name = document.getElementById('productName').value.trim();
-    if (!name) { alert('Nhập tên sản phẩm trước nhé!'); return; }
-    const btn = document.getElementById('genProductDesc');
-    const status = document.getElementById('genProductStatus');
-    btn.disabled = true; btn.textContent = '⏳ Đang tạo...';
-    status.textContent = 'Đang kết nối AI...'; status.classList.remove('d-none');
-    const desc = await generateDesc(name, 'product');
-    btn.disabled = false; btn.textContent = '✨ Tự tạo mô tả';
-    if (desc) {
-      document.getElementById('productDesc').value = desc;
-      status.textContent = '✅ Đã tạo mô tả!';
-    } else {
-      status.textContent = '❌ Không thể tạo mô tả, vui lòng thử lại.';
-    }
-    setTimeout(() => status.classList.add('d-none'), 3000);
   });
 
-  document.getElementById('genEventDesc').addEventListener('click', async () => {
-    const name = document.getElementById('eventTitle').value.trim();
-    if (!name) { alert('Nhập tiêu đề sự kiện trước nhé!'); return; }
-    const btn = document.getElementById('genEventDesc');
-    const status = document.getElementById('genEventStatus');
-    btn.disabled = true; btn.textContent = '⏳ Đang tạo...';
-    status.textContent = 'Đang kết nối AI...'; status.classList.remove('d-none');
-    const desc = await generateDesc(name, 'event');
-    btn.disabled = false; btn.textContent = '✨ Tự tạo mô tả';
-    if (desc) {
-      document.getElementById('eventDesc').value = desc;
-      status.textContent = '✅ Đã tạo mô tả!';
-    } else {
-      status.textContent = '❌ Không thể tạo mô tả, vui lòng thử lại.';
-    }
-    setTimeout(() => status.classList.add('d-none'), 3000);
+  signOutBtn.addEventListener('click', async () => {
+    await signOut(auth);
   });
 
-  // ── Image upload handlers ───────────────────────────────────────
-  function setupImageUpload(fileId, urlId, thumbId, previewId) {
-    document.getElementById(fileId).addEventListener('change', (e) => {
-      const file = e.target.files[0]; if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        document.getElementById(urlId).value = '';
-        document.getElementById(thumbId).src = ev.target.result;
-        document.getElementById(previewId).style.display = 'block';
-      };
-      reader.readAsDataURL(file);
-    });
-    document.getElementById(urlId).addEventListener('input', () => {
-      document.getElementById(fileId).value = '';
-      document.getElementById(previewId).style.display = 'none';
-    });
-  }
-  setupImageUpload('productImageFile','productImage','productImageThumb','productImagePreview');
-  setupImageUpload('eventImageFile','eventImage','eventImageThumb','eventImagePreview');
-
-  async function resolveImage(fileId, urlId) {
-    const url = document.getElementById(urlId).value.trim();
-    if (url) return url;
-    const file = document.getElementById(fileId).files[0];
-    if (!file) return '';
-    return new Promise(res => {
-      const r = new FileReader();
-      r.onload = ev => res(ev.target.result);
-      r.readAsDataURL(file);
-    });
-  }
-
-  // ── Firebase data ───────────────────────────────────────────────
   function loadAllData() {
-    onValue(ref(db, 'products'), (snap) => {
-      currentProducts = Object.entries(snap.val() || {}).map(([key, val]) => ({ key, ...val }));
+    onValue(ref(db, 'products'), (snapshot) => {
+      currentProducts = Object.entries(snapshot.val() || {}).map(([key, val]) => ({ key, ...val }));
       renderProducts(currentProducts);
     });
-    onValue(ref(db, 'events'), (snap) => {
-      currentEvents = Object.entries(snap.val() || {}).map(([key, val]) => ({ key, ...val }));
+
+    onValue(ref(db, 'events'), (snapshot) => {
+      currentEvents = Object.entries(snapshot.val() || {}).map(([key, val]) => ({ key, ...val }));
       renderEvents(currentEvents);
     });
-    initStatusTab();
-  }
 
-  // ── Render products list ────────────────────────────────────────
-  function renderProducts(products) {
-    document.getElementById('productList').innerHTML = products.length === 0
-      ? '<p class="text-muted p-3">Chưa có sản phẩm nào.</p>'
-      : products.map(p => `
-        <div class="list-group-item d-flex justify-content-between align-items-center gap-2">
-          <div class="d-flex align-items-center gap-3">
-            ${p.image ? `<img src="${p.image}" style="width:52px;height:52px;object-fit:cover;border-radius:8px;flex-shrink:0;">` : ''}
-            <div>
-              <strong>${p.name}</strong> <span class="text-muted">(${p.category})</span><br>
-              <small class="text-muted">${(p.desc||'').substring(0,60)}${(p.desc||'').length>60?'...':''}</small>
-              ${p.outOfStock ? '<span class="badge bg-danger ms-1">Hết hàng</span>' : ''}
-            </div>
-          </div>
-          <div class="d-flex gap-2 flex-shrink-0">
-            <button class="btn btn-warning btn-sm" onclick="editProduct('${p.key}')">Sửa</button>
-            <button class="btn btn-danger btn-sm" onclick="deleteProduct('${p.key}')">Xóa</button>
-          </div>
-        </div>`).join('');
-  }
-
-  // ── Render events list ──────────────────────────────────────────
-  function renderEvents(events) {
-    document.getElementById('eventList').innerHTML = events.length === 0
-      ? '<p class="text-muted p-3">Chưa có sự kiện nào.</p>'
-      : events.map(e => {
-        const start = parseDate(e.start), end = parseDate(e.end), now = new Date();
-        let badge;
-        if      (e.aborted)            badge = '<span class="badge bg-secondary">Bị hủy</span>';
-        else if (e.delayed)            badge = '<span class="badge bg-warning text-dark">Bị hoãn</span>';
-        else if (start && now < start) badge = '<span class="badge bg-info text-dark">Sắp diễn ra</span>';
-        else if (end   && now > end)   badge = '<span class="badge bg-danger">Đã kết thúc</span>';
-        else                           badge = '<span class="badge bg-success">Đang diễn ra</span>';
-        return `
-          <div class="list-group-item d-flex justify-content-between align-items-center gap-2">
-            <div class="d-flex align-items-center gap-3">
-              ${e.image ? `<img src="${e.image}" style="width:52px;height:52px;object-fit:cover;border-radius:8px;flex-shrink:0;">` : ''}
-              <div>
-                <strong>${e.title}</strong> ${badge}<br>
-                <small class="text-muted">${e.start} → ${e.end}</small><br>
-                <small class="text-muted">${(e.desc||'').substring(0,60)}${(e.desc||'').length>60?'...':''}</small>
-              </div>
-            </div>
-            <div class="d-flex gap-2 flex-shrink-0">
-              <button class="btn btn-warning btn-sm" onclick="editEvent('${e.key}')">Sửa</button>
-              <button class="btn btn-danger btn-sm" onclick="deleteEvent('${e.key}')">Xóa</button>
-            </div>
-          </div>`;
-      }).join('');
-  }
-
-  // ── Reset forms ─────────────────────────────────────────────────
-  function resetProductForm() {
-    document.getElementById('productForm').reset();
-    document.getElementById('productSubmitBtn').textContent = 'Thêm sản phẩm';
-    document.getElementById('productCancelBtn').style.display = 'none';
-    document.getElementById('productImagePreview').style.display = 'none';
-    editingProductKey = null;
-  }
-  function resetEventForm() {
-    document.getElementById('eventForm').reset();
-    document.getElementById('eventSubmitBtn').textContent = 'Thêm sự kiện';
-    document.getElementById('eventCancelBtn').style.display = 'none';
-    document.getElementById('eventImagePreview').style.display = 'none';
-    editingEventKey = null;
-  }
-  document.getElementById('productCancelBtn').addEventListener('click', resetProductForm);
-  document.getElementById('eventCancelBtn').addEventListener('click', resetEventForm);
-
-  // ── Edit / Delete ───────────────────────────────────────────────
-  window.editProduct = (key) => {
-    const p = currentProducts.find(x => x.key === key); if (!p) return;
-    editingProductKey = key;
-    document.getElementById('productName').value = p.name;
-    document.getElementById('productCategory').value = p.category;
-    document.getElementById('productDesc').value = p.desc || '';
-    document.getElementById('productImage').value = p.image || '';
-    document.getElementById('productOutOfStock').checked = !!p.outOfStock;
-    if (p.image) { document.getElementById('productImageThumb').src = p.image; document.getElementById('productImagePreview').style.display = 'block'; }
-    document.getElementById('productSubmitBtn').textContent = 'Cập nhật sản phẩm';
-    document.getElementById('productCancelBtn').style.display = 'inline-block';
-    document.getElementById('products-tab').click();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-  window.deleteProduct = async (key) => {
-    if (!confirm('Xóa sản phẩm?')) return;
-    await remove(ref(db, `products/${key}`));
-  };
-  window.editEvent = (key) => {
-    const e = currentEvents.find(x => x.key === key); if (!e) return;
-    editingEventKey = key;
-    document.getElementById('eventTitle').value = e.title;
-    document.getElementById('eventStart').value = toInputDT(e.start);
-    document.getElementById('eventEnd').value   = toInputDT(e.end);
-    document.getElementById('eventDesc').value  = e.desc || '';
-    document.getElementById('eventImage').value = e.image || '';
-    document.getElementById('eventAborted').checked = !!e.aborted;
-    document.getElementById('eventDelayed').checked = !!e.delayed;
-    if (e.image) { document.getElementById('eventImageThumb').src = e.image; document.getElementById('eventImagePreview').style.display = 'block'; }
-    document.getElementById('eventSubmitBtn').textContent = 'Cập nhật sự kiện';
-    document.getElementById('eventCancelBtn').style.display = 'inline-block';
-    document.getElementById('events-tab').click();
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-  window.deleteEvent = async (key) => {
-    if (!confirm('Xóa sự kiện?')) return;
-    await remove(ref(db, `events/${key}`));
-  };
-
-  // ── Form submits ────────────────────────────────────────────────
-  document.getElementById('productForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const image = await resolveImage('productImageFile', 'productImage');
-    const data = {
-      name:       document.getElementById('productName').value,
-      category:   document.getElementById('productCategory').value,
-      desc:       document.getElementById('productDesc').value,
-      image,
-      outOfStock: document.getElementById('productOutOfStock').checked
-    };
-    if (editingProductKey) { await update(ref(db, `products/${editingProductKey}`), data); }
-    else                   { await push(ref(db, 'products'), data); }
-    resetProductForm();
-  });
-
-  document.getElementById('eventForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const image = await resolveImage('eventImageFile', 'eventImage');
-    const data = {
-      title:   document.getElementById('eventTitle').value,
-      start:   fmtDT(document.getElementById('eventStart').value),
-      end:     fmtDT(document.getElementById('eventEnd').value),
-      desc:    document.getElementById('eventDesc').value,
-      image,
-      aborted: document.getElementById('eventAborted').checked,
-      delayed: document.getElementById('eventDelayed').checked
-    };
-    if (editingEventKey) { await update(ref(db, `events/${editingEventKey}`), data); }
-    else                 { await push(ref(db, 'events'), data); }
-    resetEventForm();
-  });
-
-  // ── Search ──────────────────────────────────────────────────────
-  document.getElementById('searchInput').addEventListener('input', (e) => {
-    const t = e.target.value.toLowerCase();
-    renderProducts(currentProducts.filter(p => p.name.toLowerCase().includes(t) || (p.category||'').toLowerCase().includes(t)));
-    renderEvents(currentEvents.filter(ev => (ev.title||'').toLowerCase().includes(t) || (ev.desc||'').toLowerCase().includes(t)));
-  });
-
-  // ── Site Status tab ─────────────────────────────────────────────
-  function initStatusTab() {
+    // ── Site Status per-page system ──────────────────────────────
     const STATUS_META = {
       none:         { color: null,      border: null,      icon: '',   label: 'None' },
       message:      { color: '#e8f5e9', border: '#00c4b4', icon: '📢', label: 'Message' },
@@ -584,89 +325,295 @@
       coming_soon:  { color: '#e2e3e5', border: '#6c757d', icon: '⏳', label: 'Coming Soon' },
       limited:      { color: '#fff3cd', border: '#ffc107', icon: '⚠️', label: 'Limited Availability' },
     };
-    const BADGE_COLORS = { none:'bg-success', message:'bg-success', construction:'bg-warning text-dark', update:'bg-info text-dark', bugfix:'bg-danger', maintenance:'bg-warning text-dark', coming_soon:'bg-secondary', limited:'bg-warning text-dark' };
-    const PAGES = ['index','products','events','contact'];
-    const PAGE_LABELS = { index:'Trang chủ', products:'Sản phẩm', events:'Sự kiện', contact:'Liên hệ' };
+
+    const BADGE_COLORS = {
+      none: 'bg-success', message: 'bg-success',
+      construction: 'bg-warning text-dark',
+      update: 'bg-info text-dark', bugfix: 'bg-danger',
+      maintenance: 'bg-warning text-dark', coming_soon: 'bg-secondary', limited: 'bg-warning text-dark'
+    };
+
+    const PAGES = ['index', 'products', 'events', 'contact'];
+    const PAGE_LABELS = { index: 'Trang chủ', products: 'Sản phẩm', events: 'Sự kiện', contact: 'Liên hệ' };
     let currentStatusPage = 'index';
     let pageStatusCache = {};
 
+    // Listen to all page statuses
     PAGES.forEach(page => {
       onValue(ref(db, `siteStatus/${page}`), (snap) => {
-        const data = snap.val() || { type:'none', message:'' };
+        const data = snap.val() || { type: 'none', message: '' };
         pageStatusCache[page] = data;
+
+        // Update overview badge
         const badge = document.getElementById(`ov-${page}-badge`);
         if (badge) {
           const m = STATUS_META[data.type] || STATUS_META.none;
-          badge.className = `badge ${BADGE_COLORS[data.type]||'bg-secondary'}`;
-          badge.textContent = (m.icon ? m.icon+' ' : '') + (data.type==='none' ? '✅ Normal' : m.label);
+          badge.className = `badge ${BADGE_COLORS[data.type] || 'bg-secondary'}`;
+          badge.textContent = (m.icon ? m.icon + ' ' : '') + (data.type === 'none' ? '✅ Normal' : m.label);
         }
+
+        // If this is the currently selected page, update the form + preview
         if (page === currentStatusPage) {
           document.getElementById('pageStatusType').value = data.type || 'none';
           document.getElementById('pageStatusMessage').value = data.message || '';
-          renderStatusPreview(data.type||'none', data.message||'');
+          renderStatusPreview(data.type || 'none', data.message || '');
         }
       });
     });
 
+    // Page pill tab switching
     document.querySelectorAll('#pageTabs .nav-link').forEach(btn => {
       btn.addEventListener('click', () => {
         document.querySelectorAll('#pageTabs .nav-link').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         currentStatusPage = btn.dataset.page;
         document.getElementById('currentPageLabel').textContent = currentStatusPage === 'all' ? 'Tất cả trang' : PAGE_LABELS[currentStatusPage];
+
+        // For "all", clear the form rather than loading one page's state
         if (currentStatusPage === 'all') {
           document.getElementById('pageStatusType').value = 'none';
           document.getElementById('pageStatusMessage').value = '';
-          renderStatusPreview('none','');
+          renderStatusPreview('none', '');
           document.getElementById('statusSaveBtn').textContent = '💾 Áp dụng cho tất cả trang';
           document.getElementById('statusClearBtn').textContent = '🗑️ Xoá tất cả banner';
         } else {
-          const c = pageStatusCache[currentStatusPage] || { type:'none', message:'' };
-          document.getElementById('pageStatusType').value = c.type || 'none';
-          document.getElementById('pageStatusMessage').value = c.message || '';
-          renderStatusPreview(c.type||'none', c.message||'');
+          const cached = pageStatusCache[currentStatusPage] || { type: 'none', message: '' };
+          document.getElementById('pageStatusType').value = cached.type || 'none';
+          document.getElementById('pageStatusMessage').value = cached.message || '';
+          renderStatusPreview(cached.type || 'none', cached.message || '');
           document.getElementById('statusSaveBtn').textContent = '💾 Lưu cho trang này';
           document.getElementById('statusClearBtn').textContent = 'Xoá banner';
         }
       });
     });
 
-    document.getElementById('pageStatusType').addEventListener('change', () => renderStatusPreview(document.getElementById('pageStatusType').value, document.getElementById('pageStatusMessage').value));
-    document.getElementById('pageStatusMessage').addEventListener('input', () => renderStatusPreview(document.getElementById('pageStatusType').value, document.getElementById('pageStatusMessage').value));
+    // Live preview on type/message change
+    document.getElementById('pageStatusType').addEventListener('change', () => {
+      renderStatusPreview(
+        document.getElementById('pageStatusType').value,
+        document.getElementById('pageStatusMessage').value
+      );
+    });
+    document.getElementById('pageStatusMessage').addEventListener('input', () => {
+      renderStatusPreview(
+        document.getElementById('pageStatusType').value,
+        document.getElementById('pageStatusMessage').value
+      );
+    });
 
     function renderStatusPreview(type, message) {
       const preview = document.getElementById('statusPreview');
-      if (!type || type === 'none') { preview.innerHTML = '<div class="text-muted p-3 text-center small">✅ Không có banner — trang hiển thị bình thường</div>'; return; }
-      const m = STATUS_META[type] || { color:'#e2e3e5', border:'#6c757d', icon:'ℹ️', label:type };
-      preview.innerHTML = `<div style="background:${m.color};color:#1a1f25;border-bottom:3px solid ${m.border};padding:10px 24px;text-align:center;font-weight:600;font-size:0.95rem;">${m.icon}&nbsp;${message.trim()||m.label}</div>`;
+      if (!type || type === 'none') {
+        preview.innerHTML = '<div class="text-muted p-3 text-center small">✅ Không có banner — trang hiển thị bình thường</div>';
+        return;
+      }
+      const m = STATUS_META[type] || { color: '#e2e3e5', border: '#6c757d', icon: 'ℹ️', label: type };
+      const msg = message.trim() || m.label;
+      // Always use the light-mode color in preview so it's visible in both themes
+      preview.innerHTML = `<div style="background:${m.color};color:#1a1f25;border-bottom:3px solid ${m.border};padding:10px 24px;text-align:center;font-weight:600;font-size:0.95rem;">${m.icon}&nbsp;${msg}</div>`;
     }
 
+    // Save button
     document.getElementById('statusSaveBtn').addEventListener('click', async () => {
       const type = document.getElementById('pageStatusType').value;
       const message = document.getElementById('pageStatusMessage').value.trim();
       const btn = document.getElementById('statusSaveBtn');
+
       if (currentStatusPage === 'all') {
-        if (!confirm('Áp dụng trạng thái này cho TẤT CẢ 4 trang?')) return;
-        await Promise.all(PAGES.map(p => set(ref(db,`siteStatus/${p}`), { type, message })));
+        if (!confirm(`Áp dụng trạng thái này cho TẤT CẢ 4 trang?`)) return;
+        await Promise.all(PAGES.map(p => set(ref(db, `siteStatus/${p}`), { type, message })));
         btn.textContent = '✅ Đã áp dụng tất cả!';
         setTimeout(() => btn.textContent = '💾 Áp dụng cho tất cả trang', 1800);
       } else {
-        await set(ref(db,`siteStatus/${currentStatusPage}`), { type, message });
+        await set(ref(db, `siteStatus/${currentStatusPage}`), { type, message });
         btn.textContent = '✅ Đã lưu!';
         setTimeout(() => btn.textContent = '💾 Lưu cho trang này', 1800);
       }
     });
 
+    // Clear button
     document.getElementById('statusClearBtn').addEventListener('click', async () => {
       if (currentStatusPage === 'all') {
         if (!confirm('Xoá banner của TẤT CẢ 4 trang?')) return;
-        await Promise.all(PAGES.map(p => set(ref(db,`siteStatus/${p}`), { type:'none', message:'' })));
+        await Promise.all(PAGES.map(p => set(ref(db, `siteStatus/${p}`), { type: 'none', message: '' })));
       } else {
         if (!confirm(`Xoá banner cho trang "${PAGE_LABELS[currentStatusPage]}"?`)) return;
-        await set(ref(db,`siteStatus/${currentStatusPage}`), { type:'none', message:'' });
+        await set(ref(db, `siteStatus/${currentStatusPage}`), { type: 'none', message: '' });
       }
     });
   }
+
+  // Products render
+  function renderProducts(products) {
+    const list = document.getElementById('productList');
+    list.innerHTML = products.map(p => `
+      <div class="list-group-item d-flex justify-content-between align-items-center">
+        <div>
+          <strong>${p.name}</strong> — ${p.price} (${p.category})<br>
+          <small class="text-muted">${p.image.substring(0, 60)}${p.image.length > 60 ? '...' : ''}</small>
+          ${p.outOfStock ? '<span class="badge bg-danger ms-2">Hết hàng</span>' : ''}
+        </div>
+        <div>
+          <button class="btn btn-warning btn-sm me-2" onclick="editProduct('${p.key}')">Sửa</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteProduct('${p.key}')">Xóa</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // Events render
+  function renderEvents(events) {
+    const list = document.getElementById('eventList');
+    const now = new Date();
+
+    list.innerHTML = events.map(e => {
+      const start = new Date(e.start);
+      const end = new Date(e.end);
+      let status = '';
+
+      if (e.aborted) status = '<span class="badge bg-secondary">Bị hủy</span>';
+      else if (e.delayed) status = '<span class="badge bg-warning">Bị hoãn</span>';
+      else if (now < start) status = '<span class="badge bg-info">Sắp diễn ra</span>';
+      else if (now > end) status = '<span class="badge bg-danger">Đã kết thúc</span>';
+      else status = '<span class="badge bg-success">Đang diễn ra</span>';
+
+      return `
+        <div class="list-group-item d-flex justify-content-between align-items-center">
+          <div>
+            <strong>${e.title}</strong><br>
+            <small>${e.start} → ${e.end}</small><br>
+            <small>${e.desc.substring(0, 80)}${e.desc.length > 80 ? '...' : ''}</small><br>
+            ${status}
+          </div>
+          <div>
+            <button class="btn btn-warning btn-sm me-2" onclick="editEvent('${e.key}')">Sửa</button>
+            <button class="btn btn-danger btn-sm" onclick="deleteEvent('${e.key}')">Xóa</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  // Reset functions
+  function resetProductForm() {
+    document.getElementById('productForm').reset();
+    document.getElementById('productSubmitBtn').textContent = 'Thêm sản phẩm';
+    document.getElementById('productOutOfStock').checked = false;
+    editingProductKey = null;
+  }
+
+  function resetEventForm() {
+    document.getElementById('eventForm').reset();
+    document.getElementById('eventSubmitBtn').textContent = 'Thêm sự kiện';
+    document.getElementById('eventAborted').checked = false;
+    document.getElementById('eventDelayed').checked = false;
+    editingEventKey = null;
+  }
+
+  // Edit & delete functions (placeholder - adjust as needed)
+  window.editProduct = (key) => {
+    const p = currentProducts.find(x => x.key === key);
+    if (!p) return;
+
+    editingProductKey = key;
+    document.getElementById('productName').value = p.name;
+    document.getElementById('productPrice').value = p.price;
+    document.getElementById('productCategory').value = p.category;
+    document.getElementById('productImage').value = p.image;
+    document.getElementById('productOutOfStock').checked = p.outOfStock;
+    document.getElementById('productSubmitBtn').textContent = 'Cập nhật sản phẩm';
+  };
+
+  window.deleteProduct = async (key) => {
+    if (!confirm('Xóa sản phẩm?')) return;
+    await remove(ref(db, `products/${key}`));
+  };
+
+  window.editEvent = (key) => {
+    const e = currentEvents.find(x => x.key === key);
+    if (!e) return;
+    function toInputDT(str) {
+      if (!str) return '';
+      const m = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})/);
+      if (m) {
+        const [,d,mo,y,h,mi] = m;
+        return `${y}-${mo.padStart(2,'0')}-${d.padStart(2,'0')}T${h.padStart(2,'0')}:${mi}`;
+      }
+      return str;
+    }
+    editingEventKey = key;
+    document.getElementById('eventTitle').value = e.title;
+    document.getElementById('eventStart').value = toInputDT(e.start);
+    document.getElementById('eventEnd').value   = toInputDT(e.end);
+    document.getElementById('eventDesc').value  = e.desc;
+    document.getElementById('eventImage').value = e.image || '';
+    document.getElementById('eventAborted').checked = e.aborted;
+    document.getElementById('eventDelayed').checked = e.delayed;
+    document.getElementById('eventSubmitBtn').textContent = 'Cập nhật sự kiện';
+  };
+
+  window.deleteEvent = async (key) => {
+    if (!confirm('Xóa sự kiện?')) return;
+    await remove(ref(db, `events/${key}`));
+  };
+
+  // Form submits (placeholder - adjust as needed)
+  document.getElementById('productForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = {
+      name: document.getElementById('productName').value,
+      price: document.getElementById('productPrice').value,
+      category: document.getElementById('productCategory').value,
+      image: document.getElementById('productImage').value,
+      outOfStock: document.getElementById('productOutOfStock').checked
+    };
+    if (editingProductKey) {
+      await update(ref(db, `products/${editingProductKey}`), data);
+      editingProductKey = null;
+    } else {
+      await push(ref(db, 'products'), data);
+    }
+    e.target.reset();
+    resetProductForm();
+  });
+
+  document.getElementById('eventForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    function fmtDT(val) {
+      if (!val) return '';
+      const d = new Date(val);
+      const dd = String(d.getDate()).padStart(2,'0');
+      const mm = String(d.getMonth()+1).padStart(2,'0');
+      const yyyy = d.getFullYear();
+      const hh = String(d.getHours()).padStart(2,'0');
+      const mi = String(d.getMinutes()).padStart(2,'0');
+      return `${dd}/${mm}/${yyyy} ${hh}:${mi}`;
+    }
+    const data = {
+      title: document.getElementById('eventTitle').value,
+      start: fmtDT(document.getElementById('eventStart').value),
+      end:   fmtDT(document.getElementById('eventEnd').value),
+      desc:  document.getElementById('eventDesc').value,
+      image: document.getElementById('eventImage').value,
+      aborted: document.getElementById('eventAborted').checked,
+      delayed: document.getElementById('eventDelayed').checked
+    };
+    if (editingEventKey) {
+      await update(ref(db, `events/${editingEventKey}`), data);
+      editingEventKey = null;
+    } else {
+      await push(ref(db, 'events'), data);
+    }
+    e.target.reset();
+    resetEventForm();
+  });
+
+  // Search filter
+  searchInput.addEventListener('input', (e) => {
+    const term = e.target.value.toLowerCase().trim();
+    renderProducts(currentProducts.filter(p => p.name.toLowerCase().includes(term) || p.category.toLowerCase().includes(term)));
+    renderEvents(currentEvents.filter(e => e.title.toLowerCase().includes(term) || e.desc.toLowerCase().includes(term)));
+  });
 </script>
 </body>
 </html>
