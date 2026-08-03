@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="vi" data-bs-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Triển lãm – InkSpire Bookstore</title>
+  <link rel="icon" type="image/png" href="https://avatars.githubusercontent.com/u/254457838?s=64">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .artist-header {
+      padding: 2.5rem 0 1.5rem;
+      border-bottom: 2px solid var(--bs-border-color);
+      margin-bottom: 2rem;
+    }
+    .artist-avatar {
+      width: 90px; height: 90px; border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--bs-primary);
+      box-shadow: 0 4px 14px rgba(0,0,0,0.15);
+    }
+    .avatar-placeholder {
+      width: 90px; height: 90px; border-radius: 50%;
+      background: linear-gradient(135deg, #00c4b4, #3de0c2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 2.2rem; flex-shrink: 0;
+    }
+    .artist-title { font-size: 2rem; font-weight: 800; margin-bottom: 0.2rem; }
+    .artist-meta { color: var(--bs-primary); font-weight: 600; font-size: 1.05rem; }
+
+    /* Timeline */
+    .timeline { position: relative; padding-left: 2rem; }
+    .timeline::before {
+      content: ''; position: absolute; left: 0.55rem; top: 0; bottom: 0;
+      width: 2px; background: var(--bs-border-color);
+    }
+    .timeline-item { position: relative; margin-bottom: 2.5rem; }
+    .timeline-dot {
+      position: absolute; left: -1.95rem; top: 0.4rem;
+      width: 14px; height: 14px; border-radius: 50%;
+      background: var(--bs-primary);
+      border: 2px solid var(--bs-body-bg);
+      box-shadow: 0 0 0 2px var(--bs-primary);
+    }
+    .timeline-date {
+      font-size: 0.82rem; font-weight: 600;
+      color: var(--bs-secondary-color); margin-bottom: 0.5rem;
+    }
+    .artwork-img {
+      width: 100%; max-height: 420px; object-fit: cover;
+      border-radius: 12px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.14);
+      cursor: pointer;
+      transition: transform 0.22s;
+    }
+    .artwork-img:hover { transform: scale(1.015); }
+    .artwork-note {
+      margin-top: 0.6rem; font-size: 0.95rem;
+      color: var(--bs-secondary-color); font-style: italic;
+    }
+
+    /* Lightbox */
+    #lightbox {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.88); z-index: 9999;
+      align-items: center; justify-content: center;
+      padding: 1rem;
+    }
+    #lightbox.active { display: flex; }
+    #lightbox img {
+      max-width: 92vw; max-height: 90vh;
+      object-fit: contain; border-radius: 8px;
+    }
+    #lightbox-close {
+      position: fixed; top: 1.2rem; right: 1.5rem;
+      font-size: 2rem; color: white; cursor: pointer;
+      background: none; border: none; line-height: 1;
+      opacity: 0.8;
+    }
+    #lightbox-close:hover { opacity: 1; }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg sticky-top shadow">
+  <div class="container">
+    <a class="navbar-brand fw-bold fs-4" href="https://inkspire-vn.github.io">InkSpire</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain"><span class="navbar-toggler-icon"></span></button>
+    <div class="collapse navbar-collapse" id="navMain">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link" href="https://inkspire-vn.github.io">Trang chủ</a></li>
+        <li class="nav-item"><a class="nav-link" href="/products">Sản phẩm</a></li>
+        <li class="nav-item"><a class="nav-link" href="/events">Sự kiện</a></li>
+        <li class="nav-item"><a class="nav-link active" href="/gallery">Triển lãm</a></li>
+        <li class="nav-item"><a class="nav-link" href="/contact">Liên hệ</a></li>
+      </ul>
+      <div class="d-flex align-items-center">
+        <button class="theme-btn" id="themeBtn">🌙</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Lightbox -->
+<div id="lightbox">
+  <button id="lightbox-close">✕</button>
+  <img id="lightbox-img" src="" alt="">
+</div>
+
+<main class="container">
+
+  <div id="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status" style="width:3rem;height:3rem;"></div>
+    <p class="mt-3">Đang tải...</p>
+  </div>
+
+  <div id="notfound" class="text-center py-5 d-none">
+    <i class="fas fa-exclamation-circle fa-5x text-muted mb-4"></i>
+    <h4 class="mb-3">Không tìm thấy học viên</h4>
+    <a href="/gallery" class="btn btn-outline-primary btn-lg">← Quay về Triển lãm</a>
+  </div>
+
+  <div id="detail-content" class="d-none">
+    <!-- Artist header -->
+    <div class="artist-header">
+      <div class="mb-3">
+        <a href="/gallery" class="text-decoration-none text-muted small">
+          <i class="fas fa-arrow-left me-1"></i> Tất cả học viên
+        </a>
+      </div>
+      <div class="d-flex align-items-center gap-3">
+        <div class="avatar-placeholder" id="d-avatar">🎨</div>
+        <div>
+          <div class="artist-title" id="d-name"></div>
+          <div class="artist-meta" id="d-meta"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Artwork timeline -->
+    <h4 class="mb-4 fw-bold">
+      <i class="fas fa-images me-2" style="color:var(--bs-primary);"></i>
+      Hành trình nghệ thuật
+    </h4>
+
+    <div id="no-artworks" class="text-center py-4 text-muted d-none">
+      <i class="fas fa-paint-brush fa-3x mb-3 d-block" style="opacity:0.3;"></i>
+      <p>Chưa có tác phẩm nào được tải lên.</p>
+    </div>
+
+    <div class="timeline" id="artwork-timeline"></div>
+  </div>
+
+</main>
+
+<footer class="text-center py-4 mt-5" style="background:var(--bs-primary);color:white;">
+  <div class="container">
+    <p class="mb-1">© 2026 InkSpire Bookstore • TP. Hồ Chí Minh</p>
+    <small>Tri thức bắt đầu từ một giọt mực</small>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script type="module">
+  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+  const _fc = {
+    apiKey:"AIzaSyA9XvWCZOyaSuT42HBMUgQQ7KTuQYPWLbE",
+    authDomain:"inkspire-vn-security.firebaseapp.com",
+    databaseURL:"https://inkspire-vn-security-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId:"inkspire-vn-security",
+    storageBucket:"inkspire-vn-security.firebasestorage.app",
+    messagingSenderId:"774834040534",
+    appId:"1:774834040534:web:c7b5e64826176a44b4e377",
+    measurementId:"G-MJSRBE9TY6"
+  };
+  const app = getApps().length ? getApps()[0] : initializeApp(_fc);
+  const db = getDatabase(app);
+
+  const html = document.documentElement;
+  const themeBtn = document.getElementById('themeBtn');
+  function setTheme(mode) { html.setAttribute('data-bs-theme',mode); localStorage.setItem('theme',mode); themeBtn.textContent=mode==='dark'?'☀️':'🌙'; }
+  setTheme(localStorage.getItem('theme')||'light');
+  themeBtn.onclick = () => setTheme(html.getAttribute('data-bs-theme')==='light'?'dark':'light');
+
+  // Lightbox
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightbox-img');
+  document.getElementById('lightbox-close').onclick = () => lightbox.classList.remove('active');
+  lightbox.addEventListener('click', e => { if (e.target === lightbox) lightbox.classList.remove('active'); });
+  function openLightbox(src) { lightboxImg.src = src; lightbox.classList.add('active'); }
+
+  const currentYear = new Date().getFullYear();
+  const params = new URLSearchParams(window.location.search);
+  const key = params.get('key');
+
+  const loading = document.getElementById('loading');
+  const notfound = document.getElementById('notfound');
+  const content  = document.getElementById('detail-content');
+
+  if (!key) {
+    loading.classList.add('d-none');
+    notfound.classList.remove('d-none');
+  } else {
+    onValue(ref(db, `gallery/${key}`), snap => {
+      const artist = snap.val();
+      loading.classList.add('d-none');
+      if (!artist) { notfound.classList.remove('d-none'); return; }
+      content.classList.remove('d-none');
+
+      document.title = `${artist.name} – Triển lãm InkSpire`;
+      document.getElementById('d-name').textContent = artist.name;
+      const age = artist.birthYear ? `${currentYear - parseInt(artist.birthYear)} tuổi · Sinh năm ${artist.birthYear}` : '';
+      document.getElementById('d-meta').textContent = age;
+
+      // Artworks — sorted newest first
+      const artworks = Object.entries(artist.artworks || {})
+        .map(([k,v]) => ({k,...v}))
+        .sort((a,b) => b.timestamp - a.timestamp);
+
+      const timeline = document.getElementById('artwork-timeline');
+      const noArtworks = document.getElementById('no-artworks');
+
+      if (artworks.length === 0) {
+        noArtworks.classList.remove('d-none'); timeline.innerHTML = ''; return;
+      }
+      noArtworks.classList.add('d-none');
+      timeline.innerHTML = artworks.map(aw => {
+        const date = new Date(aw.timestamp);
+        const dateStr = date.toLocaleString('vi-VN', { day:'2-digit', month:'2-digit', year:'numeric', hour:'2-digit', minute:'2-digit' });
+        return `
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-date"><i class="fas fa-clock me-1"></i>${dateStr}</div>
+            <img class="artwork-img" src="${aw.image}" alt="${aw.note||'Tác phẩm'}"
+                 onclick="openLightbox('${aw.image}')">
+            ${aw.note ? `<div class="artwork-note">"${aw.note}"</div>` : ''}
+          </div>`;
+      }).join('');
+    });
+  }
+
+  window.openLightbox = openLightbox;
+</script>
+</body>
+</html>
