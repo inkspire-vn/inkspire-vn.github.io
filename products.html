@@ -18,6 +18,7 @@
     .product-info { padding:1.25rem; text-align:center; }
     .product-title { font-size:1.18rem; font-weight:600; margin-bottom:0.5rem; }
     .product-category { font-size:0.95rem; color:#6c757d; margin-bottom:0.75rem; }
+    .product-price { font-size:1.45rem; font-weight:700; margin-bottom:0; }
   </style>
 </head>
 <body>
@@ -30,6 +31,7 @@
         <li class="nav-item"><a class="nav-link" href="https://inkspire-vn.github.io">Trang chủ</a></li>
         <li class="nav-item"><a class="nav-link active" href="/products">Sản phẩm</a></li>
         <li class="nav-item"><a class="nav-link" href="/events">Sự kiện</a></li>
+        <li class="nav-item"><a class="nav-link" href="/gallery">Triển lãm</a></li>
         <li class="nav-item"><a class="nav-link" href="/contact">Liên hệ</a></li>
       </ul>
       <div class="d-flex align-items-center">
@@ -102,7 +104,7 @@
     grid.innerHTML='';
     products.forEach(p=>{
       const oos=!!p.outOfStock;
-      grid.innerHTML+=`<div class="col-6 col-md-4 col-lg-3"><div class="card h-100 product-card ${oos?'out-of-stock':''} position-relative">${oos?'<span class="out-of-stock-badge">Hết hàng</span>':''}<img src="${p.image||'https://via.placeholder.com/400x300?text=No+Image'}" class="card-img-top" alt="${p.name}"><div class="product-info"><h5 class="product-title">${p.name}</h5><p class="product-category">${p.category||'Không xác định'}</p></div></div></div>`;
+      grid.innerHTML+=`<div class="col-6 col-md-4 col-lg-3"><div class="card h-100 product-card ${oos?'out-of-stock':''} position-relative">${oos?'<span class="out-of-stock-badge">Hết hàng</span>':''}<img src="${p.image||'https://via.placeholder.com/400x300?text=No+Image'}" class="card-img-top" alt="${p.name}"><div class="product-info"><h5 class="product-title">${p.name}</h5><p class="product-category">${p.category||'Không xác định'}</p><p class="product-price ${oos?'text-danger':'text-primary'}">${p.price}</p></div></div></div>`;
     });
   });
 </script>
