@@ -266,12 +266,6 @@
     <div class="track" id="books-track"></div>
   </div>
 
-  <!-- Decoration Slider -->
-  <h2 class="mb-5 mt-5">Đồ trang trí – Decoration</h2>
-  <div class="slider-wrap reverse">
-    <div class="track" id="decoration-track"></div>
-  </div>
-
 </main>
 
 <footer class="text-center py-4" style="background:var(--bs-primary); color:white;">
@@ -339,10 +333,9 @@
   // ── Firebase: Products sliders ──────────────────────────────────
   onValue(ref(db, 'products'), (snapshot) => {
     const products = Object.values(snapshot.val() || {});
-    renderSlider('toys-track',       products.filter(p => (p.category||'').toLowerCase().includes('toy')        || (p.category||'').includes('đồ chơi')));
-    renderSlider('stationery-track', products.filter(p => (p.category||'').toLowerCase().includes('station')    || (p.category||'').includes('văn phòng')));
-    renderSlider('books-track',      products.filter(p => (p.category||'').toLowerCase().includes('book')       || (p.category||'').includes('sách')));
-    renderSlider('decoration-track', products.filter(p => (p.category||'').toLowerCase().includes('decoration') || (p.category||'').includes('trang trí')));
+    renderSlider('toys-track',       products.filter(p => (p.category||'').toLowerCase().includes('toy')     || (p.category||'').includes('đồ chơi')));
+    renderSlider('stationery-track', products.filter(p => (p.category||'').toLowerCase().includes('station') || (p.category||'').includes('văn phòng')));
+    renderSlider('books-track',      products.filter(p => (p.category||'').toLowerCase().includes('book')    || (p.category||'').includes('sách')));
   });
 
   // ── Firebase: Events box (max 3) ────────────────────────────────
