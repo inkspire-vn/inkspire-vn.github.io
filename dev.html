@@ -59,6 +59,8 @@
           <li class="nav-item"><a class="nav-link" href="https://inkspire-vn.github.io">Trang chủ</a></li>
           <li class="nav-item"><a class="nav-link" href="/products">Sản phẩm</a></li>
           <li class="nav-item"><a class="nav-link" href="/events">Sự kiện</a></li>
+          <li class="nav-item"><a class="nav-link" href="/events">Sự kiện</a></li>
+          <li class="nav-item"><a class="nav-link" href="/gallery">Triển lãm</a></li>
           <li class="nav-item"><a class="nav-link" href="/contact">Liên hệ</a></li>
         </ul>
         <div class="d-flex align-items-center gap-2">
@@ -82,6 +84,9 @@
       </li>
       <li class="nav-item" role="presentation">
         <button class="nav-link" id="events-tab" data-bs-toggle="tab" data-bs-target="#events" type="button" role="tab">Sự kiện</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="gallery-tab" data-bs-toggle="tab" data-bs-target="#gallery" type="button" role="tab">Triển lãm</button>
       </li>
       <li class="nav-item" role="presentation">
         <button class="nav-link" id="status-tab" data-bs-toggle="tab" data-bs-target="#status" type="button" role="tab">Trạng thái Website</button>
@@ -195,6 +200,60 @@
         <div id="eventList" class="list-group"></div>
       </div>
 
+      <!-- ── Gallery tab ── -->
+      <div class="tab-pane fade" id="gallery" role="tabpanel">
+        <h3 class="mb-4">Thêm / Sửa học viên</h3>
+        <form id="artistForm" class="row g-3 mb-5">
+          <div class="col-md-8">
+            <label class="form-label">Tên học viên</label>
+            <input type="text" class="form-control" id="artistName" placeholder="Ví dụ: Nguyễn Văn An" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label">Năm sinh</label>
+            <input type="number" class="form-control" id="artistBirthYear" placeholder="Ví dụ: 2012" min="1900" max="2026">
+          </div>
+          <div class="col-12 text-end">
+            <button type="button" class="btn btn-outline-secondary me-2" id="artistCancelBtn" style="display:none;">Hủy</button>
+            <button type="submit" class="btn btn-primary" id="artistSubmitBtn">Thêm học viên</button>
+          </div>
+        </form>
+
+        <h4 class="mt-2 mb-3">Tải lên tác phẩm</h4>
+        <div class="card p-4 mb-5">
+          <div class="row g-3">
+            <div class="col-md-5">
+              <label class="form-label">Chọn học viên</label>
+              <select class="form-select" id="artworkArtist">
+                <option value="">-- Chọn học viên --</option>
+              </select>
+            </div>
+            <div class="col-md-7">
+              <label class="form-label">Ghi chú <span class="text-muted fw-normal">(không bắt buộc)</span></label>
+              <input type="text" class="form-control" id="artworkNote" placeholder="Ví dụ: Bức tranh phong cảnh đầu tiên">
+            </div>
+            <div class="col-12">
+              <label class="form-label">Ảnh tác phẩm</label>
+              <div class="input-group mb-2">
+                <input type="url" class="form-control" id="artworkImageUrl" placeholder="https://example.com/artwork.jpg">
+                <span class="input-group-text">hoặc</span>
+                <input type="file" class="form-control" id="artworkImageFile" accept="image/*">
+              </div>
+              <div id="artworkImagePreview" style="display:none;" class="mt-2">
+                <img id="artworkImageThumb" src="" style="max-height:140px;border-radius:8px;border:1px solid #dee2e6;">
+              </div>
+            </div>
+            <div class="col-12 text-end">
+              <button class="btn btn-success" id="artworkUploadBtn">
+                <i class="fas fa-upload me-1"></i> Tải lên tác phẩm
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <h4 class="mb-3">Danh sách học viên</h4>
+        <div id="artistList" class="list-group"></div>
+      </div>
+
       <!-- ── Website Status tab ── -->
       <div class="tab-pane fade" id="status" role="tabpanel">
         <h3 class="mb-2">Trạng thái Website</h3>
@@ -204,6 +263,7 @@
           <li class="nav-item"><button class="nav-link" data-page="products">📦 Sản phẩm</button></li>
           <li class="nav-item"><button class="nav-link" data-page="events">📅 Sự kiện</button></li>
           <li class="nav-item"><button class="nav-link" data-page="contact">📞 Liên hệ</button></li>
+          <li class="nav-item"><button class="nav-link" data-page="gallery">🎨 Triển lãm</button></li>
           <li class="nav-item"><button class="nav-link text-danger fw-bold" data-page="all">🌐 Tất cả trang</button></li>
         </ul>
         <div class="card p-4 mb-4">
@@ -238,6 +298,7 @@
           <div class="col-md-3"><div class="card p-3 text-center"><div class="fw-bold mb-1">📦 Sản phẩm</div><span class="badge bg-secondary" id="ov-products-badge">Đang tải...</span></div></div>
           <div class="col-md-3"><div class="card p-3 text-center"><div class="fw-bold mb-1">📅 Sự kiện</div><span class="badge bg-secondary" id="ov-events-badge">Đang tải...</span></div></div>
           <div class="col-md-3"><div class="card p-3 text-center"><div class="fw-bold mb-1">📞 Liên hệ</div><span class="badge bg-secondary" id="ov-contact-badge">Đang tải...</span></div></div>
+          <div class="col-md-3"><div class="card p-3 text-center"><div class="fw-bold mb-1">🎨 Triển lãm</div><span class="badge bg-secondary" id="ov-gallery-badge">Đang tải...</span></div></div>
         </div>
         <h5 class="mb-3">Xem trước banner</h5>
         <div id="statusPreview" class="rounded overflow-hidden border" style="min-height:52px;">
@@ -374,7 +435,135 @@
       renderEvents(currentEvents);
     });
     initStatusTab();
+    initGalleryTab();
   }
+  // ── Gallery (Triển lãm) ───────────────────────────────────────
+  function initGalleryTab() {
+    const currentYear = new Date().getFullYear();
+    let allArtists = [], editingArtistKey = null;
+
+    onValue(ref(db,'gallery'), snap => {
+      allArtists = Object.entries(snap.val()||{}).map(([key,val])=>({key,...val}));
+      renderArtists(allArtists);
+      // Populate artwork artist select
+      const sel = document.getElementById('artworkArtist');
+      const prev = sel.value;
+      sel.innerHTML = '<option value="">-- Chọn học viên --</option>';
+      allArtists.forEach(a => {
+        const opt = document.createElement('option');
+        opt.value = a.key; opt.textContent = a.name;
+        sel.appendChild(opt);
+      });
+      if (prev) sel.value = prev;
+    });
+
+    function renderArtists(artists) {
+      const list = document.getElementById('artistList');
+      if (artists.length === 0) { list.innerHTML='<p class="text-muted p-3">Chưa có học viên nào.</p>'; return; }
+      list.innerHTML = artists.map(a => {
+        const age = a.birthYear ? `${currentYear - parseInt(a.birthYear)} tuổi (${a.birthYear})` : 'Chưa có năm sinh';
+        const artCount = Object.keys(a.artworks||{}).length;
+        const latest = Object.values(a.artworks||{}).sort((x,y)=>y.timestamp-x.timestamp)[0];
+        return `
+          <div class="list-group-item d-flex justify-content-between align-items-center gap-2">
+            <div class="d-flex align-items-center gap-3">
+              ${latest ? `<img src="${latest.image}" style="width:52px;height:52px;object-fit:cover;border-radius:8px;flex-shrink:0;">` : '<div style="width:52px;height:52px;border-radius:8px;background:linear-gradient(135deg,#00c4b4,#3de0c2);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.5rem;">🎨</div>'}
+              <div>
+                <strong>${a.name}</strong><br>
+                <small class="text-muted">${age} · ${artCount} tác phẩm</small>
+              </div>
+            </div>
+            <div class="d-flex gap-2 flex-shrink-0">
+              <button class="btn btn-warning btn-sm" onclick="editArtist('${a.key}')">Sửa</button>
+              <button class="btn btn-danger btn-sm" onclick="deleteArtist('${a.key}')">Xóa</button>
+            </div>
+          </div>`;
+      }).join('');
+    }
+
+    function resetArtistForm() {
+      document.getElementById('artistForm').reset();
+      document.getElementById('artistSubmitBtn').textContent = 'Thêm học viên';
+      document.getElementById('artistCancelBtn').style.display = 'none';
+      editingArtistKey = null;
+    }
+    document.getElementById('artistCancelBtn').addEventListener('click', resetArtistForm);
+
+    window.editArtist = (key) => {
+      const a = allArtists.find(x=>x.key===key); if(!a) return;
+      editingArtistKey = key;
+      document.getElementById('artistName').value = a.name;
+      document.getElementById('artistBirthYear').value = a.birthYear || '';
+      document.getElementById('artistSubmitBtn').textContent = 'Cập nhật học viên';
+      document.getElementById('artistCancelBtn').style.display = 'inline-block';
+      document.getElementById('gallery-tab').click();
+      window.scrollTo({top:0,behavior:'smooth'});
+    };
+
+    window.deleteArtist = async (key) => {
+      if (!confirm('Xóa học viên và tất cả tác phẩm?')) return;
+      await remove(ref(db,`gallery/${key}`));
+    };
+
+    document.getElementById('artistForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const data = {
+        name: document.getElementById('artistName').value.trim(),
+        birthYear: document.getElementById('artistBirthYear').value || null
+      };
+      if (editingArtistKey) { await update(ref(db,`gallery/${editingArtistKey}`), data); }
+      else { await push(ref(db,'gallery'), data); }
+      resetArtistForm();
+    });
+
+    // Artwork image upload preview
+    document.getElementById('artworkImageFile').addEventListener('change', e => {
+      const file = e.target.files[0]; if(!file) return;
+      const reader = new FileReader();
+      reader.onload = ev => {
+        document.getElementById('artworkImageUrl').value = '';
+        document.getElementById('artworkImageThumb').src = ev.target.result;
+        document.getElementById('artworkImagePreview').style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    });
+    document.getElementById('artworkImageUrl').addEventListener('input', () => {
+      document.getElementById('artworkImageFile').value = '';
+      document.getElementById('artworkImagePreview').style.display = 'none';
+    });
+
+    document.getElementById('artworkUploadBtn').addEventListener('click', async () => {
+      const artistKey = document.getElementById('artworkArtist').value;
+      if (!artistKey) { alert('Chọn học viên trước nhé!'); return; }
+
+      const urlInput = document.getElementById('artworkImageUrl').value.trim();
+      const fileInput = document.getElementById('artworkImageFile');
+      let image = urlInput;
+      if (!image && fileInput.files[0]) {
+        image = await new Promise(res => {
+          const r = new FileReader(); r.onload = ev => res(ev.target.result); r.readAsDataURL(fileInput.files[0]);
+        });
+      }
+      if (!image) { alert('Chọn hoặc nhập URL ảnh trước nhé!'); return; }
+
+      const btn = document.getElementById('artworkUploadBtn');
+      btn.disabled = true; btn.textContent = '⏳ Đang tải...';
+
+      const note = document.getElementById('artworkNote').value.trim();
+      await push(ref(db,`gallery/${artistKey}/artworks`), {
+        image, note, timestamp: Date.now()
+      });
+
+      btn.disabled = false; btn.innerHTML = '<i class="fas fa-upload me-1"></i> Tải lên tác phẩm';
+      document.getElementById('artworkImageFile').value = '';
+      document.getElementById('artworkImageUrl').value = '';
+      document.getElementById('artworkImagePreview').style.display = 'none';
+      document.getElementById('artworkNote').value = '';
+      btn.textContent = '✅ Đã tải lên!';
+      setTimeout(() => btn.innerHTML = '<i class="fas fa-upload me-1"></i> Tải lên tác phẩm', 2000);
+    });
+  }
+
 
   // ── Render lists ──────────────────────────────────────────────
   function renderProducts(products) {
@@ -535,8 +724,8 @@
       limited:      { color:'#fff3cd', border:'#ffc107', icon:'⚠️', label:'Limited Availability' },
     };
     const BADGE_COLORS = { none:'bg-success', message:'bg-success', construction:'bg-warning text-dark', update:'bg-info text-dark', bugfix:'bg-danger', maintenance:'bg-warning text-dark', coming_soon:'bg-secondary', limited:'bg-warning text-dark' };
-    const PAGES = ['index','products','events','contact'];
-    const PAGE_LABELS = { index:'Trang chủ', products:'Sản phẩm', events:'Sự kiện', contact:'Liên hệ' };
+    const PAGES = ['index','products','events','contact','gallery'];
+    const PAGE_LABELS = { index:'Trang chủ', products:'Sản phẩm', events:'Sự kiện', contact:'Liên hệ', gallery:'Triển lãm' };
     let currentStatusPage = 'index', pageStatusCache = {};
 
     PAGES.forEach(page => {
