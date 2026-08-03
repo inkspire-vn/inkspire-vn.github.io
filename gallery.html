@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="vi" data-bs-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Triển lãm – InkSpire Bookstore</title>
+  <link rel="icon" type="image/png" href="https://avatars.githubusercontent.com/u/254457838?s=64">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="/styles.css">
+  <style>
+    .page-hero {
+      background: linear-gradient(rgba(0,0,0,0.5),rgba(0,0,0,0.5)),
+                  url('https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&q=80') center/cover;
+      color: white; height: 32vh; min-height: 220px;
+      display: flex; align-items: center; justify-content: center;
+      text-shadow: 1px 1px 4px rgba(0,0,0,0.7);
+    }
+    .search-wrap { max-width: 520px; margin: 2rem auto; }
+    .artist-card {
+      border: 2px solid transparent;
+      border-radius: 14px;
+      overflow: hidden;
+      transition: transform 0.22s, box-shadow 0.22s, border-color 0.22s;
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      background: var(--bs-body-bg);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.09);
+    }
+    .artist-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 12px 32px rgba(0,0,0,0.16);
+      border-color: var(--bs-primary);
+      color: inherit;
+    }
+    .artist-thumb {
+      width: 100%; height: 200px;
+      object-fit: cover;
+      background: var(--bs-secondary-bg);
+    }
+    .artist-thumb-placeholder {
+      width: 100%; height: 200px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 3.5rem;
+      background: linear-gradient(135deg, #e0f7f5, #b2f0eb);
+    }
+    [data-bs-theme="dark"] .artist-thumb-placeholder { background: linear-gradient(135deg, #0d3330, #0a2a28); }
+    .artist-info { padding: 1rem 1.1rem 1.2rem; }
+    .artist-name { font-size: 1.15rem; font-weight: 700; margin-bottom: 0.2rem; }
+    .artist-age { font-size: 0.9rem; color: var(--bs-primary); font-weight: 600; }
+    .artist-count { font-size: 0.82rem; color: var(--bs-secondary-color); margin-top: 0.3rem; }
+    .no-results { text-align: center; padding: 4rem 0; color: var(--bs-secondary-color); }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg sticky-top shadow">
+  <div class="container">
+    <a class="navbar-brand fw-bold fs-4" href="https://inkspire-vn.github.io">InkSpire</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMain"><span class="navbar-toggler-icon"></span></button>
+    <div class="collapse navbar-collapse" id="navMain">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link" href="https://inkspire-vn.github.io">Trang chủ</a></li>
+        <li class="nav-item"><a class="nav-link" href="/products">Sản phẩm</a></li>
+        <li class="nav-item"><a class="nav-link" href="/events">Sự kiện</a></li>
+        <li class="nav-item"><a class="nav-link active" href="/gallery">Triển lãm</a></li>
+        <li class="nav-item"><a class="nav-link" href="/contact">Liên hệ</a></li>
+      </ul>
+      <div class="d-flex align-items-center">
+        <button class="theme-btn" id="themeBtn">🌙</button>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<div id="site-status-banner" class="d-none" style="position:sticky;top:56px;z-index:1020;"></div>
+
+<section class="page-hero text-center">
+  <div class="container">
+    <h1 class="display-4 fw-bold">Triển lãm</h1>
+    <p class="lead">Tác phẩm nghệ thuật của các học viên lớp vẽ</p>
+  </div>
+</section>
+
+<main class="container py-4">
+  <div class="search-wrap">
+    <input type="text" id="searchInput" class="form-control form-control-lg"
+           placeholder="Tìm theo tên, năm sinh, tuổi...">
+  </div>
+
+  <div id="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status" style="width:3rem;height:3rem;"></div>
+    <p class="mt-3">Đang tải...</p>
+  </div>
+
+  <div id="no-artists" class="no-results d-none">
+    <i class="fas fa-palette fa-4x mb-3 d-block" style="color:var(--bs-primary);opacity:0.4;"></i>
+    <h5>Chưa có học viên nào</h5>
+    <p>Vui lòng quay lại sau!</p>
+  </div>
+
+  <div id="no-results" class="no-results d-none">
+    <i class="fas fa-search fa-3x mb-3 d-block" style="opacity:0.3;"></i>
+    <h5>Không tìm thấy kết quả</h5>
+  </div>
+
+  <div id="artist-grid" class="row g-4 d-none"></div>
+</main>
+
+<footer class="text-center py-4" style="background:var(--bs-primary);color:white;">
+  <div class="container">
+    <p class="mb-1">© 2026 InkSpire Bookstore • TP. Hồ Chí Minh</p>
+    <small>Tri thức bắt đầu từ một giọt mực</small>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script type="module">
+  import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+  import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+  const _fc = {
+    apiKey:"AIzaSyA9XvWCZOyaSuT42HBMUgQQ7KTuQYPWLbE",
+    authDomain:"inkspire-vn-security.firebaseapp.com",
+    databaseURL:"https://inkspire-vn-security-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId:"inkspire-vn-security",
+    storageBucket:"inkspire-vn-security.firebasestorage.app",
+    messagingSenderId:"774834040534",
+    appId:"1:774834040534:web:c7b5e64826176a44b4e377",
+    measurementId:"G-MJSRBE9TY6"
+  };
+  const app = getApps().length ? getApps()[0] : initializeApp(_fc);
+  const db = getDatabase(app);
+
+  // Theme
+  const html = document.documentElement;
+  const themeBtn = document.getElementById('themeBtn');
+  function setTheme(mode) { html.setAttribute('data-bs-theme',mode); localStorage.setItem('theme',mode); themeBtn.textContent=mode==='dark'?'☀️':'🌙'; }
+  setTheme(localStorage.getItem('theme')||'light');
+  themeBtn.onclick = () => setTheme(html.getAttribute('data-bs-theme')==='light'?'dark':'light');
+
+  // Banner
+  const _SM={message:{border:"#00c4b4",icon:"📢",label:"Thông báo"},construction:{border:"#ffc107",icon:"🚧",label:"Trang đang được xây dựng"},update:{border:"#0dcaf0",icon:"🔄",label:"Trang đang được cập nhật"},bugfix:{border:"#dc3545",icon:"🐛",label:"Đang sửa lỗi"},maintenance:{border:"#fd7e14",icon:"🔧",label:"Đang bảo trì"},coming_soon:{border:"#6c757d",icon:"⏳",label:"Sắp ra mắt"},limited:{border:"#ffc107",icon:"⚠️",label:"Tính năng có hạn"}};
+  onValue(ref(db,"siteStatus/gallery"),(snap)=>{
+    const banner=document.getElementById("site-status-banner");
+    const data=snap.val();
+    if(!data||!data.type||data.type==="none"){banner.classList.add("d-none");banner.innerHTML="";return;}
+    const m=_SM[data.type]||{border:"#6c757d",icon:"ℹ️",label:data.type};
+    banner.innerHTML=`<div class="site-banner-inner" style="border-bottom:3px solid ${m.border};padding:10px 24px;text-align:center;font-weight:600;font-size:0.95rem;">${m.icon}&nbsp;${data.message||m.label}</div>`;
+    banner.classList.remove("d-none");
+  });
+
+  const currentYear = new Date().getFullYear();
+  let allArtists = [];
+
+  function calcAge(birthYear) {
+    if (!birthYear) return null;
+    return currentYear - parseInt(birthYear);
+  }
+
+  function getLatestArtwork(artist) {
+    const artworks = Object.values(artist.artworks || {});
+    if (!artworks.length) return null;
+    return artworks.sort((a,b) => b.timestamp - a.timestamp)[0];
+  }
+
+  function renderGrid(artists) {
+    const grid = document.getElementById('artist-grid');
+    const noResults = document.getElementById('no-results');
+    if (artists.length === 0) {
+      grid.classList.add('d-none'); grid.innerHTML='';
+      noResults.classList.remove('d-none'); return;
+    }
+    noResults.classList.add('d-none');
+    grid.classList.remove('d-none');
+    const age = (a) => calcAge(a.birthYear);
+    grid.innerHTML = artists.map(a => {
+      const latest = getLatestArtwork(a);
+      const artCount = Object.keys(a.artworks||{}).length;
+      const ageStr = age(a) !== null ? `${age(a)} tuổi (${a.birthYear})` : '';
+      return `
+        <div class="col-6 col-md-4 col-lg-3">
+          <a href="/gallery-detail?key=${a.key}" class="artist-card">
+            ${latest
+              ? `<img class="artist-thumb" src="${latest.image}" alt="${a.name}">`
+              : `<div class="artist-thumb-placeholder">🎨</div>`}
+            <div class="artist-info">
+              <div class="artist-name">${a.name}</div>
+              ${ageStr ? `<div class="artist-age">${ageStr}</div>` : ''}
+              <div class="artist-count">${artCount ? `${artCount} tác phẩm` : 'Chưa có tác phẩm'}</div>
+            </div>
+          </a>
+        </div>`;
+    }).join('');
+  }
+
+  onValue(ref(db,'gallery'), snap => {
+    const loading = document.getElementById('loading');
+    const noArtists = document.getElementById('no-artists');
+    const grid = document.getElementById('artist-grid');
+    loading.classList.add('d-none');
+
+    const data = snap.val() || {};
+    allArtists = Object.entries(data).map(([key,val]) => ({key,...val}));
+
+    if (allArtists.length === 0) {
+      noArtists.classList.remove('d-none'); grid.classList.add('d-none'); return;
+    }
+    noArtists.classList.add('d-none');
+    renderGrid(allArtists);
+  });
+
+  // Search — name, birth year, age
+  document.getElementById('searchInput').addEventListener('input', e => {
+    const q = e.target.value.trim().toLowerCase();
+    if (!q) { renderGrid(allArtists); return; }
+    const filtered = allArtists.filter(a => {
+      const age = calcAge(a.birthYear);
+      return (
+        (a.name||'').toLowerCase().includes(q) ||
+        String(a.birthYear||'').includes(q) ||
+        (age !== null && String(age).includes(q))
+      );
+    });
+    renderGrid(filtered);
+  });
+</script>
+</body>
+</html>
