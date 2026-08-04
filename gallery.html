@@ -195,7 +195,8 @@
     }).join('');
   }
 
-  onValue(ref(db,'gallery'), snap => {
+  const galleryRef = ref(db,'gallery');
+  onValue(galleryRef, snap => {
     const loading = document.getElementById('loading');
     const noArtists = document.getElementById('no-artists');
     const grid = document.getElementById('artist-grid');
@@ -209,6 +210,11 @@
     }
     noArtists.classList.add('d-none');
     renderGrid(allArtists);
+  }, err => {
+    // Permission error - show empty state instead of spinning forever
+    document.getElementById('loading').classList.add('d-none');
+    document.getElementById('no-artists').classList.remove('d-none');
+    console.warn('Gallery read error:', err.code);
   });
 
   // Search — name, birth year, age
