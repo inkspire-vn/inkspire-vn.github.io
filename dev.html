@@ -500,6 +500,9 @@
       sel.innerHTML='<option value="">-- Chọn học viên --</option>';
       allArtists.forEach(a=>{const opt=document.createElement('option');opt.value=a.key;opt.textContent=a.name+(a.birthYear?` (${currentYear-parseInt(a.birthYear)} tuổi)`:'');sel.appendChild(opt);});
       if(prev) sel.value=prev;
+    }, err => {
+      console.warn('Gallery permission error:', err.code);
+      document.getElementById('artistList').innerHTML = `<div class="alert alert-warning">⚠️ Không thể tải dữ liệu học viên. Vui lòng kiểm tra Firebase Rules cho đường dẫn <code>gallery</code>.<br><small>Lỗi: ${err.code}</small></div>`;
     });
 
     function renderArtists(artists) {
@@ -547,10 +550,17 @@
 
     document.getElementById('artistForm').addEventListener('submit', async e => {
       e.preventDefault();
-      const data={name:document.getElementById('artistName').value.trim(),birthYear:document.getElementById('artistBirthYear').value||null};
-      if(editingArtistKey){await update(ref(db,`gallery/${editingArtistKey}`),data);}
-      else{await push(ref(db,'gallery'),data);}
-      resetArtistForm();
+      const btn = document.getElementById('artistSubmitBtn');
+      btn.disabled = true; btn.textContent = '⏳ Đang lưu...';
+      try {
+        const data={name:document.getElementById('artistName').value.trim(),birthYear:document.getElementById('artistBirthYear').value||null};
+        if(editingArtistKey){await update(ref(db,`gallery/${editingArtistKey}`),data);}
+        else{await push(ref(db,'gallery'),data);}
+        resetArtistForm();
+      } catch(err) {
+        alert(`❌ Không thể lưu học viên.\nLỗi: ${err.code||err.message}\n\nVui lòng kiểm tra Firebase Rules cho đường dẫn "gallery".`);
+        btn.disabled = false; btn.textContent = editingArtistKey ? 'Cập nhật học viên' : 'Thêm học viên';
+      }
     });
 
     // Artwork image upload
@@ -563,14 +573,20 @@
       if(!image){alert('Chọn hoặc nhập URL ảnh trước nhé!');return;}
       const btn=document.getElementById('artworkUploadBtn');
       btn.disabled=true; btn.innerHTML='⏳ Đang tải...';
-      const note=document.getElementById('artworkNote').value.trim();
-      await push(ref(db,`gallery/${artistKey}/artworks`),{image,note,timestamp:Date.now()});
-      document.getElementById('artworkImageFile').value='';
-      document.getElementById('artworkImageUrl').value='';
-      document.getElementById('artworkImagePreview').style.display='none';
-      document.getElementById('artworkNote').value='';
-      btn.disabled=false; btn.innerHTML='✅ Đã tải lên!';
-      setTimeout(()=>btn.innerHTML='<i class="fas fa-upload me-1"></i> Tải lên tác phẩm',2000);
+      try {
+        const note=document.getElementById('artworkNote').value.trim();
+        await push(ref(db,`gallery/${artistKey}/artworks`),{image,note,timestamp:Date.now()});
+        document.getElementById('artworkImageFile').value='';
+        document.getElementById('artworkImageUrl').value='';
+        document.getElementById('artworkImagePreview').style.display='none';
+        document.getElementById('artworkNote').value='';
+        btn.innerHTML='✅ Đã tải lên!';
+        setTimeout(()=>btn.innerHTML='<i class="fas fa-upload me-1"></i> Tải lên tác phẩm',2000);
+      } catch(err) {
+        alert(`❌ Không thể tải ảnh lên.\nLỗi: ${err.code||err.message}`);
+        btn.innerHTML='<i class="fas fa-upload me-1"></i> Tải lên tác phẩm';
+      }
+      btn.disabled=false;
     });
   }
 
